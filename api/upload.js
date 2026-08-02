@@ -4,29 +4,32 @@
  * Body is the raw image, content-type says which format. Requires the
  * x-kz-key header to match EDIT_KEY.
  */
-import { EXTENSIONS, authorize, json, validSlot, writeImage } from "./_store.js";
-
-export const config = { runtime: "edge" };
+import { EXTENSIONS, authorize, query, readBody, send, validSlot, writeImage } from "./_store.js";
 
 const MAX_BYTES = 12 * 1024 * 1024;
 
-export default async function handler(request) {
-  if (request.method !== "POST") return json({ error: "POST only" }, 405);
+export default async function handler(req, res) {
+  if (req.method !== "POST") return send(res, 405, { error: "POST only" });
 
-  const denied = authorize(request);
-  if (denied) return json({ error: denied }, 401);
+  const denied = authorize(req);
+  if (denied) return send(res, 401, { error: denied });
 
-  const slot = new URL(request.url).searchParams.get("slot");
-  if (!validSlot(slot)) return json({ error: "invalid slot id" }, 400);
+  const slot = query(req, "slot");
+  if (!validSlot(slot)) return send(res, 400, { error: "invalid slot id" });
 
-  const type = (request.headers.get("content-type") || "").split(";")[0].trim();
+  const type = String(req.headers["content-type"] || "").split(";")[0].trim();
   const extension = EXTENSIONS[type];
-  if (!extension) return json({ error: `unsupported image type: ${type || "none"}` }, 415);
+  if (!extension) return send(res, 415, { error: `unsupported image type: ${type || "none"}` });
 
-  const body = await request.arrayBuffer();
-  if (!body.byteLength) return json({ error: "empty upload" }, 400);
-  if (body.byteLength > MAX_BYTES) return json({ error: "image is larger than 12 MB" }, 413);
+  const body = await readBody(req);
+  if (!body.length) return send(res, 400, { error: "empty upload" });
+  if (body.length > MAX_BYTES) return send(res, 413, { error: "image is larger than 12 MB" });
 
-  const url = await writeImage(slot, extension, type, body);
-  return json({ ok: true, slot, url });
+  try {
+    const url = await writeImage(slot, extension, type, body);
+    send(res, 200, { ok: true, slot, url });
+  } catch (error) {
+    console.error("upload failed", error);
+    send(res, 500, { error: String(error && error.message ? error.message : error) });
+  }
 }

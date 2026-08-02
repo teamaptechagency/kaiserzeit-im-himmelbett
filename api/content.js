@@ -8,51 +8,56 @@
  * and only the client edits, so concurrent writers are not a real concern
  * here; two people editing at once could drop one change.
  */
-import { authorize, json, readContent, writeContent } from "./_store.js";
-
-export const config = { runtime: "edge" };
+import { authorize, readBody, readContent, send, writeContent } from "./_store.js";
 
 const MAX_KEYS = 40;
 const MAX_TEXT = 5000;
 
-export default async function handler(request) {
-  if (request.method !== "POST") return json({ error: "POST only" }, 405);
+export default async function handler(req, res) {
+  if (req.method !== "POST") return send(res, 405, { error: "POST only" });
 
-  const denied = authorize(request);
-  if (denied) return json({ error: denied }, 401);
+  const denied = authorize(req);
+  if (denied) return send(res, 401, { error: denied });
 
   let patch;
   try {
-    patch = await request.json();
+    patch = JSON.parse((await readBody(req)).toString("utf8"));
   } catch {
-    return json({ error: "body must be JSON" }, 400);
+    return send(res, 400, { error: "body must be JSON" });
   }
-  if (!patch || typeof patch !== "object") return json({ error: "body must be an object" }, 400);
+  if (!patch || typeof patch !== "object") {
+    return send(res, 400, { error: "body must be an object" });
+  }
 
   const texts = patch.texts && typeof patch.texts === "object" ? patch.texts : {};
   const styles = patch.styles && typeof patch.styles === "object" ? patch.styles : {};
   if (Object.keys(texts).length + Object.keys(styles).length > MAX_KEYS) {
-    return json({ error: "too many keys in one request" }, 400);
+    return send(res, 400, { error: "too many keys in one request" });
   }
   for (const value of Object.values(texts)) {
     if (value !== null && (typeof value !== "string" || value.length > MAX_TEXT)) {
-      return json({ error: "text values must be strings under 5000 characters" }, 400);
+      return send(res, 400, { error: "text values must be strings under 5000 characters" });
     }
   }
 
-  const content = await readContent();
+  try {
+    const content = await readContent();
 
-  for (const [key, value] of Object.entries(texts)) {
-    if (value === null) delete content.texts[key];
-    else content.texts[key] = value;
-  }
-  for (const [key, value] of Object.entries(styles)) {
-    /* An empty object means "back to the design default", so drop the key
-       rather than emitting a rule with no declarations. */
-    if (value === null || !value || Object.keys(value).length === 0) delete content.styles[key];
-    else content.styles[key] = value;
-  }
+    for (const [key, value] of Object.entries(texts)) {
+      if (value === null) delete content.texts[key];
+      else content.texts[key] = value;
+    }
+    for (const [key, value] of Object.entries(styles)) {
+      /* An empty object means "back to the design default", so drop the key
+         rather than emitting a rule with no declarations. */
+      if (value === null || !value || Object.keys(value).length === 0) delete content.styles[key];
+      else content.styles[key] = value;
+    }
 
-  await writeContent(content);
-  return json({ ok: true, texts: content.texts, styles: content.styles });
+    await writeContent(content);
+    send(res, 200, { ok: true, texts: content.texts, styles: content.styles });
+  } catch (error) {
+    console.error("content save failed", error);
+    send(res, 500, { error: String(error && error.message ? error.message : error) });
+  }
 }

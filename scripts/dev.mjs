@@ -2,9 +2,10 @@
  * Local dev server.
  *
  * Serves public/ and routes /api/* to the real handlers in api/, backed by a
- * directory on disk instead of Vercel Blob (see api/_store.js). That means
- * uploading a photo, editing copy and setting a background all work exactly
- * as they do in production, without a deployment or a Vercel account.
+ * directory on disk instead of Vercel Blob (see api/_store.js). The handlers
+ * use the same (req, res) signature Vercel's Node runtime calls them with, so
+ * they run here unmodified: uploading a photo, editing copy and setting a
+ * background all behave exactly as in production, with no Vercel account.
  *
  *   npm run dev
  *
@@ -47,25 +48,6 @@ const routes = {
   "/api/content": () => import("../api/content.js")
 };
 
-/* Node's req/res translated to the Web Request/Response the edge handlers
-   are written against. */
-async function toRequest(req) {
-  const url = new URL(req.url, `http://localhost:${port}`);
-  const init = { method: req.method, headers: req.headers };
-  if (req.method !== "GET" && req.method !== "HEAD") {
-    const chunks = [];
-    for await (const chunk of req) chunks.push(chunk);
-    init.body = Buffer.concat(chunks);
-  }
-  return new Request(url, init);
-}
-
-async function send(res, response) {
-  res.statusCode = response.status;
-  response.headers.forEach((value, key) => res.setHeader(key, value));
-  res.end(Buffer.from(await response.arrayBuffer()));
-}
-
 async function serveFile(res, filePath, { store = false } = {}) {
   const info = await stat(filePath).catch(() => null);
   if (!info || !info.isFile()) return false;
@@ -82,10 +64,12 @@ const server = createServer(async (req, res) => {
     const url = new URL(req.url, `http://localhost:${port}`);
     let pathname = decodeURIComponent(url.pathname);
 
+    /* The handlers take Node's req/res, exactly as Vercel's Node runtime
+       calls them, so they run here unmodified. */
     const route = routes[pathname];
     if (route) {
       const module = await route();
-      return await send(res, await module.default(await toRequest(req)));
+      return await module.default(req, res);
     }
 
     /* Files the local store has written back to the browser. */
