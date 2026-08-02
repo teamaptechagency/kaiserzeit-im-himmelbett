@@ -23,7 +23,11 @@ New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 
 $stateUrl = $Site.TrimEnd("/") + "/api/state"
 Write-Host "reading $stateUrl"
-$state = Invoke-RestMethod -Uri $stateUrl -Headers @{ "Cache-Control" = "no-cache" }
+
+# Decoded from the raw bytes rather than through Invoke-RestMethod, which on
+# Windows PowerShell 5.1 falls back to ISO-8859-1 and turns every ö into Ã¶.
+$response = Invoke-WebRequest -Uri $stateUrl -UseBasicParsing -Headers @{ "Cache-Control" = "no-cache" }
+$state = [System.Text.Encoding]::UTF8.GetString($response.RawContentStream.ToArray()) | ConvertFrom-Json
 
 if (-not $state.ok) {
   Write-Warning "the server reported a problem: $($state.error)"
@@ -88,12 +92,22 @@ if ($state.texts) {
   foreach ($entry in $state.texts.PSObject.Properties) { $texts[$entry.Name] = $entry.Value }
 }
 
-$out = [ordered]@{ images = $localImages; texts = $texts; styles = $styles }
-$json = $out | ConvertTo-Json -Depth 6
+# Comments come along too, so the review thread is preserved in the repo
+# rather than living only in the preview.
+$notes = [ordered]@{}
+if ($state.notes) {
+  foreach ($entry in $state.notes.PSObject.Properties) { $notes[$entry.Name] = $entry.Value }
+}
+
+$out = [ordered]@{ images = $localImages; texts = $texts; styles = $styles; notes = $notes }
+$json = $out | ConvertTo-Json -Depth 8
 [System.IO.File]::WriteAllText((Join-Path $outDir "state.json"), $json, [System.Text.UTF8Encoding]::new($false))
+
+$openNotes = @($notes.Values | Where-Object { -not $_.resolved }).Count
 
 Write-Host ""
 Write-Host "$count image(s), $($texts.Count) text change(s), $($styles.Count) background change(s)"
+Write-Host "$($notes.Count) note(s), $openNotes still open"
 Write-Host "written to public/assets/uploads/"
 Write-Host ""
 Write-Host "review, then:  git add public/assets/uploads && git commit -m ""Pull client content"""

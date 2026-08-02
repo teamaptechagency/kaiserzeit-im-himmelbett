@@ -28,6 +28,13 @@ Once signed in:
 | **Photos** | Drag an image onto any placeholder, or click it to browse |
 | **Copy** | Double-click any text, type, press Enter |
 | **Backgrounds** | Switch to *Hintergrund*, click a section, pick a colour or drop in an image |
+| **Comments** | Switch to *Notizen*, click anywhere — beside a heading, on a photo, in the margin |
+
+Comments are for the review conversation: a pin drops where you clicked, with
+replies, a resolved state and delete. Everyone in edit mode sees them and the
+count of open ones sits on the toolbar; read-only visitors never load them at
+all. `pull` brings them into the repo with the rest, so the feedback is kept
+rather than living only in the preview.
 
 `/admin` lists all 46 photo slots as a grid with a progress bar, which is the
 quickest way to see what is still missing.
@@ -94,7 +101,8 @@ needed to run them lives alongside:
 | `public/*.dc.html` | The design prototypes, untouched |
 | `public/support.js` | Runtime for the prototype format — the handoff referenced it but never shipped it, so it is reimplemented here |
 | `public/image-slot.js` | `<image-slot>` element plus the shared store of client edits |
-| `public/editor.js` | Copy and background editing; loaded only under `?edit=1` |
+| `public/editor.js` | Copy and background editing; loaded only in edit mode |
+| `public/notes.js` | Pinned comments, registered as a third toolbar mode |
 | `public/responsive.css` | Phone corrections the prototypes never specified |
 | `public/admin.html` | Grid of all 46 photo slots |
 | `api/` | `state` (read), `upload` (photos), `content` (copy + backgrounds) |
@@ -126,6 +134,13 @@ form. The patcher reuses nodes, so typing behaves normally.
 `lang: "de"` in its own state, so switching to English used to last exactly
 one page. The choice is stored and applied before the first paint, so one
 switch holds everywhere and English never flashes as German first.
+
+**Comment pins are anchored to elements, not coordinates.** A pin stores the
+`data-kz-el` of whatever was under the cursor plus a fraction of that
+element's box. Page coordinates would drift as soon as a photo loaded at a
+different height or the window changed width; this way a pin placed on the
+hero title is still on it at 375px, where that element is less than half as
+wide.
 
 **Edits are keyed to survive re-editing.** Copy overrides are keyed on
 `page | language | original wording`, so an edit stays attached to its slot no

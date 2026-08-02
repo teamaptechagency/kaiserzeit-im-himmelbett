@@ -76,19 +76,24 @@
   var hint = bar.querySelector(".kz-hint");
   var status = bar.querySelector(".kz-status");
 
-  var HINTS = {
-    text: "Doppelklick auf einen Text zum Ändern. Fotos: einfach darauf ziehen.",
-    background: "Klicken Sie auf einen Abschnitt, um Farbe oder Bild zu setzen."
+  /* Modes are a registry so notes.js can add its own without this file
+     knowing anything about comments. */
+  var MODES = {
+    text: { hint: "Doppelklick auf einen Text zum Ändern. Fotos: einfach darauf ziehen." },
+    background: { hint: "Klicken Sie auf einen Abschnitt, um Farbe oder Bild zu setzen." }
   };
 
   function setMode(next) {
+    var previous = mode;
     mode = next;
-    hint.textContent = HINTS[next];
+    hint.textContent = (MODES[next] && MODES[next].hint) || "";
     document.body.classList.toggle("kz-bg", next === "background");
     bar.querySelectorAll("button[data-mode]").forEach(function (b) {
       b.setAttribute("aria-pressed", String(b.dataset.mode === next));
     });
     if (next !== "background") closePanel();
+    if (MODES[previous] && MODES[previous].exit) MODES[previous].exit();
+    if (MODES[next] && MODES[next].enter) MODES[next].enter();
   }
 
   bar.addEventListener("click", function (e) {
@@ -96,6 +101,22 @@
     if (button) setMode(button.dataset.mode);
   });
   setMode("text");
+
+  window.KZEditor = {
+    bar: bar,
+    say: say,
+    isMode: function (id) { return mode === id; },
+    addMode: function (id, label, options) {
+      MODES[id] = options || {};
+      var button = document.createElement("button");
+      button.dataset.mode = id;
+      button.setAttribute("aria-pressed", "false");
+      button.textContent = label;
+      /* Sits with the other mode buttons, before the hint text. */
+      bar.insertBefore(button, hint);
+      return button;
+    }
+  };
 
   var statusTimer;
   function say(message, sticky) {
@@ -325,4 +346,9 @@
 
   window.addEventListener("dc:render", markText);
   markText();
+
+  /* Loaded last so KZEditor.addMode exists by the time it registers. */
+  var notes = document.createElement("script");
+  notes.src = "notes.js";
+  document.head.appendChild(notes);
 })();

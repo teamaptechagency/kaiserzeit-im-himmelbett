@@ -39,7 +39,7 @@
   var EDIT = EDIT_FROM_URL || (stored(EDIT_FLAG) === "1" && !!stored(KEY_STORE));
   var MAX_BYTES = 12 * 1024 * 1024;
 
-  var state = { images: {}, texts: {}, styles: {} };
+  var state = { images: {}, texts: {}, styles: {}, notes: {} };
   var slots = new Set();
 
   /* -------------------------------------------------------------- state */
@@ -57,6 +57,7 @@
         state.images = data.images || {};
         state.texts = data.texts || {};
         state.styles = data.styles || {};
+        state.notes = data.notes || {};
       }
       applyStyles();
       slots.forEach(function (el) { el.refresh(); });
@@ -184,6 +185,17 @@
     applyStyles();
     var patch = { styles: {} };
     patch.styles[key] = value;
+    return saveContent(patch);
+  }
+
+  /* Notes are keyed by their own id, so two people commenting in different
+     places merge instead of overwriting each other. */
+  function setNote(id, value) {
+    if (value == null) delete state.notes[id];
+    else state.notes[id] = value;
+    window.dispatchEvent(new CustomEvent("kz:notes"));
+    var patch = { notes: {} };
+    patch.notes[id] = value == null ? null : value;
     return saveContent(patch);
   }
 
@@ -341,9 +353,13 @@
     get images() { return state.images; },
     get texts() { return state.texts; },
     get styles() { return state.styles; },
+    get notes() { return state.notes; },
     upload: upload,
     setText: setText,
     setStyle: setStyle,
+    setNote: setNote,
+    stored: stored,
+    remember: remember,
     publishImage: publishImage,
     applyStyles: applyStyles
   };
