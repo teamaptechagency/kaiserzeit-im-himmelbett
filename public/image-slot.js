@@ -386,7 +386,9 @@
   };
 
   function buildSignIn() {
-    var t = COPY[(document.documentElement.lang === "en") ? "en" : "de"];
+    /* Read from the same stored choice support.js uses, rather than from
+       <html lang>, because the first render may not have run yet. */
+    var t = COPY[stored("kz-lang") === "en" ? "en" : "de"];
 
     var style = document.createElement("style");
     style.textContent = [

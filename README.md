@@ -122,6 +122,11 @@ The runtime refetches the page and rewrites the `sc-*` tags to `<template>`
 focus and the caret every time the client typed a character into the booking
 form. The patcher reuses nodes, so typing behaves normally.
 
+**The language choice is site-wide.** Each page's prototype starts at
+`lang: "de"` in its own state, so switching to English used to last exactly
+one page. The choice is stored and applied before the first paint, so one
+switch holds everywhere and English never flashes as German first.
+
 **Edits are keyed to survive re-editing.** Copy overrides are keyed on
 `page | language | original wording`, so an edit stays attached to its slot no
 matter how many times it is changed, and German edits never leak into English.
