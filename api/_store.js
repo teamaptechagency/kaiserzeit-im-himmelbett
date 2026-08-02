@@ -40,7 +40,10 @@ const blob = () => import("@vercel/blob");
 
 export function send(res, status, body) {
   res.statusCode = status;
-  res.setHeader("content-type", "application/json");
+  /* The charset is explicit because the copy is largely German: without it
+     some clients fall back to ISO-8859-1 and every ö and ß comes out
+     double-encoded. */
+  res.setHeader("content-type", "application/json; charset=utf-8");
   res.setHeader("cache-control", "no-store");
   res.end(JSON.stringify(body));
 }
@@ -114,31 +117,35 @@ export async function readImages() {
   return images;
 }
 
+function shape(data) {
+  return {
+    texts: (data && data.texts) || {},
+    styles: (data && data.styles) || {},
+    notes: (data && data.notes) || {}
+  };
+}
+
 export async function readContent() {
-  const empty = { texts: {}, styles: {} };
   const root = LOCAL_ROOT();
 
   if (root) {
     try {
-      const raw = await readFile(path.join(root, CONTENT_PATH), "utf8");
-      const data = JSON.parse(raw);
-      return { texts: data.texts || {}, styles: data.styles || {} };
+      return shape(JSON.parse(await readFile(path.join(root, CONTENT_PATH), "utf8")));
     } catch {
-      return empty;
+      return shape(null);
     }
   }
 
   const { list } = await blob();
   const { blobs } = await list({ prefix: CONTENT_PATH });
   const entry = blobs.find((b) => b.pathname === CONTENT_PATH);
-  if (!entry) return empty;
+  if (!entry) return shape(null);
   try {
     const res = await fetch(entry.url, { cache: "no-store" });
-    if (!res.ok) return empty;
-    const data = await res.json();
-    return { texts: data.texts || {}, styles: data.styles || {} };
+    if (!res.ok) return shape(null);
+    return shape(await res.json());
   } catch {
-    return empty;
+    return shape(null);
   }
 }
 

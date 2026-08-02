@@ -1,17 +1,52 @@
 /*
- * POST /api/content — merge copy and background overrides.
+ * POST /api/content — merge copy, background and comment overrides.
  *
- * Body: { texts?: { key: string|null }, styles?: { key: object|null } }
- * A null value deletes the override and restores the design's original.
+ * Body: { texts?, styles?, notes? } where each is { key: value|null }.
+ * A null value deletes that entry and restores the design's original.
  *
  * Read-modify-write on one JSON document. The browser serialises its saves,
- * and only the client edits, so concurrent writers are not a real concern
- * here; two people editing at once could drop one change.
+ * so a single person editing never races; two people editing at the same
+ * moment could drop one change. Notes are keyed by their own id, so two
+ * people commenting on different spots merge cleanly.
  */
 import { authorize, readBody, readContent, send, writeContent } from "./_store.js";
 
 const MAX_KEYS = 40;
 const MAX_TEXT = 5000;
+const MAX_NOTE = 2000;
+const MAX_NOTES = 500;
+const MAX_REPLIES = 60;
+
+/* Notes are the one place a client types free-form content that is stored
+   and replayed to other viewers, so the shape is pinned down here rather
+   than trusted from the browser. */
+function cleanNote(value) {
+  if (!value || typeof value !== "object") return null;
+
+  const text = typeof value.text === "string" ? value.text.slice(0, MAX_NOTE) : "";
+  const author = typeof value.author === "string" ? value.author.slice(0, 80) : "";
+  if (!text.trim()) return null;
+
+  const replies = Array.isArray(value.replies)
+    ? value.replies.slice(0, MAX_REPLIES).map((reply) => ({
+        author: typeof reply.author === "string" ? reply.author.slice(0, 80) : "",
+        text: typeof reply.text === "string" ? reply.text.slice(0, MAX_NOTE) : "",
+        at: Number(reply.at) || 0
+      })).filter((reply) => reply.text.trim())
+    : [];
+
+  return {
+    page: typeof value.page === "string" ? value.page.slice(0, 120) : "",
+    el: typeof value.el === "string" ? value.el.slice(0, 40) : "root",
+    x: Math.min(1, Math.max(0, Number(value.x) || 0)),
+    y: Math.min(1, Math.max(0, Number(value.y) || 0)),
+    author,
+    text,
+    at: Number(value.at) || 0,
+    resolved: !!value.resolved,
+    replies
+  };
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return send(res, 405, { error: "POST only" });
@@ -29,19 +64,19 @@ export default async function handler(req, res) {
     return send(res, 400, { error: "body must be an object" });
   }
 
-  const texts = patch.texts && typeof patch.texts === "object" ? patch.texts : {};
-  const styles = patch.styles && typeof patch.styles === "object" ? patch.styles : {};
+  const pick = (name) =>
+    patch[name] && typeof patch[name] === "object" ? patch[name] : {};
+  const texts = pick("texts");
+  const styles = pick("styles");
+  const notes = pick("notes");
 
   /* An empty patch is the sign-in check: it has already passed authorize(),
      so answering here lets the login button verify a key without a fourth
      function and without a pointless write. */
-  if (!Object.keys(texts).length && !Object.keys(styles).length) {
-    return send(res, 200, { ok: true, verified: true });
-  }
+  const total = Object.keys(texts).length + Object.keys(styles).length + Object.keys(notes).length;
+  if (!total) return send(res, 200, { ok: true, verified: true });
+  if (total > MAX_KEYS) return send(res, 400, { error: "too many keys in one request" });
 
-  if (Object.keys(texts).length + Object.keys(styles).length > MAX_KEYS) {
-    return send(res, 400, { error: "too many keys in one request" });
-  }
   for (const value of Object.values(texts)) {
     if (value !== null && (typeof value !== "string" || value.length > MAX_TEXT)) {
       return send(res, 400, { error: "text values must be strings under 5000 characters" });
@@ -61,9 +96,21 @@ export default async function handler(req, res) {
       if (value === null || !value || Object.keys(value).length === 0) delete content.styles[key];
       else content.styles[key] = value;
     }
+    for (const [key, value] of Object.entries(notes)) {
+      if (value === null) {
+        delete content.notes[key];
+        continue;
+      }
+      const note = cleanNote(value);
+      if (!note) return send(res, 400, { error: "a note needs text" });
+      if (!(key in content.notes) && Object.keys(content.notes).length >= MAX_NOTES) {
+        return send(res, 400, { error: "note limit reached" });
+      }
+      content.notes[key] = note;
+    }
 
     await writeContent(content);
-    send(res, 200, { ok: true, texts: content.texts, styles: content.styles });
+    send(res, 200, { ok: true, texts: content.texts, styles: content.styles, notes: content.notes });
   } catch (error) {
     console.error("content save failed", error);
     send(res, 500, { error: String(error && error.message ? error.message : error) });
