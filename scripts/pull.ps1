@@ -41,21 +41,24 @@ foreach ($entry in $state.images.PSObject.Properties) {
   $slot = $entry.Name
   $url = $entry.Value
 
-  # Blob pathnames carry the real extension; the ?v= cache buster does not.
+  # Vercel Blob hands back absolute URLs; the local dev store uses paths
+  # relative to the site root.
+  if ($url -notmatch '^https?://') { $url = $Site.TrimEnd("/") + $url }
+
+  # The pathname carries the real extension; the ?v= cache buster does not.
   $clean = ($url -split "\?")[0]
   $ext = [System.IO.Path]::GetExtension($clean)
-  if (-not $ext) { $ext = ".jpg" }
+
+  if (-not $ext) {
+    $type = (Invoke-WebRequest -Uri $url -Method Head -UseBasicParsing).Headers["Content-Type"]
+    if ($type -and $extByType.ContainsKey($type)) { $ext = $extByType[$type] } else { $ext = ".jpg" }
+  }
 
   $fileName = "$slot$ext"
   $target = Join-Path $outDir $fileName
 
   Write-Host ("  {0,-28} -> assets/uploads/{1}" -f $slot, $fileName)
   Invoke-WebRequest -Uri $url -OutFile $target -UseBasicParsing
-
-  if (-not $ext -or $ext -eq ".bin") {
-    $type = (Invoke-WebRequest -Uri $url -Method Head -UseBasicParsing).Headers["Content-Type"]
-    if ($extByType.ContainsKey($type)) { $ext = $extByType[$type] }
-  }
 
   $localImages[$slot] = "assets/uploads/$fileName"
   $count++

@@ -4,6 +4,9 @@
   "private": true,
   "description": "Clickable preview of the KAISERZEIT im Himmelbett design handoff, with client-facing photo, copy and background editing.",
   "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.mjs"
+  },
   "dependencies": {
     "@vercel/blob": "^0.27.0"
   }
