@@ -13,9 +13,15 @@ i18n, payments, legal pages).
 
 ## What the client can do
 
-Open the preview with `?edit=1` — for example
-`https://<your-preview>.vercel.app/?edit=1` — and a toolbar appears at the
-bottom:
+Click **Bearbeiten** in the bottom-left corner of any page and enter the key.
+The browser remembers it, so from then on the site is editable straight from
+its normal public URL — no special link. "Bearbeiten beenden" in the same
+panel signs out again. (`?edit=1` still works as a one-off.)
+
+Anyone without the key sees an ordinary read-only site, so the same URL can be
+shared for review.
+
+Once signed in:
 
 | | How |
 |---|---|
@@ -26,11 +32,9 @@ bottom:
 `/admin` lists all 46 photo slots as a grid with a progress bar, which is the
 quickest way to see what is still missing.
 
-Without `?edit=1` the site is read-only — that is the link to share for
-review.
-
-Editing asks once for a key, which is the `EDIT_KEY` environment variable.
-Reading is public; only writing needs the key.
+The key is the `EDIT_KEY` environment variable, and it is checked against the
+server at sign-in rather than in the browser. Reading is public; every write
+carries the key and is rejected without it.
 
 ---
 

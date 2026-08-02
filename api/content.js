@@ -31,6 +31,14 @@ export default async function handler(req, res) {
 
   const texts = patch.texts && typeof patch.texts === "object" ? patch.texts : {};
   const styles = patch.styles && typeof patch.styles === "object" ? patch.styles : {};
+
+  /* An empty patch is the sign-in check: it has already passed authorize(),
+     so answering here lets the login button verify a key without a fourth
+     function and without a pointless write. */
+  if (!Object.keys(texts).length && !Object.keys(styles).length) {
+    return send(res, 200, { ok: true, verified: true });
+  }
+
   if (Object.keys(texts).length + Object.keys(styles).length > MAX_KEYS) {
     return send(res, 400, { error: "too many keys in one request" });
   }
