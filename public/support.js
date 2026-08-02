@@ -201,6 +201,27 @@
   var PAGE = decodeURIComponent(location.pathname.split("/").pop() || "Home.dc.html");
   var currentLang = "de";
 
+  /* --------------------------------------------------------- language ----
+     Each page starts at `lang: "de"` in its own state, so switching to
+     English and clicking through to another page dropped straight back to
+     German. The choice is remembered instead and applied before the first
+     paint, so one switch holds for the whole site. */
+
+  var LANG_KEY = "kz-lang";
+
+  function savedLang() {
+    try {
+      var value = localStorage.getItem(LANG_KEY);
+      return value === "de" || value === "en" ? value : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function rememberLang(value) {
+    try { localStorage.setItem(LANG_KEY, value); } catch (err) { /* private mode */ }
+  }
+
   function textKey(value) {
     return PAGE + "|" + currentLang + "|" + value;
   }
@@ -438,6 +459,11 @@
     if (!instance || !template) return;
 
     currentLang = (instance.state && instance.state.lang) || "de";
+    /* Kept in step so screen readers and the editing chrome follow the
+       visible language. */
+    if (document.documentElement.lang !== currentLang) {
+      document.documentElement.lang = currentLang;
+    }
 
     var scope;
     try {
@@ -476,6 +502,9 @@
   DCLogic.prototype.setState = function (update) {
     var patch = typeof update === "function" ? update(this.state) : update;
     if (!patch) return;
+    /* Catches every switch — the nav dropdown, the footer toggle and the
+       profile preference all route through here. */
+    if (patch.lang && patch.lang !== this.state.lang) rememberLang(patch.lang);
     var merged = {};
     for (var k in this.state) merged[k] = this.state[k];
     for (var j in patch) merged[j] = patch[j];
@@ -567,6 +596,15 @@
     }
 
     instance = new Component();
+
+    /* Applied straight to state rather than through setState, so the stored
+       language is in place for the first render and English never flashes as
+       German first. */
+    var preferred = savedLang();
+    if (preferred && instance.state && typeof instance.state.lang === "string") {
+      instance.state.lang = preferred;
+    }
+
     render();
   }
 
