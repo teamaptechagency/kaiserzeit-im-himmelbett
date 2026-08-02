@@ -104,17 +104,20 @@
     if (!sticky) statusTimer = setTimeout(function () { status.textContent = ""; }, 2500);
   }
 
-  /* Keep ?edit=1 across navigation so a nav click does not silently drop the
-     client back into the read-only preview. */
-  document.addEventListener("click", function (e) {
-    var link = e.target.closest && e.target.closest("a[href]");
-    if (!link || e.defaultPrevented) return;
-    var url;
-    try { url = new URL(link.getAttribute("href"), location.href); } catch (err) { return; }
-    if (url.origin !== location.origin || url.searchParams.has("edit")) return;
-    url.searchParams.set("edit", "1");
-    link.setAttribute("href", url.pathname + url.search + url.hash);
-  }, true);
+  /* Only needed when edit mode came from ?edit=1 — a signed-in session is
+     remembered across pages on its own, and rewriting every link would put a
+     query string on URLs that do not need one. */
+  if (KZ.editFromUrl) {
+    document.addEventListener("click", function (e) {
+      var link = e.target.closest && e.target.closest("a[href]");
+      if (!link || e.defaultPrevented) return;
+      var url;
+      try { url = new URL(link.getAttribute("href"), location.href); } catch (err) { return; }
+      if (url.origin !== location.origin || url.searchParams.has("edit")) return;
+      url.searchParams.set("edit", "1");
+      link.setAttribute("href", url.pathname + url.search + url.hash);
+    }, true);
+  }
 
   /* ------------------------------------------------------------------ text */
 

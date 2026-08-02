@@ -18,8 +18,25 @@
 (function () {
   "use strict";
 
-  var EDIT = new URLSearchParams(location.search).has("edit");
+  /* Editing is unlocked either by ?edit=1 or by having signed in through the
+     button in the corner. The sign-in is remembered in localStorage, so the
+     site can be edited straight from its normal public URL — but only by
+     someone who knows EDIT_KEY. Everyone else sees a read-only page. */
   var KEY_STORE = "kz-edit-key";
+  var EDIT_FLAG = "kz-edit-on";
+  var EDIT_FROM_URL = new URLSearchParams(location.search).has("edit");
+
+  function stored(name) {
+    try { return localStorage.getItem(name); } catch (err) { return null; }
+  }
+  function remember(name, value) {
+    try {
+      if (value == null) localStorage.removeItem(name);
+      else localStorage.setItem(name, value);
+    } catch (err) { /* private browsing */ }
+  }
+
+  var EDIT = EDIT_FROM_URL || (stored(EDIT_FLAG) === "1" && !!stored(KEY_STORE));
   var MAX_BYTES = 12 * 1024 * 1024;
 
   var state = { images: {}, texts: {}, styles: {} };
@@ -80,17 +97,35 @@
   /* ------------------------------------------------------------ writing */
 
   function editKey() {
-    var key = sessionStorage.getItem(KEY_STORE);
-    if (!key) {
-      key = window.prompt("Bearbeitungs-Schlüssel / edit key:");
-      if (key) sessionStorage.setItem(KEY_STORE, key);
-    }
-    return key;
+    return stored(KEY_STORE);
   }
 
   function failed(res, data) {
-    if (res.status === 401) sessionStorage.removeItem(KEY_STORE);
+    /* A rejected key is a dead key — drop it so the next action asks again
+       instead of silently failing over and over. */
+    if (res.status === 401) {
+      remember(KEY_STORE, null);
+      remember(EDIT_FLAG, null);
+    }
     return new Error(data.error || "Fehler / failed (" + res.status + ")");
+  }
+
+  /* Verified against the server rather than locally, so a wrong key is
+     rejected at sign-in instead of at the first upload. An empty patch is
+     accepted by /api/content purely as this check. */
+  function verifyKey(key) {
+    return fetch("/api/content", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-kz-key": key },
+      body: "{}"
+    }).then(function (res) {
+      if (res.ok) return true;
+      return res.json().catch(function () { return {}; }).then(function (data) {
+        throw new Error(res.status === 401
+          ? (data.error === "unauthorized" ? "Falscher Schlüssel / wrong key" : data.error)
+          : (data.error || "Fehler (" + res.status + ")"));
+      });
+    });
   }
 
   function upload(slot, file) {
@@ -301,6 +336,7 @@
   window.KZ = {
     ready: ready,
     edit: EDIT,
+    editFromUrl: EDIT_FROM_URL,
     state: state,
     get images() { return state.images; },
     get texts() { return state.texts; },
@@ -312,10 +348,204 @@
     applyStyles: applyStyles
   };
 
-  if (EDIT) {
-    var editor = document.createElement("script");
-    editor.src = "editor.js";
-    editor.defer = true;
-    document.head.appendChild(editor);
+  /* ------------------------------------------------------- sign-in button --
+     The design already has an "Edit" button in the bottom-left corner that
+     opens an Editing Guide, but it was a demo explainer that did nothing.
+     This turns it into the real entry point: same styling, same position, on
+     every page rather than only on Home, with the key prompt inside the panel
+     it already showed. The prototype's inert copy is hidden so there is only
+     one. */
+
+  var COPY = {
+    de: {
+      trigger: "Bearbeiten",
+      title: "Bearbeitungsmodus",
+      body: "Text: Doppelklicken Sie auf einen Text, um ihn zu ändern. Bilder: Ziehen Sie ein Foto auf einen Platzhalter. Hintergrund: Abschnitt anklicken.",
+      locked: "Geben Sie den Schlüssel ein, um Änderungen vorzunehmen.",
+      placeholder: "Schlüssel",
+      start: "Bearbeiten starten",
+      checking: "Wird geprüft…",
+      active: "Bearbeitung ist aktiv.",
+      images: "Alle Bilder",
+      stop: "Bearbeiten beenden",
+      close: "Verstanden"
+    },
+    en: {
+      trigger: "Edit",
+      title: "Editing Guide",
+      body: "Text: double-click any text to change it. Images: drag a photo onto any placeholder. Background: click a section.",
+      locked: "Enter the key to make changes.",
+      placeholder: "Key",
+      start: "Start editing",
+      checking: "Checking…",
+      active: "Editing is on.",
+      images: "All images",
+      stop: "Stop editing",
+      close: "Got it"
+    }
+  };
+
+  function buildSignIn() {
+    var t = COPY[(document.documentElement.lang === "en") ? "en" : "de"];
+
+    var style = document.createElement("style");
+    style.textContent = [
+      /* The prototype's demo button sat here and did nothing. */
+      '#dc-root [style*="bottom:26px"][style*="left:26px"]{display:none!important;}',
+      /* Clears the editor toolbar when it is on screen. */
+      "#kz-signin{position:fixed;bottom:" + (EDIT ? "74px" : "26px") + ";left:26px;",
+      "z-index:61;font-family:'EB Garamond',Georgia,serif;}",
+      "#kz-signin .trigger{display:flex;align-items:center;gap:8px;",
+      "border:1px solid rgba(185,128,63,0.4);border-radius:999px;padding:10px 16px;",
+      "background:#29241f;color:#f2ecdf;font-family:'Playfair Display',serif;",
+      "font-weight:600;font-size:13px;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,0.3);}",
+      "#kz-signin .panel{position:absolute;bottom:52px;left:0;width:min(78vw,300px);",
+      "background:#29241f;border:1px solid rgba(185,128,63,0.3);border-radius:14px;",
+      "padding:20px;box-shadow:0 16px 36px rgba(0,0,0,0.4);color:#f2ecdf;font-size:14px;",
+      "line-height:1.55;}",
+      "#kz-signin .panel[hidden]{display:none;}",
+      "#kz-signin h4{margin:0 0 8px;font-family:'Playfair Display',serif;font-weight:600;",
+      "font-size:17px;color:#f7f1e6;}",
+      "#kz-signin p{margin:0 0 14px;color:rgba(242,236,224,0.72);}",
+      "#kz-signin input{width:100%;box-sizing:border-box;background:rgba(0,0,0,0.3);",
+      "border:1px solid rgba(185,128,63,0.25);border-radius:8px;padding:10px 12px;",
+      "color:#f2ecdf;font-family:inherit;font-size:14px;margin-bottom:10px;outline:none;}",
+      "#kz-signin input:focus{border-color:rgba(185,128,63,0.6);}",
+      "#kz-signin .go{width:100%;border:none;border-radius:999px;padding:10px;",
+      "background:linear-gradient(135deg,#e6c184,#b9803f);color:#201d1a;",
+      "font-family:'Playfair Display',serif;font-weight:600;font-size:13px;cursor:pointer;}",
+      "#kz-signin .go[disabled]{opacity:.6;cursor:default;}",
+      "#kz-signin .links{display:flex;gap:14px;margin-top:12px;font-size:13px;}",
+      "#kz-signin .links a,#kz-signin .links button{color:#d9a868;background:none;border:none;",
+      "padding:0;font:inherit;cursor:pointer;text-decoration:none;}",
+      "#kz-signin .err{color:#e8a598;font-size:13px;margin:0 0 10px;}"
+    ].join("");
+    document.head.appendChild(style);
+
+    var host = document.createElement("div");
+    host.id = "kz-signin";
+
+    var trigger = document.createElement("button");
+    trigger.className = "trigger";
+    trigger.innerHTML =
+      "<svg width='14' height='14' viewBox='0 0 24 24' fill='none'>" +
+      "<path d='M4 20h4L20 8l-4-4L4 16v4z' stroke='#d9a868' stroke-width='1.6' " +
+      "stroke-linejoin='round'/></svg><span></span>";
+    trigger.querySelector("span").textContent = t.trigger;
+
+    var panel = document.createElement("div");
+    panel.className = "panel";
+    panel.hidden = true;
+
+    host.appendChild(panel);
+    host.appendChild(trigger);
+    document.body.appendChild(host);
+
+    function render() {
+      panel.textContent = "";
+
+      var title = document.createElement("h4");
+      title.textContent = t.title;
+      var body = document.createElement("p");
+      body.textContent = EDIT ? t.body : t.locked;
+      panel.appendChild(title);
+      panel.appendChild(body);
+
+      if (!EDIT) {
+        var error = document.createElement("p");
+        error.className = "err";
+        error.hidden = true;
+
+        var input = document.createElement("input");
+        input.type = "password";
+        input.placeholder = t.placeholder;
+        input.autocomplete = "current-password";
+
+        var go = document.createElement("button");
+        go.className = "go";
+        go.textContent = t.start;
+
+        function submit() {
+          var key = input.value.trim();
+          if (!key) return input.focus();
+          go.disabled = true;
+          go.textContent = t.checking;
+          error.hidden = true;
+          verifyKey(key).then(function () {
+            remember(KEY_STORE, key);
+            remember(EDIT_FLAG, "1");
+            /* Reloading is the honest way in: the image slots decide whether
+               to attach their drop targets when they are created. */
+            location.reload();
+          }, function (err) {
+            go.disabled = false;
+            go.textContent = t.start;
+            error.textContent = err.message;
+            error.hidden = false;
+            input.select();
+          });
+        }
+
+        go.addEventListener("click", submit);
+        input.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") { e.preventDefault(); submit(); }
+        });
+
+        panel.appendChild(error);
+        panel.appendChild(input);
+        panel.appendChild(go);
+        setTimeout(function () { input.focus(); }, 0);
+        return;
+      }
+
+      var done = document.createElement("button");
+      done.className = "go";
+      done.textContent = t.close;
+      done.addEventListener("click", function () { panel.hidden = true; });
+      panel.appendChild(done);
+
+      var links = document.createElement("div");
+      links.className = "links";
+      var admin = document.createElement("a");
+      admin.href = "admin.html";
+      admin.textContent = t.images;
+      var stop = document.createElement("button");
+      stop.textContent = t.stop;
+      stop.addEventListener("click", function () {
+        remember(KEY_STORE, null);
+        remember(EDIT_FLAG, null);
+        /* Drop ?edit=1 too, or the reload would land straight back in edit. */
+        var url = new URL(location.href);
+        url.searchParams.delete("edit");
+        location.href = url.pathname + url.search;
+      });
+      links.appendChild(admin);
+      links.appendChild(stop);
+      panel.appendChild(links);
+    }
+
+    trigger.addEventListener("click", function () {
+      if (panel.hidden) render();
+      panel.hidden = !panel.hidden;
+    });
+
+    document.addEventListener("click", function (e) {
+      if (!panel.hidden && !host.contains(e.target)) panel.hidden = true;
+    });
+  }
+
+  function boot() {
+    if (EDIT) {
+      var editor = document.createElement("script");
+      editor.src = "editor.js";
+      document.head.appendChild(editor);
+    }
+    buildSignIn();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
   }
 })();
