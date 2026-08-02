@@ -17,6 +17,31 @@ const MAX_NOTE = 2000;
 const MAX_NOTES = 500;
 const MAX_REPLIES = 60;
 
+/* Style values are interpolated straight into a stylesheet in the browser, so
+   they are pinned to an exact shape here. Without this, a saved value like
+   "red;} body{display:none" would be injected as CSS for every later viewer. */
+function cleanStyle(value) {
+  if (!value || typeof value !== "object") return null;
+
+  const out = {};
+  if (typeof value.color === "string" && /^#[0-9a-f]{3,8}$/i.test(value.color.trim())) {
+    out.color = value.color.trim();
+  }
+  if (typeof value.image === "string") {
+    const url = value.image.trim();
+    /* Uploads only: an absolute https URL or a path inside the site. */
+    if (url === "" || /^https:\/\/[\w.-]+\/[\w./%-]*(\?[\w=&.%-]*)?$/i.test(url) ||
+        /^[\w./-]+$/.test(url)) {
+      out.image = url;
+    }
+  }
+  if (value.overlay === "dark" || value.overlay === "light") out.overlay = value.overlay;
+  if (value.strength != null) out.strength = Math.min(0.95, Math.max(0, Number(value.strength) || 0));
+  if (value.photo != null) out.photo = Math.min(1, Math.max(0, Number(value.photo) || 0));
+
+  return Object.keys(out).length ? out : null;
+}
+
 /* Notes are the one place a client types free-form content that is stored
    and replayed to other viewers, so the shape is pinned down here rather
    than trusted from the browser. */
@@ -93,8 +118,9 @@ export default async function handler(req, res) {
     for (const [key, value] of Object.entries(styles)) {
       /* An empty object means "back to the design default", so drop the key
          rather than emitting a rule with no declarations. */
-      if (value === null || !value || Object.keys(value).length === 0) delete content.styles[key];
-      else content.styles[key] = value;
+      const clean = cleanStyle(value);
+      if (!clean) delete content.styles[key];
+      else content.styles[key] = clean;
     }
     for (const [key, value] of Object.entries(notes)) {
       if (value === null) {
