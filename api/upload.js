@@ -1,0 +1,54 @@
+/*
+ * POST /api/upload?slot=<id> — replace one photo.
+ *
+ * Body is the raw image, content-type says which format. Requires the
+ * x-kz-key header to match EDIT_KEY.
+ */
+import { del, list, put } from "@vercel/blob";
+import { EXTENSIONS, SLOT_PREFIX, authorize, json, validSlot } from "./_store.js";
+
+export const config = { runtime: "edge" };
+
+const MAX_BYTES = 12 * 1024 * 1024;
+
+export default async function handler(request) {
+  if (request.method !== "POST") return json({ error: "POST only" }, 405);
+
+  const denied = authorize(request);
+  if (denied) return json({ error: denied }, 401);
+
+  const slot = new URL(request.url).searchParams.get("slot");
+  if (!validSlot(slot)) return json({ error: "invalid slot id" }, 400);
+
+  const type = (request.headers.get("content-type") || "").split(";")[0].trim();
+  const extension = EXTENSIONS[type];
+  if (!extension) return json({ error: `unsupported image type: ${type || "none"}` }, 415);
+
+  const body = await request.arrayBuffer();
+  if (!body.byteLength) return json({ error: "empty upload" }, 400);
+  if (body.byteLength > MAX_BYTES) return json({ error: "image is larger than 12 MB" }, 413);
+
+  const pathname = `${SLOT_PREFIX}${slot}.${extension}`;
+
+  const blob = await put(pathname, body, {
+    access: "public",
+    contentType: type,
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    cacheControlMaxAge: 60
+  });
+
+  /* A re-upload in a different format would otherwise leave the old file
+     behind, and the slot would have two entries in the listing. */
+  try {
+    const { blobs } = await list({ prefix: `${SLOT_PREFIX}${slot}.` });
+    const stale = blobs
+      .filter((b) => b.pathname !== pathname && /^[^.]+\.[^.]+$/.test(b.pathname.slice(SLOT_PREFIX.length)))
+      .map((b) => b.url);
+    if (stale.length) await del(stale);
+  } catch (error) {
+    console.error("could not remove superseded blobs", error);
+  }
+
+  return json({ ok: true, slot, url: `${blob.url}?v=${Date.now()}` });
+}
