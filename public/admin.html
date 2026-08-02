@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bilder — KAISERZEIT im Himmelbett</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#201d1a;color:#f2ecdf;font:16px/1.6 'EB Garamond',Georgia,serif}
+  header{padding:34px 22px 20px;text-align:center;border-bottom:1px solid rgba(185,128,63,.25)}
+  h1{margin:0 0 6px;font:700 30px 'Playfair Display',serif;
+     background:linear-gradient(180deg,#f0d9ae,#d9a868 45%,#8a5a2f);
+     -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:rgba(242,236,224,.6);font-size:15px}
+  .sub a{color:#d9a868}
+  main{max-width:1180px;margin:0 auto;padding:22px}
+  .progress{margin:18px 0 6px;height:6px;border-radius:999px;background:rgba(185,128,63,.18);overflow:hidden}
+  .progress i{display:block;height:100%;width:0;background:linear-gradient(135deg,#e6c184,#b9803f);transition:width .3s}
+  .count{font-size:13px;color:rgba(242,236,224,.55);text-align:right}
+  h2{margin:34px 0 4px;font:600 20px 'Playfair Display',serif;color:#f7f1e6}
+  h2 span{font-size:13px;color:rgba(242,236,224,.45);font-family:'EB Garamond',serif;font-weight:400}
+  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));margin-top:14px}
+  .cell{border:1px solid rgba(185,128,63,.22);border-radius:10px;overflow:hidden;background:#29241f}
+  .drop{position:relative;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;
+        cursor:pointer;text-align:center;font-size:12px;color:rgba(242,236,224,.45);padding:10px}
+  .drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .drop.over{background:rgba(185,128,63,.3);color:#201d1a}
+  .drop .msg{position:relative;z-index:1}
+  .drop.filled .msg{opacity:0;transition:opacity .15s}
+  .drop.filled:hover .msg{opacity:1;background:rgba(26,24,21,.75);color:#f2ecdf;
+        border-radius:6px;padding:6px 10px}
+  .meta{padding:8px 10px;border-top:1px solid rgba(185,128,63,.18);font-size:12px}
+  .meta b{display:block;font-weight:400;color:#f7f1e6}
+  .meta code{color:rgba(242,236,224,.4);font-size:11px}
+  .bar{position:sticky;top:0;z-index:5;background:#161310;border-bottom:1px solid rgba(185,128,63,.3);
+       padding:10px 22px;display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:14px}
+  .bar a,.bar button{color:#f2ecdf;background:transparent;border:1px solid rgba(185,128,63,.45);
+       border-radius:999px;padding:6px 15px;font:inherit;cursor:pointer;text-decoration:none}
+  .status{color:#d9a868;min-width:120px;text-align:center}
+  .err{color:#e8a598}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <a href="Home.dc.html?edit=1">← Zur Website (Bearbeiten)</a>
+  <button id="reload">Aktualisieren</button>
+  <span class="status" id="status"></span>
+</div>
+
+<header>
+  <h1>Bilder verwalten</h1>
+  <div class="sub">
+    Ziehen Sie ein Foto auf einen Platzhalter — es wird sofort gespeichert.<br>
+    <span style="opacity:.7">Drag a photo onto any placeholder; it saves immediately.</span>
+  </div>
+</header>
+
+<main>
+  <div class="progress"><i id="fill"></i></div>
+  <div class="count" id="count"></div>
+  <div id="groups"></div>
+</main>
+
+<script src="image-slot.js"></script>
+<script>
+/*
+ * Grid view of every photo the site needs, grouped the way the client thinks
+ * about them. The slot ids match the ones baked into the design templates —
+ * see DESIGN-HANDOFF.md. Editing in place on the real pages (?edit=1) is
+ * usually nicer; this page is for spotting what is still missing.
+ */
+const GROUPS = [
+  { title: "Startseite", note: "Home.dc.html", slots: [
+    ["hero-bg", "Hero-Hintergrund (Textur)"],
+    ["intro-photo", "Intro: Apartment-Innenraum"],
+    ["hosts-photo", "Gastgeber Ivi & Jörg"],
+    ["vintage-map-blumenstrasse", "Karte Blumenstraße"],
+    ["vintage-map-kanal", "Karte Nest am Kanal"]
+  ]},
+  { title: "Apartments-Seite", note: "Apartments.dc.html", slots: [
+    ["apartments-hero", "Kopfbild der Übersicht"]
+  ]},
+  { title: "Häuser", note: "Gruppenkarten auf Start- und Apartments-Seite", slots: [
+    ["group-blumenstrasse", "City, Messe & Zoo"],
+    ["group-kanal", "Kanal & Künstlerviertel"]
+  ]},
+  { title: "Apartment-Karten", note: "Vorschaubilder in Listen und Suchergebnissen", slots: [
+    ["apt-residenz", "Residenz"],
+    ["apt-cozy", "Cozy"],
+    ["apt-belle-etage", "Belle Étage"],
+    ["apt-nest", "Nest am Kanal"]
+  ]},
+  { title: "Residenz", note: "Detailseite", slots: [
+    ["apt-hero-residenz", "Kopfbild (21:9)"],
+    ["apt-hero-residenz-pano", "360°-Panorama (breit)"],
+    ...[0,1,2,3,4,5].map(i => [`res-g${i}`, `Galerie ${i+1}`])
+  ]},
+  { title: "Cozy", note: "Detailseite", slots: [
+    ["apt-hero-cozy", "Kopfbild (21:9)"],
+    ["apt-hero-cozy-pano", "360°-Panorama (breit)"],
+    ...[0,1,2,3,4,5].map(i => [`cozy-g${i}`, `Galerie ${i+1}`])
+  ]},
+  { title: "Belle Étage", note: "Detailseite", slots: [
+    ["apt-hero-belle", "Kopfbild (21:9)"],
+    ["apt-hero-belle-pano", "360°-Panorama (breit)"],
+    ...[0,1,2,3,4,5].map(i => [`belle-g${i}`, `Galerie ${i+1}`])
+  ]},
+  { title: "Nest am Kanal", note: "Detailseite — eigenes Layout mit 8 Galeriebildern", slots: [
+    ["apt-hero-nest", "Kopfbild (21:9)"],
+    ["apt-hero-nest-pano", "360°-Panorama (breit)"],
+    ...[0,1,2,3,4,5,6,7].map(i => [`nest-g${i}`, `Galerie ${i+1}`])
+  ]}
+];
+
+const statusEl = document.getElementById("status");
+let statusTimer;
+function say(msg, cls) {
+  statusEl.textContent = msg;
+  statusEl.className = "status" + (cls ? " " + cls : "");
+  clearTimeout(statusTimer);
+  if (!cls) statusTimer = setTimeout(() => (statusEl.textContent = ""), 2500);
+}
+
+function tally() {
+  const all = GROUPS.flatMap(g => g.slots.map(s => s[0]));
+  const done = all.filter(id => KZ.images[id]).length;
+  document.getElementById("fill").style.width = (done / all.length * 100) + "%";
+  document.getElementById("count").textContent = `${done} von ${all.length} Bildern gesetzt`;
+}
+
+function cell(id, label) {
+  const wrap = document.createElement("div");
+  wrap.className = "cell";
+  wrap.innerHTML =
+    `<div class="drop"><span class="msg">Ziehen oder klicken</span></div>` +
+    `<div class="meta"><b></b><code></code></div>`;
+  wrap.querySelector("b").textContent = label;
+  wrap.querySelector("code").textContent = id;
+
+  const drop = wrap.querySelector(".drop");
+  const msg = wrap.querySelector(".msg");
+  const file = Object.assign(document.createElement("input"), { type: "file", accept: "image/*" });
+  file.style.display = "none";
+  wrap.appendChild(file);
+
+  function paint() {
+    const url = KZ.images[id];
+    drop.querySelector("img")?.remove();
+    if (url) {
+      const img = document.createElement("img");
+      img.src = url;
+      img.alt = label;
+      drop.prepend(img);
+      drop.classList.add("filled");
+      msg.textContent = "Ersetzen";
+    } else {
+      drop.classList.remove("filled");
+      msg.textContent = "Ziehen oder klicken";
+    }
+    tally();
+  }
+
+  function send(chosen) {
+    if (!chosen) return;
+    msg.textContent = "Wird hochgeladen…";
+    drop.classList.remove("filled");
+    KZ.upload(id, chosen).then(data => {
+      KZ.publishImage(id, data.url);
+      paint();
+      say("Gespeichert ✓");
+    }, err => {
+      msg.textContent = err.message;
+      say(err.message, "err");
+    });
+  }
+
+  drop.addEventListener("click", () => file.click());
+  file.addEventListener("change", () => { send(file.files[0]); file.value = ""; });
+  ["dragenter", "dragover"].forEach(t =>
+    drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "dragend"].forEach(t =>
+    drop.addEventListener(t, () => drop.classList.remove("over")));
+  drop.addEventListener("drop", e => {
+    e.preventDefault();
+    drop.classList.remove("over");
+    send(e.dataTransfer.files && e.dataTransfer.files[0]);
+  });
+
+  paint();
+  return wrap;
+}
+
+KZ.ready.then(() => {
+  const host = document.getElementById("groups");
+  host.textContent = "";
+  for (const group of GROUPS) {
+    const h = document.createElement("h2");
+    h.innerHTML = `${group.title} <span>— ${group.note}</span>`;
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    for (const [id, label] of group.slots) grid.appendChild(cell(id, label));
+    host.appendChild(h);
+    host.appendChild(grid);
+  }
+  tally();
+});
+
+document.getElementById("reload").addEventListener("click", () => location.reload());
+</script>
+</body>
+</html>

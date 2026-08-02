@@ -1,0 +1,67 @@
+/*
+ * responsive.css — mobile corrections for the design prototypes.
+ *
+ * The handoff pages carry their own breakpoints for the nav (880px), the
+ * Nest split (900px) and the profile sidebar (760px). What they never
+ * specify is a phone treatment for the hero booking bar or for the tighter
+ * fixed-column grids, so those are handled here.
+ *
+ * Kept in its own file, and hooked on the inline styles the design already
+ * uses, so the .dc.html files stay byte-for-byte as delivered. The grid
+ * minmax() floors are clamped in support.js; everything else is below.
+ *
+ * Selectors match on the normalised inline style, e.g.
+ * [style*="flex-wrap:nowrap"] — support.js serialises declarations without
+ * spaces, so these are stable.
+ */
+
+/* A stray overflowing child should never make the whole page pan sideways. */
+html, body { max-width: 100%; overflow-x: hidden; }
+
+#dc-root img,
+#dc-root image-slot { max-width: 100%; }
+
+@media (max-width: 760px) {
+  /* Hero booking bar: authored as one non-wrapping row with a horizontal
+     scrollbar. On a phone that clips the guests field and the CTA, so let it
+     stack instead. */
+  #dc-root [style*="flex-wrap:nowrap"][style*="overflow-x:auto"] {
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+  }
+  #dc-root [style*="flex-wrap:nowrap"][style*="overflow-x:auto"] > * {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Two- and three-up fixed grids (apartment cards, the photo gallery)
+     have no auto-fit floor to clamp, so they are collapsed explicitly. */
+  #dc-root [style*="grid-template-columns:repeat(2,1fr)"] {
+    grid-template-columns: 1fr !important;
+  }
+  #dc-root [style*="grid-template-columns:repeat(3,1fr)"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Modals: full-height dialogs need to scroll rather than overflow. */
+  #dc-root [style*="position:fixed"][style*="z-index"] > [style*="border-radius:14px"] {
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+
+  /* Long words in German headings should break rather than push the layout. */
+  #dc-root h1, #dc-root h2, #dc-root h3 { overflow-wrap: break-word; }
+}
+
+@media (max-width: 520px) {
+  /* The 360° viewer and gallery are tall on a phone; cap them so the page
+     stays scannable. */
+  #dc-root .nest-gallery { grid-template-rows: none !important; }
+
+  /* Trust line under the booking bar reads better stacked than as three
+     bullet-separated fragments. */
+  #dc-root [style*="flex-wrap:wrap"][style*="justify-content:center"] { row-gap: 6px; }
+}
+
+/* Editing chrome must not sit on top of the content it is editing. */
+body.kz-bg #dc-root { scroll-margin-bottom: 60px; }

@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta charset="utf-8"/>
+<title>KAISERZEIT im Himmelbett</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet"/>
+<script src="./image-slot.js"></script>
+<style>
+  html,body{margin:0;padding:0;}
+  *{box-sizing:border-box;}
+  img{max-width:100%;display:block;}
+  a{color:#d9a868;text-decoration:none;}
+  a:hover{color:#f2ecdf;}
+  @keyframes kz-bounce{0%,100%{transform:translateY(0);opacity:0.55;}50%{transform:translateY(10px);opacity:1;}}
+  ::selection{background:#b9803f;color:#201d1a;}
+
+  @media (max-width: 880px){
+    .nav-links-desktop{display:none !important;}
+    .nav-hamburger{display:flex !important;}
+    .nav-booknow{display:none !important;}
+  }
+
+
+  image-slot#nav-avatar::part(empty),
+  image-slot#nav-avatar-lg::part(empty),
+  image-slot#profile-hero-avatar::part(empty){display:none;}
+  image-slot#nav-avatar::part(frame),
+  image-slot#nav-avatar-lg::part(frame),
+  image-slot#profile-hero-avatar::part(frame){background:linear-gradient(135deg,#e6c184,#b9803f);}
+
+</style>
+</helmet>
+
+<div style="font-family:'EB Garamond',serif;background:#f2ecdf;color:#2b241d;overflow-x:hidden;">
+
+  <nav style="position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(32,29,26,0.85);backdropFilter:blur(10px);borderBottom:1px solid rgba(185,128,63,0.28);padding:8px clamp(20px,5vw,56px) 6px;">
+    <div style="display:flex;justify-content:center;margin-bottom:2px;">
+      <img src="assets/kaiserzeit-logo.png" alt="KAISERZEIT im Himmelbett" style="height:76px;width:auto;"/>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div class="nav-links-desktop" style="{{ navLinksRowStyle }}">
+        <a href="Home.dc.html" style="font-size:15px;letter-spacing:0.03em;color:#f2ecdf;">{{ t.nav.home }}</a>
+        <a href="Apartments.dc.html" style="font-size:15px;letter-spacing:0.03em;color:#f2ecdf;">{{ t.nav.apartments }}</a>
+        <a href="Booking.dc.html" style="font-size:15px;letter-spacing:0.03em;color:#f2ecdf;">{{ t.nav.booking }}</a>
+        <a href="About Us.dc.html" style="font-size:15px;letter-spacing:0.03em;color:#f2ecdf;">{{ t.nav.about }}</a>
+        <a href="Contact.dc.html" style="font-size:15px;letter-spacing:0.03em;color:#f2ecdf;">{{ t.nav.kontakt }}</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+      <div style="position:relative;">
+        <button onClick="{{ toggleLangMenu }}" style="display:flex;align-items:center;gap:6px;border:1px solid rgba(185,128,63,0.4);borderRadius:999px;padding:9px 14px;background:transparent;color:#f2ecdf;fontFamily:'EB Garamond',serif;fontSize:13px;cursor:pointer;">
+          {{ currentLangLabel }}
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#d9a868" stroke-width="2"/></svg>
+        </button>
+        <sc-if value="{{ langMenuOpen }}">
+          <div style="position:absolute;top:42px;left:0;width:110px;background:#201d1a;border:1px solid rgba(185,128,63,0.3);borderRadius:10px;padding:6px;boxShadow:0 14px 30px rgba(0,0,0,0.4);">
+            <button onClick="{{ setLangDe }}" style="{{ langDeMenuItemStyle }}">Deutsch</button>
+            <button onClick="{{ setLangEn }}" style="{{ langEnMenuItemStyle }}">English</button>
+          </div>
+        </sc-if>
+      </div>
+      <a href="Booking.dc.html" class="nav-booknow" style="font-size:13px;letter-spacing:0.03em;color:#201d1a;background:linear-gradient(135deg,#e6c184,#b9803f);padding:11px 20px;borderRadius:999px;fontFamily:'Playfair Display',serif;fontWeight:600;">{{ bookNowNavLabel }}</a>
+      <div style="width:1px;height:22px;background:rgba(185,128,63,0.3);"></div>
+      <div style="position:relative;">
+        <sc-if value="{{ isSignedIn }}">
+          <button onClick="{{ toggleProfileMenu }}" style="width:36px;height:36px;borderRadius:50%;overflow:hidden;border:1px solid rgba(185,128,63,0.5);cursor:pointer;padding:0;">
+            <image-slot id="nav-avatar" shape="circle" fit="cover" placeholder="Foto" style="width:100%;height:100%;overflow:hidden;borderRadius:50%;fontSize:9px;"></image-slot>
+          </button>
+          <sc-if value="{{ profileMenuOpen }}">
+            <div style="position:absolute;top:48px;right:0;width:220px;background:#201d1a;border:1px solid rgba(185,128,63,0.3);borderRadius:14px;padding:20px;boxShadow:0 16px 36px rgba(0,0,0,0.4);text-align:center;">
+              <div style="width:56px;height:56px;borderRadius:50%;overflow:hidden;margin:0 auto 12px;border:1px solid rgba(185,128,63,0.4);">
+                <image-slot id="nav-avatar-lg" shape="circle" fit="cover" placeholder="Foto" style="width:100%;height:100%;overflow:hidden;borderRadius:50%;fontSize:11px;"></image-slot>
+              </div>
+              <div style="font-family:'Playfair Display',serif;font-size:15px;color:#f7f1e6;margin-bottom:2px;">{{ profileName }}</div>
+              <div style="font-size:12px;color:rgba(242,236,224,0.5);margin-bottom:16px;">{{ profileEmail }}</div>
+              <div style="display:flex;flex-direction:column;gap:4px;borderTop:1px solid rgba(185,128,63,0.2);paddingTop:14px;">
+                <a href="Profile.dc.html" style="display:flex;align-items:center;gap:10px;font-size:14px;color:#f2ecdf;padding:8px 4px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="#d9a868" stroke-width="1.3"/><path d="M3 10h18M8 3v4M16 3v4" stroke="#d9a868" stroke-width="1.3"/></svg>{{ authBookingsLabel }}
+                </a>
+                <button onClick="{{ logout }}" style="display:flex;align-items:center;gap:10px;font-size:14px;color:#f2ecdf;background:transparent;border:none;padding:8px 4px;cursor:pointer;text-align:left;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="#d9a868" stroke-width="1.3"/><path d="M16 17l5-5-5-5M21 12H9" stroke="#d9a868" stroke-width="1.3"/></svg>{{ authLogoutLabel }}
+                </button>
+              </div>
+            </div>
+          </sc-if>
+        </sc-if>
+        <sc-if value="{{ isSignedOut }}">
+          <a href="Booking.dc.html" style="display:inline-block;border:1px solid rgba(185,128,63,0.4);borderRadius:999px;padding:9px 18px;background:transparent;color:#f2ecdf;fontFamily:'Playfair Display',serif;fontWeight:600;fontSize:13px;">{{ authSigninLabel }}</a>
+        </sc-if>
+      </div>
+      <button onClick="{{ toggleMobileMenu }}" class="nav-hamburger" style="{{ hamburgerStyle }}">
+        <div style="width:22px;height:1px;background:#f2ecdf;"></div>
+        <div style="width:22px;height:1px;background:#f2ecdf;"></div>
+        <div style="width:22px;height:1px;background:#f2ecdf;"></div>
+      </button>
+      </div>
+    </div>
+  </nav>
+
+  <sc-if value="{{ showMobileMenu }}">
+    <div style="position:fixed;top:118px;left:0;right:0;z-index:49;background:#201d1a;borderBottom:1px solid rgba(185,128,63,0.28);display:flex;flex-direction:column;padding:18px clamp(20px,5vw,56px) 26px;gap:18px;">
+      <a href="Home.dc.html" style="color:#f2ecdf;font-size:17px;">{{ t.nav.home }}</a>
+      <a href="Apartments.dc.html" style="color:#f2ecdf;font-size:17px;">{{ t.nav.apartments }}</a>
+      <a href="Booking.dc.html" style="color:#f2ecdf;font-size:17px;">{{ t.nav.booking }}</a>
+      <a href="About Us.dc.html" style="color:#f2ecdf;font-size:17px;">{{ t.nav.about }}</a>
+      <a href="Contact.dc.html" style="color:#f2ecdf;font-size:17px;">{{ t.nav.kontakt }}</a>
+    </div>
+  </sc-if>
+
+  <section id="home" style="position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;background:#1a1815;overflow:hidden;">
+    <image-slot id="hero-bg" shape="rect" fit="cover" src="assets/hero-texture.png" placeholder="Foto: dunkle Stein-/Schiefertextur" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0.75;"></image-slot>
+    <div style="position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(circle at 20% 15%,rgba(185,128,63,0.14),transparent 42%),radial-gradient(circle at 82% 78%,rgba(185,128,63,0.10),transparent 45%),repeating-linear-gradient(115deg,rgba(255,255,255,0.02) 0px,rgba(255,255,255,0.02) 1px,transparent 1px,transparent 3px),linear-gradient(180deg,rgba(20,18,16,0.55) 0%,rgba(20,18,16,0.72) 55%,#1a1815 100%);"></div>
+    <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;">
+      <div style="display:inline-block;font-size:12px;letter-spacing:0.24em;text-transform:uppercase;color:#d9a868;margin-bottom:26px;border:1px solid rgba(185,128,63,0.4);padding:8px 20px;borderRadius:2px;">{{ t.hero.eyebrow }}</div>
+      <h1 style="margin:0;max-width:960px;">
+        <span style="display:block;font-family:'Playfair Display',serif;font-weight:800;font-size:clamp(42px,7vw,92px);line-height:1.15;letter-spacing:0.02em;background:linear-gradient(180deg,#f0d9ae 0%,#d9a868 45%,#8a5a2f 100%);-webkit-background-clip:text;background-clip:text;color:transparent;">{{ t.hero.titleLine1 }}</span>
+        <span style="display:block;margin-top:14px;font-family:'Playfair Display',serif;font-weight:700;font-style:italic;font-size:clamp(34px,5.5vw,72px);line-height:1.3;background:linear-gradient(180deg,#f0d9ae 0%,#d9a868 45%,#8a5a2f 100%);-webkit-background-clip:text;background-clip:text;color:transparent;">{{ t.hero.titleLine2 }}</span>
+      </h1>
+      <p style="font-size:clamp(16px,2vw,20px);line-height:1.6;color:rgba(242,236,224,0.82);max-width:600px;margin:22px 0 0;">{{ t.hero.subtitle }}</p>
+      <div id="booking" style="margin-top:36px;width:min(94vw,960px);background:rgba(41,36,31,0.88);border:1px solid rgba(185,128,63,0.3);borderRadius:14px;padding:clamp(22px,3vw,32px) clamp(20px,3vw,36px);backdropFilter:blur(6px);position:relative;">
+        <div style="position:absolute;top:10px;right:14px;display:flex;gap:4px;background:rgba(0,0,0,0.25);borderRadius:999px;padding:3px;">
+          <button onClick="{{ setDropdownMode }}" style="{{ dropdownModeBtnStyle }}">Dropdown</button>
+          <button onClick="{{ setPopupMode }}" style="{{ popupModeBtnStyle }}">Popup</button>
+        </div>
+        <div style="display:flex;flex-wrap:nowrap;gap:16px;align-items:end;overflow-x:auto;">
+          <div style="text-align:left;flex:1 1 0;min-width:150px;">
+            <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#d9a868;margin-bottom:10px;white-space:nowrap;">{{ t.hero.booking.nameLabel }}</div>
+            <div style="display:flex;align-items:center;gap:10px;background:rgba(20,18,16,0.6);border:1px solid rgba(185,128,63,0.25);borderRadius:8px;padding:12px 14px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.4c-3.3 0-9.8 1.6-9.8 4.9v2.5h19.6v-2.5c0-3.3-6.5-4.9-9.8-4.9z" stroke="#b9803f" stroke-width="1.2" fill="none"/></svg>
+              <input type="text" placeholder="{{ t.hero.booking.namePlaceholder }}" style="background:transparent;border:none;outline:none;color:#f2ecdf;font-family:'EB Garamond',serif;font-size:15px;width:100%;"/>
+            </div>
+          </div>
+          <div style="text-align:left;flex:1 1 0;min-width:170px;">
+            <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#d9a868;margin-bottom:10px;white-space:nowrap;">{{ t.hero.booking.datesLabel }}</div>
+            <div style="display:flex;align-items:center;gap:10px;background:rgba(20,18,16,0.6);border:1px solid rgba(185,128,63,0.25);borderRadius:8px;padding:12px 14px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;"><rect x="3" y="5" width="18" height="16" rx="2" stroke="#b9803f" stroke-width="1.2"/><path d="M3 10h18M8 3v4M16 3v4" stroke="#b9803f" stroke-width="1.2"/></svg>
+              <span style="color:rgba(242,236,224,0.55);font-size:15px;">{{ t.hero.booking.datesPlaceholder }}</span>
+            </div>
+          </div>
+          <div style="text-align:left;flex:1 1 0;min-width:150px;">
+            <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#d9a868;margin-bottom:10px;white-space:nowrap;">{{ t.hero.booking.guestsLabel }}</div>
+            <div style="display:flex;align-items:center;gap:10px;background:rgba(20,18,16,0.6);border:1px solid rgba(185,128,63,0.25);borderRadius:8px;padding:12px 14px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;"><circle cx="9" cy="8" r="3" stroke="#b9803f" stroke-width="1.2"/><path d="M3 20c0-3 2.7-5 6-5s6 2 6 5" stroke="#b9803f" stroke-width="1.2"/><circle cx="17" cy="9" r="2.4" stroke="#b9803f" stroke-width="1.2"/><path d="M15.5 20c0-2.3 1.6-4.1 3.8-4.6" stroke="#b9803f" stroke-width="1.2"/></svg>
+              <span style="color:rgba(242,236,224,0.85);font-size:15px;">{{ t.hero.booking.guestsValue }}</span>
+            </div>
+          </div>
+          <button onClick="{{ bookingBtnOnClick }}" style="{{ bookingBtnStyle }}">{{ bookingBtnLabel }}</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:22px;">
+          <sc-for list="{{ t.hero.booking.trust }}" as="item" hint-placeholder-count="3">
+            <span style="font-size:13px;color:rgba(242,236,224,0.65);display:flex;align-items:center;gap:8px;">
+              <sc-if value="{{ $index }}" hint-placeholder-val="{{ 0 }}"><span style="color:rgba(185,128,63,0.5);">•</span></sc-if>
+              ✓ {{ item }}
+            </span>
+          </sc-for>
+        </div>
+        <div style="{{ resultsWrapperStyle }}">
+          <div style="padding-top:26px;borderTop:1px solid rgba(185,128,63,0.25);text-align:left;">
+            <div style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:#d9a868;margin-bottom:18px;">{{ resultsTitle }}</div>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <sc-for list="{{ apartmentResults }}" as="apt" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:16px;background:rgba(20,18,16,0.5);border:1px solid rgba(185,128,63,0.18);borderRadius:10px;padding:12px;">
+                  <image-slot id="{{ apt.slotId }}" shape="rounded" radius="8" placeholder="Foto" style="width:76px;height:64px;flex-shrink:0;"></image-slot>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-family:'Playfair Display',serif;font-size:17px;color:#f7f1e6;margin-bottom:4px;">{{ apt.name }}</div>
+                    <div style="font-size:14px;color:rgba(242,236,224,0.6);line-height:1.4;">{{ apt.brief }}</div>
+                  </div>
+                  <span style="{{ apt.statusStyle }}">{{ apt.statusLabel }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+      <sc-if value="{{ isPopupMode }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ popupOverlayStyle }}" onClick="{{ toggleResults }}">
+          <div style="{{ popupCardStyle }}" onClick="{{ stopPropagation }}">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+              <div style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:#d9a868;">{{ resultsTitle }}</div>
+              <button onClick="{{ toggleResults }}" style="background:transparent;border:none;color:rgba(242,236,224,0.6);fontSize:20px;cursor:pointer;lineHeight:1;">×</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <sc-for list="{{ apartmentResults }}" as="apt" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:16px;background:rgba(20,18,16,0.5);border:1px solid rgba(185,128,63,0.18);borderRadius:10px;padding:12px;">
+                  <image-slot id="popup-{{ apt.slotId }}" shape="rounded" radius="8" placeholder="Foto" style="width:76px;height:64px;flex-shrink:0;"></image-slot>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-family:'Playfair Display',serif;font-size:17px;color:#f7f1e6;margin-bottom:4px;">{{ apt.name }}</div>
+                    <div style="font-size:14px;color:rgba(242,236,224,0.6);line-height:1.4;">{{ apt.brief }}</div>
+                  </div>
+                  <span style="{{ apt.statusStyle }}">{{ apt.statusLabel }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+      <div style="margin-top:40px;display:flex;flex-direction:column;align-items:center;gap:8px;animation:kz-bounce 2.2s ease-in-out infinite;">
+        <div style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(242,236,224,0.6);">{{ t.hero.scroll }}</div>
+        <div style="width:1px;height:36px;background:linear-gradient(#d9a868,transparent);"></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding:clamp(70px,10vw,140px) clamp(24px,6vw,80px);background:#f2ecdf;">
+    <div style="display:grid;gridTemplateColumns:repeat(auto-fit,minmax(320px,1fr));gap:clamp(36px,6vw,80px);maxWidth:1200px;margin:0 auto;align-items:center;">
+      <image-slot id="intro-photo" shape="rect" placeholder="Foto: Apartment-Innenraum" style="width:100%;aspect-ratio:4/5;borderRadius:2px;"></image-slot>
+      <div>
+        <div style="font-size:13px;letter-spacing:0.24em;text-transform:uppercase;color:#8a5a2f;margin-bottom:16px;">{{ t.intro.label }}</div>
+        <h2 style="font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(28px,4vw,44px);color:#2b241d;margin:0 0 22px;line-height:1.15;">{{ t.intro.title }}</h2>
+        <p style="font-size:18px;line-height:1.75;color:#4a4038;margin:0 0 34px;text-wrap:pretty;">{{ t.intro.body }}</p>
+        <a href="#kontakt" style="display:inline-block;background:#201d1a;color:#f2ecdf;padding:16px 32px;borderRadius:2px;fontFamily:'Playfair Display',serif;fontWeight:600;font-size:15px;letter-spacing:0.03em;border:1px solid #201d1a;">{{ t.intro.cta }}</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="apartments" style="padding:clamp(70px,10vw,140px) clamp(24px,6vw,80px);background:radial-gradient(circle at 15% 20%,rgba(185,128,63,0.08),transparent 40%),radial-gradient(circle at 85% 80%,rgba(185,128,63,0.07),transparent 45%),#201d1a;">
+    <div style="text-align:center;maxWidth:720px;margin:0 auto 64px;">
+      <div style="font-size:13px;letter-spacing:0.24em;text-transform:uppercase;color:#d9a868;margin-bottom:16px;">{{ t.groups.label }}</div>
+      <h2 style="font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(28px,4vw,44px);color:#f7f1e6;margin:0;">{{ t.groups.title }}</h2>
+    </div>
+    <div style="display:grid;gridTemplateColumns:repeat(auto-fit,minmax(380px,1fr));gap:36px;maxWidth:1200px;margin:0 auto;">
+      <sc-for list="{{ t.groups.items }}" as="group" hint-placeholder-count="2">
+        <div style="background:#29241f;borderRadius:2px;border:1px solid rgba(185,128,63,0.22);display:flex;flex-direction:column;height:100%;">
+          <div style="width:100%;aspect-ratio:16/10;position:relative;flex-shrink:0;">
+            <image-slot id="{{ group.slotId }}" shape="rect" placeholder="Foto: Apartmentgruppe" style="position:absolute;inset:0;width:100%;height:100%;"></image-slot>
+          </div>
+          <div style="padding:36px;display:flex;flex-direction:column;flex:1;">
+            <h3 style="font-family:'Playfair Display',serif;font-weight:600;font-size:24px;color:#f7f1e6;margin:0 0 6px;">{{ group.name }}</h3>
+            <div style="font-size:14px;color:#b9803f;margin-bottom:18px;letter-spacing:0.02em;">{{ group.address }}</div>
+            <p style="font-size:16px;line-height:1.7;color:rgba(242,236,224,0.78);margin:0 0 22px;">{{ group.desc }}</p>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:26px;">
+              <sc-for list="{{ group.apts }}" as="apt" hint-placeholder-count="3">
+                <span style="font-size:13px;color:#f2ecdf;border:1px solid rgba(185,128,63,0.4);padding:7px 14px;borderRadius:999px;letter-spacing:0.02em;">{{ apt }}</span>
+              </sc-for>
+            </div>
+            <a href="#kontakt" style="font-size:14px;color:#d9a868;letter-spacing:0.03em;border-bottom:1px solid rgba(185,128,63,0.5);padding-bottom:3px;margin-top:auto;align-self:flex-start;">{{ group.cta }} →</a>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="lage" style="padding:clamp(70px,10vw,140px) clamp(24px,6vw,80px);background:#f2ecdf;">
+    <div style="text-align:center;maxWidth:720px;margin:0 auto 20px;">
+      <div style="font-size:13px;letter-spacing:0.24em;text-transform:uppercase;color:#8a5a2f;margin-bottom:16px;">{{ t.map.label }}</div>
+      <h2 style="font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(28px,4vw,44px);color:#2b241d;margin:0 0 16px;">{{ t.map.title }}</h2>
+      <p style="font-size:17px;line-height:1.7;color:#4a4038;margin:0;">{{ t.map.subtitle }}</p>
+    </div>
+    <div style="display:flex;justify-content:center;gap:12px;margin:40px 0 48px;flex-wrap:wrap;">
+      <sc-for list="{{ mapTabs }}" as="tab" hint-placeholder-count="2">
+        <button onClick="{{ tab.onClick }}" style="{{ tab.btnStyle }}">{{ tab.name }}</button>
+      </sc-for>
+    </div>
+    <div style="display:grid;gridTemplateColumns:repeat(auto-fit,minmax(340px,1fr));gap:clamp(36px,6vw,64px);maxWidth:1100px;margin:0 auto;align-items:center;">
+                  <sc-if value="{{ isBlumenstrasseTab }}">
+        <image-slot id="vintage-map-blumenstrasse" shape="rect" src="assets/vintage-map-blumenstrasse.png" placeholder="Stilisierte Vintage-Karte: Blumenstraße" style="width:100%;aspect-ratio:3/2;borderRadius:2px;border:1px solid rgba(185,128,63,0.3);"></image-slot>
+      </sc-if>
+      <sc-if value="{{ isKanalTab }}">
+        <image-slot id="vintage-map-kanal" shape="rect" placeholder="Stilisierte Vintage-Karte: Nest am Kanal" style="width:100%;aspect-ratio:3/2;borderRadius:2px;border:1px solid rgba(185,128,63,0.3);"></image-slot>
+      </sc-if>
+      <div>
+        <sc-for list="{{ activeLandmarks }}" as="mark" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;gap:16px;padding:16px 0;borderBottom:1px solid rgba(185,128,63,0.22);">
+            <div style="width:9px;height:9px;borderRadius:50%;background:#b9803f;flex-shrink:0;"></div>
+            <span style="font-size:18px;color:#2b241d;">{{ mark }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" style="padding:clamp(70px,10vw,140px) clamp(24px,6vw,80px);background:#1a1815;">
+    <div style="display:grid;gridTemplateColumns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(36px,6vw,80px);maxWidth:1100px;margin:0 auto;align-items:center;">
+      <image-slot id="hosts-photo" shape="rounded" radius="4" placeholder="Foto: Ivi &amp; Jörg" style="width:100%;aspect-ratio:4/5;"></image-slot>
+      <div>
+        <div style="font-size:13px;letter-spacing:0.24em;text-transform:uppercase;color:#d9a868;margin-bottom:16px;">{{ t.hosts.label }}</div>
+        <h2 style="font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(28px,4vw,44px);color:#f7f1e6;margin:0 0 22px;line-height:1.15;">{{ t.hosts.title }}</h2>
+        <p style="font-family:'Playfair Display',serif;font-style:italic;font-size:20px;line-height:1.5;color:#d9a868;margin:0 0 26px;">"{{ t.hosts.quote }}"</p>
+        <p style="font-size:16px;line-height:1.75;color:rgba(242,236,224,0.78);margin:0 0 18px;">{{ t.hosts.body1 }}</p>
+        <p style="font-size:16px;line-height:1.75;color:rgba(242,236,224,0.78);margin:0 0 30px;">{{ t.hosts.body2 }}</p>
+        <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+          <a href="https://wa.me/4915565726486" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#e6c184,#b9803f);color:#201d1a;padding:14px 26px;borderRadius:4px;fontFamily:'Playfair Display',serif;fontWeight:600;font-size:14px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-1.5-.7-2.5-1.3-3.5-3-.3-.5.3-.4.7-1.4.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s1 2.6 1.1 2.7c.1.2 1.9 3 4.7 4.1.7.3 1.2.4 1.6.5.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2-.1-.1-.2-.2-.4-.3z" fill="#201d1a"/><path d="M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 5L2 22l5.2-1.4c1.5.8 3.1 1.2 4.8 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3.1.8.8-3-.2-.3C4 14.9 3.6 13.5 3.6 12c0-4.6 3.8-8.4 8.4-8.4s8.4 3.8 8.4 8.4-3.8 8.2-8.4 8.2z" fill="#201d1a"/></svg>
+            {{ t.hosts.cta }}
+          </a>
+          <span style="font-size:13px;color:rgba(242,236,224,0.55);">{{ t.hosts.replyNote }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding:clamp(70px,10vw,140px) clamp(24px,6vw,80px);background:radial-gradient(circle at 15% 20%,rgba(185,128,63,0.08),transparent 40%),radial-gradient(circle at 85% 80%,rgba(185,128,63,0.07),transparent 45%),#201d1a;">
+    <div style="text-align:center;maxWidth:720px;margin:0 auto 60px;">
+      <h2 style="font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(28px,4vw,44px);color:#f7f1e6;margin:0 0 16px;">{{ t.amenities.title }}</h2>
+      <p style="font-size:17px;line-height:1.6;color:rgba(242,236,224,0.7);font-style:italic;margin:0;">{{ t.amenities.subtitle }}</p>
+    </div>
+    <div style="display:grid;gridTemplateColumns:repeat(auto-fit,minmax(220px,1fr));gap:40px;maxWidth:1200px;margin:0 auto;">
+      <div>
+        <div style="width:52px;height:52px;borderRadius:50%;border:1px solid rgba(185,128,63,0.5);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M2 8.5a15 15 0 0 1 20 0" stroke="#d9a868" stroke-width="1.4"/><path d="M5.5 12a10 10 0 0 1 13 0" stroke="#d9a868" stroke-width="1.4"/><path d="M9 15.5a5 5 0 0 1 6 0" stroke="#d9a868" stroke-width="1.4"/><circle cx="12" cy="19" r="1.2" fill="#d9a868"/></svg>
+        </div>
+        <h3 style="font-family:'Playfair Display',serif;font-size:18px;color:#f7f1e6;margin:0 0 10px;">{{ amenity0.title }}</h3>
+        <p style="font-size:14px;line-height:1.7;color:rgba(242,236,224,0.65);margin:0;">{{ amenity0.desc }}</p>
+      </div>
+      <div>
+        <div style="width:52px;height:52px;borderRadius:50%;border:1px solid rgba(185,128,63,0.5);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.3 7-11.5A7 7 0 0 0 5 9.5C5 14.7 12 21 12 21z" stroke="#d9a868" stroke-width="1.4"/><circle cx="12" cy="9.5" r="2.4" stroke="#d9a868" stroke-width="1.4"/></svg>
+        </div>
+        <h3 style="font-family:'Playfair Display',serif;font-size:18px;color:#f7f1e6;margin:0 0 10px;">{{ amenity1.title }}</h3>
+        <p style="font-size:14px;line-height:1.7;color:rgba(242,236,224,0.65);margin:0;">{{ amenity1.desc }}</p>
+      </div>
+      <div>
+        <div style="width:52px;height:52px;borderRadius:50%;border:1px solid rgba(185,128,63,0.5);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 11l8-6 8 6" stroke="#d9a868" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 10v9h12v-9" stroke="#d9a868" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 19v-5h4v5" stroke="#d9a868" stroke-width="1.4"/></svg>
+        </div>
+        <h3 style="font-family:'Playfair Display',serif;font-size:18px;color:#f7f1e6;margin:0 0 10px;">{{ amenity2.title }}</h3>
+        <p style="font-size:14px;line-height:1.7;color:rgba(242,236,224,0.65);margin:0;">{{ amenity2.desc }}</p>
+      </div>
+      <div>
+        <div style="width:52px;height:52px;borderRadius:50%;border:1px solid rgba(185,128,63,0.5);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="2" stroke="#d9a868" stroke-width="1.4"/><path d="M4 9.5h16" stroke="#d9a868" stroke-width="1.4"/><path d="M8 3v4M16 3v4" stroke="#d9a868" stroke-width="1.4"/><path d="M9 13.5l2 2 4-4" stroke="#d9a868" stroke-width="1.4"/></svg>
+        </div>
+        <h3 style="font-family:'Playfair Display',serif;font-size:18px;color:#f7f1e6;margin:0 0 10px;">{{ amenity3.title }}</h3>
+        <p style="font-size:14px;line-height:1.7;color:rgba(242,236,224,0.65);margin:0;">{{ amenity3.desc }}</p>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding:clamp(70px,10vw,140px) clamp(24px,6vw,80px);background:#f2ecdf;">
+    <div style="text-align:center;maxWidth:720px;margin:0 auto 56px;">
+      <div style="font-size:13px;letter-spacing:0.24em;text-transform:uppercase;color:#8a5a2f;margin-bottom:16px;">{{ t.testimonials.label }}</div>
+      <h2 style="font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(28px,4vw,44px);color:#2b241d;margin:0;">{{ t.testimonials.title }}</h2>
+    </div>
+    <div style="display:grid;gridTemplateColumns:repeat(auto-fit,minmax(280px,1fr));gap:36px;maxWidth:1100px;margin:0 auto;">
+      <sc-for list="{{ t.testimonials.items }}" as="q" hint-placeholder-count="3">
+        <div style="background:#fff;border:1px solid rgba(185,128,63,0.25);borderRadius:2px;padding:36px;display:flex;flex-direction:column;gap:22px;">
+          <div style="font-family:'Playfair Display',serif;font-size:34px;color:#b9803f;line-height:1;">"</div>
+          <p style="font-size:18px;font-style:italic;line-height:1.6;color:#3a322b;margin:0;">{{ q.text }}</p>
+          <div style="font-size:14px;letter-spacing:0.05em;color:#8a5a2f;text-transform:uppercase;">{{ q.name }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <footer id="kontakt" style="padding:clamp(60px,8vw,90px) clamp(24px,6vw,80px) 32px;background:#1a1815;color:#e9e0d0;">
+    <div style="display:grid;gridTemplateColumns:repeat(auto-fit,minmax(220px,1fr));gap:48px;maxWidth:1200px;margin:0 auto;padding-bottom:48px;borderBottom:1px solid rgba(185,128,63,0.22);">
+      <div>
+        <img src="assets/kaiserzeit-logo.png" alt="KAISERZEIT im Himmelbett" style="height:56px;width:auto;margin-bottom:18px;"/>
+        <p style="font-size:15px;line-height:1.7;color:rgba(233,224,208,0.65);max-width:280px;margin:0;">{{ t.footer.tagline }}</p>
+      </div>
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:15px;color:#d9a868;letter-spacing:0.05em;margin-bottom:18px;">{{ t.footer.addressTitle }}</div>
+        <div style="font-size:15px;line-height:1.8;color:rgba(233,224,208,0.78);margin-bottom:16px;">{{ groupOneName }}<br/>{{ groupOneAddress }}</div>
+        <div style="font-size:15px;line-height:1.8;color:rgba(233,224,208,0.78);">{{ groupTwoName }}<br/>{{ groupTwoAddress }}</div>
+      </div>
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:15px;color:#d9a868;letter-spacing:0.05em;margin-bottom:18px;">{{ t.footer.contact }}</div>
+        <div style="font-size:15px;line-height:1.9;color:rgba(233,224,208,0.78);">
+          <div>Tel &amp; WhatsApp: +49 15565 726486</div>
+          <div>info@kaiserzeit-himmelbett.de</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:15px;color:#d9a868;letter-spacing:0.05em;margin-bottom:18px;">{{ t.footer.legalTitle }}</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <sc-for list="{{ t.footer.legal }}" as="item" hint-placeholder-count="4">
+            <a href="#" style="font-size:14px;color:rgba(233,224,208,0.72);">{{ item }}</a>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;max-width:1200px;margin:32px auto 0;">
+      <div style="font-size:13px;color:rgba(233,224,208,0.5);">{{ t.footer.rights }}</div>
+      <div style="display:flex;gap:6px;align-items:center;border:1px solid rgba(185,128,63,0.35);borderRadius:999px;padding:4px;">
+        <button onClick="{{ setLangDe }}" style="{{ langDeBtnStyle }}">DE</button>
+        <button onClick="{{ setLangEn }}" style="{{ langEnBtnStyle }}">EN</button>
+      </div>
+    </div>
+  </footer>
+
+  <div style="position:fixed;bottom:26px;left:26px;z-index:60;">
+    <sc-if value="{{ showCookiePopup }}">
+      <div style="position:absolute;bottom:64px;left:0;width:280px;background:#29241f;border:1px solid rgba(185,128,63,0.35);borderRadius:12px;padding:20px;boxShadow:0 20px 44px rgba(0,0,0,0.4);">
+        <div style="font-family:'Playfair Display',serif;font-size:16px;color:#f7f1e6;margin-bottom:10px;">{{ cookieCopy.title }}</div>
+        <p style="font-size:13px;line-height:1.6;color:rgba(242,236,224,0.72);margin:0 0 16px;">{{ cookieCopy.body }}</p>
+        <button onClick="{{ toggleCookiePopup }}" style="width:100%;border:none;borderRadius:999px;padding:10px;background:linear-gradient(135deg,#e6c184,#b9803f);color:#201d1a;fontFamily:'Playfair Display',serif;fontWeight:600;fontSize:13px;cursor:pointer;">{{ cookieCopy.acceptAll }}</button>
+      </div>
+    </sc-if>
+    <button onClick="{{ toggleCookiePopup }}" aria-label="Editing guide" style="display:flex;align-items:center;gap:8px;border:1px solid rgba(185,128,63,0.4);borderRadius:999px;padding:10px 16px;background:#29241f;color:#f2ecdf;fontFamily:'Playfair Display',serif;fontWeight:600;fontSize:13px;cursor:pointer;boxShadow:0 10px 24px rgba(0,0,0,0.3);">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1z" stroke="#d9a868" stroke-width="1.4" stroke-linejoin="round"/><path d="M13 7l3 3" stroke="#d9a868" stroke-width="1.4"/></svg>{{ cookieCopy.trigger }}
+    </button>
+  </div>
+
+  <a href="https://wa.me/4915565726486" target="_blank" rel="noopener" style="position:fixed;bottom:26px;right:26px;z-index:60;width:58px;height:58px;borderRadius:50%;background:linear-gradient(135deg,#d9a868,#8a5a2f);display:flex;align-items:center;justify-content:center;boxShadow:0 10px 28px rgba(0,0,0,0.35);" aria-label="WhatsApp">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+      <path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-1.5-.7-2.5-1.3-3.5-3-.3-.5.3-.4.7-1.4.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s1 2.6 1.1 2.7c.1.2 1.9 3 4.7 4.1.7.3 1.2.4 1.6.5.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2-.1-.1-.2-.2-.4-.3z" fill="#1a1815"/>
+      <path d="M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 5L2 22l5.2-1.4c1.5.8 3.1 1.2 4.8 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3.1.8.8-3-.2-.3C4 14.9 3.6 13.5 3.6 12c0-4.6 3.8-8.4 8.4-8.4s8.4 3.8 8.4 8.4-3.8 8.2-8.4 8.2z" fill="#1a1815"/>
+    </svg>
+  </a>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const CONTENT = {
+  de: {
+    nav: { home: "Home", apartments: "Apartments", booking: "Buchung", about: "Über uns", kontakt: "Kontakt", cta: "Verfügbarkeit prüfen" },
+    hero: {
+      eyebrow: "Ein erlesener Aufenthalt in Leipzig",
+      titleLine1: "KAISERZEIT",
+      titleLine2: "im Himmelbett!",
+      subtitle: "Ihr einzigartiges Apartment-Erlebnis in Leipzig, Deutschland.",
+      ctaPrimary: "Verfügbarkeit prüfen",
+      ctaSecondary: "Jetzt buchen",
+      scroll: "Entdecken",
+      booking: {
+        nameLabel: "Ihr Name", namePlaceholder: "Vollständiger Name",
+        datesLabel: "Aufenthalt", datesPlaceholder: "Check-in & Check-out",
+        guestsLabel: "Gästezahl", guestsValue: "2 Gäste",
+        cta: "Verfügbarkeit prüfen",
+        trust: ["Garantiert der günstigste Preis bei Direktbuchung", "Keine versteckten Plattformgebühren", "Direkte Buchung bei Ihrem Gastgeber"]
+      }
+    },
+    intro: {
+      label: "Willkommen",
+      title: "Ein Zuhause auf Zeit, mit Geschichte",
+      body: "Zwischen hohen Altbaudecken und samtweichen Details verbinden unsere Apartments das Erbe der Kaiserzeit mit dem Komfort von heute. Jedes Detail wurde mit Bedacht gewählt – für Gäste, die das Besondere zu schätzen wissen.",
+      cta: "Verfügbarkeit prüfen"
+    },
+    groups: {
+      label: "Unsere Adressen",
+      title: "Zwei Adressen, ein Anspruch",
+      items: [
+        { slotId: "group-blumenstrasse", name: "City, Messe & Zoo", address: "Blumenstraße 1, 04105 Leipzig", desc: "Drei Apartments im Herzen der Stadt – zu Fuß entfernt von Zoo, Messe und Zentrum.", apts: ["Residenz", "Cozy", "Belle Étage"], cta: "Mehr erfahren" },
+        { slotId: "group-kanal", name: "Kanal & Künstlerviertel", address: "Helmholtzstraße 12, 04177 Leipzig", desc: "Ein Apartment direkt am Wasser, umgeben von Kunst, Kultur und dem Leipziger Nachtleben – ruhig gelegen und doch mitten im Geschehen.", apts: ["Nest am Kanal"], cta: "Mehr erfahren" }
+      ]
+    },
+    map: {
+      label: "Lage",
+      title: "Mitten im Geschehen",
+      subtitle: "Lage war für uns nie nebensächlich – jede Adresse liegt dort, wo Leipzig sich zeigt."
+    },
+    amenities: {
+      title: "Mein Leipzig lob ich mir",
+      subtitle: "Es ist ein klein Paris und bildet seine Leute.",
+      items: [
+        { icon: "wifi", title: "Moderne Konnektivität", desc: "Ob Homeoffice oder Streaming: Sie können sich in allen Apartments auf schnelles, stabiles Internet verlassen." },
+        { icon: "pin", title: `„Kurze Wege" und „exzellente Anbindung"`, desc: `In Leipzig ist alles nah – von unseren Apartments aus noch näher. Ob die Ruhe der Parks oder die pulsierende Energie des Zentrums: Mit exzellenten Verkehrsanbindungen und zentraler Lage erreichen Sie alle Highlights von „Klein-Paris" im Nu.` },
+        { icon: "home", title: "Ankommen & sich zuhause fühlen", desc: "Wir möchten, dass Sie sich vom ersten Moment an entspannen können. Nehmen Sie sich nach der Ankunft Zeit für einen frischen Kaffee oder Tee – alles ist für Sie vorbereitet. Unsere Apartments verfügen über individuell ausgestattete Küchen. Ob schneller Espresso oder leichter Snack – es fehlt an nichts." },
+        { icon: "booking", title: "Direktbuchung, mehr Vorteile", desc: "Buchen Sie direkt über unsere Website, um sich die beste verfügbare Rate zu sichern. Genießen Sie einen professionellen Buchungsprozess mit offizieller Rechnung, bei direktem Draht zu uns als Ihren Gastgebern. Einfach, transparent und persönlich." }
+      ]
+    },
+    hosts: {
+      label: "Ihre Gastgeber",
+      title: "Lernen Sie Ivi & Jörg kennen",
+      quote: "Wir glauben, dass ein perfekter Aufenthalt bedeutet, sich vollkommen zuhause zu fühlen – auch unterwegs.",
+      body1: "Als Ihre privaten Gastgeber stecken wir unser Herz in jedes Detail, damit Ihr Check-in reibungslos verläuft. Von der Innenausstattung bis zum Empfang – alles ist darauf ausgerichtet, Ihnen dieses besondere 'Kaiserzeit'-Gefühl zu geben, eine Mischung aus historischem Charme und modernem Komfort.",
+      body2: "Wir freuen uns darauf, Ihren Aufenthalt in Leipzig unvergesslich zu machen. Und ganz ehrlich: Bei uns läuft nicht immer alles perfekt – wir sind schließlich auch nur Menschen und keine kühle, unpersönliche Maschine. Sollte einmal etwas nicht ganz stimmen, sagen Sie uns Bescheid. Wir finden immer eine Lösung.",
+      cta: "Frage stellen",
+      replyNote: "Antwortet meist innerhalb einer Stunde"
+    },
+    testimonials: {
+      label: "Stimmen",
+      title: "Was Gäste sagen",
+      items: [
+        { text: "Ein Ort, an dem man die Zeit vergisst.", name: "M. Hoffmann" },
+        { text: "Stilvoll, ruhig und liebevoll eingerichtet.", name: "S. Berger" },
+        { text: "Fühlte sich an wie eine private Suite.", name: "J. Krause" }
+      ]
+    },
+    footer: {
+      tagline: "Private Rückzugsorte mit Charakter, im Herzen von Leipzig.",
+      addressTitle: "Adressen",
+      contact: "Kontakt",
+      legalTitle: "Rechtliches",
+      legal: ["Datenschutz", "AGB", "Cookie-Einstellungen", "Impressum"],
+      rights: "© 2026 KAISERZEIT im Himmelbett. Alle Rechte vorbehalten."
+    }
+  },
+  en: {
+    nav: { home: "Home", apartments: "Apartments", booking: "Booking", about: "About Us", kontakt: "Contact", cta: "Check Availability" },
+    hero: {
+      eyebrow: "A Refined Stay in Leipzig",
+      titleLine1: "KAISERZEIT",
+      titleLine2: "im Himmelbett!",
+      subtitle: "Your Unique Apartment Experience in Leipzig, Germany.",
+      ctaPrimary: "Check Availability",
+      ctaSecondary: "Book Now",
+      scroll: "Discover",
+      booking: {
+        nameLabel: "Your Name", namePlaceholder: "Full Name",
+        datesLabel: "Stay Dates", datesPlaceholder: "Check-in & out",
+        guestsLabel: "Guest Count", guestsValue: "2 guests",
+        cta: "Check Availability",
+        trust: ["Guaranteed best price when booking direct", "No hidden platform fees", "Direct booking with your host"]
+      }
+    },
+    intro: {
+      label: "Welcome",
+      title: "A Home for a While, With History",
+      body: "Between soaring period ceilings and soft, considered details, our apartments blend the heritage of the Kaiserzeit with today's comfort. Every detail is chosen with care – for guests who notice the difference.",
+      cta: "Check Availability"
+    },
+    groups: {
+      label: "Our Addresses",
+      title: "Two Addresses, One Standard",
+      items: [
+        { slotId: "group-blumenstrasse", name: "City, Messe & Zoo", address: "Blumenstraße 1, 04105 Leipzig", desc: "Three apartments in the heart of the city – a short walk from the zoo, the trade fair, and the centre.", apts: ["Residenz", "Cozy", "Belle Étage"], cta: "Learn more" },
+        { slotId: "group-kanal", name: "Kanal & Künstlerviertel", address: "Helmholtzstraße 12, 04177 Leipzig", desc: "One apartment right on the water, surrounded by art, culture, and Leipzig nightlife – quietly set, yet close to it all.", apts: ["Nest am Kanal"], cta: "Learn more" }
+      ]
+    },
+    map: {
+      label: "Location",
+      title: "In the Middle of It All",
+      subtitle: "Location was never an afterthought for us – every address sits where Leipzig shows itself best."
+    },
+    amenities: {
+      title: "My Little Paris",
+      subtitle: "I praise my Leipzig! It is a little Paris and shapes its people.",
+      items: [
+        { icon: "wifi", title: "Modern Connectivity", desc: "Whether for home office or streaming, you can rely on fast and stable internet in all apartments." },
+        { icon: "pin", title: `"Short distances" and "excellent connectivity"`, desc: `In Leipzig, everything is close – and from our apartments, it's even closer. Whether you're looking for the peacefulness of the parks or the vibrant energy of the city centre: with excellent public transport connections and our central locations, you can reach all the highlights of "Little Paris" in no time.` },
+        { icon: "home", title: "Arrive & Feel at Home", desc: "We want you to relax from the very first moment. After your arrival, take a moment to enjoy a fresh coffee or tea – everything is ready for you. Our apartments feature individually equipped kitchens. Whether it's a quick morning espresso or a light snack, we've made sure you have everything you need." },
+        { icon: "booking", title: "Direct Booking, Better Benefits", desc: "Book directly through our website to secure the best available rate. Enjoy a professional booking process with official invoicing, while keeping a direct line to us as your hosts. Simple, transparent, and personal." }
+      ]
+    },
+    hosts: {
+      label: "Your Hosts",
+      title: "Meet Ivi & Jörg",
+      quote: "We believe a perfect stay means feeling completely at home while you're on the road.",
+      body1: "As your private hosts, we pour our hearts into every detail so your check-in is seamless. From the interior design to the way we welcome you, everything is created to give you that special 'Kaiserzeit' feeling – a blend of historic charm and modern comfort.",
+      body2: "We look forward to making your time in Leipzig unforgettable. And honestly, we know things don't always run perfectly – after all, we're human, not a cold, corporate machine. If something isn't quite right, just let us know. We'll always find a solution.",
+      cta: "Ask a Question",
+      replyNote: "Usually replies within an hour"
+    },
+    testimonials: {
+      label: "Voices",
+      title: "What Guests Say",
+      items: [
+        { text: "A place where you forget time.", name: "M. Hoffmann" },
+        { text: "Stylish, calm, and thoughtfully furnished.", name: "S. Berger" },
+        { text: "Felt like a private suite.", name: "J. Krause" }
+      ]
+    },
+    footer: {
+      tagline: "Private retreats with character, in the heart of Leipzig.",
+      addressTitle: "Addresses",
+      contact: "Contact",
+      legalTitle: "Legal",
+      legal: ["Privacy Policy", "Terms & Conditions", "Cookie Preferences", "Imprint"],
+      rights: "© 2026 KAISERZEIT im Himmelbett. All rights reserved."
+    }
+  }
+};
+
+const APARTMENTS = [
+  { key: "residenz", slotId: "apt-residenz",
+    name: { de: "Residenz", en: "Residenz" },
+    brief: { de: "Geräumige Altbauwohnung mit hohen Decken und Stuck.", en: "Spacious period apartment with soaring ceilings and stucco." } },
+  { key: "cozy", slotId: "apt-cozy",
+    name: { de: "Cozy", en: "Cozy" },
+    brief: { de: "Kompaktes, gemütliches Apartment für kurze Aufenthalte.", en: "A compact, cozy apartment for shorter stays." } },
+  { key: "belle-etage", slotId: "apt-belle-etage",
+    name: { de: "Belle Étage", en: "Belle Étage" },
+    brief: { de: "Elegante Beletage-Wohnung mit Erkerfenstern.", en: "Elegant belle-étage apartment with bay windows." } },
+  { key: "nest-am-kanal", slotId: "apt-nest",
+    name: { de: "Nest am Kanal", en: "Nest am Kanal" },
+    brief: { de: "Ruhiges Apartment direkt am Wasser im Künstlerviertel.", en: "A quiet apartment right on the canal in the artists' quarter." } }
+];
+
+const LANDMARKS = {
+  de: {
+    blumenstrasse: ["Leipzig Zentrum", "Leipziger Zoo", "Leipziger Messe"],
+    kanal: ["Alte Baumwollspinnerei", "Kunstkraftwerk", "RB Arena", "Quarterback Arena"]
+  },
+  en: {
+    blumenstrasse: ["Leipzig City Centre", "Leipzig Zoo", "Leipzig Trade Fair"],
+    kanal: ["Alte Baumwollspinnerei", "Kunstkraftwerk", "RB Arena", "Quarterback Arena"]
+  }
+};
+
+class Component extends DCLogic {
+  state = { lang: "de", showMobileMenu: false, isSignedIn: false, profileMenuOpen: false, langMenuOpen: false, mapTab: "blumenstrasse", checkStage: "idle", showResults: false, apartmentStatus: {}, showCookiePopup: false, resultsMode: "dropdown" };
+
+  toggleCookiePopup = () => this.setState(s => ({ showCookiePopup: !s.showCookiePopup }));
+
+  scrollToHero = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  toggleResults = () => {
+    if (this.state.showResults) { this.setState({ showResults: false }); return; }
+    if (Object.keys(this.state.apartmentStatus).length) { this.setState({ showResults: true }); this.scrollToHero(); return; }
+    this.setState({ checkStage: "checking" });
+    this.scrollToHero();
+    setTimeout(() => {
+      const status = {};
+      APARTMENTS.forEach(a => { status[a.key] = Math.random() > 0.45; });
+      this.setState({ checkStage: "idle", apartmentStatus: status, showResults: true });
+      this.scrollToHero();
+    }, 900);
+  };
+
+  renderVals() {
+    const lang = this.state.lang;
+    const t = CONTENT[lang];
+    const activeBtn = { padding: "8px 16px", borderRadius: "999px", border: "none", background: "linear-gradient(135deg,#d9a868,#b9803f)", color: "#201d1a", fontFamily: "'Playfair Display',serif", fontWeight: 600, fontSize: "13px", cursor: "pointer" };
+    const inactiveBtn = { padding: "8px 16px", borderRadius: "999px", border: "none", background: "transparent", color: "#f2ecdf", fontFamily: "'Playfair Display',serif", fontWeight: 600, fontSize: "13px", cursor: "pointer", opacity: 0.75 };
+
+    const mapTabDefs = [
+      { key: "blumenstrasse", name: "Blumenstraße" },
+      { key: "kanal", name: "Nest am Kanal" }
+    ];
+    const mapTabs = mapTabDefs.map(m => ({
+      name: m.name,
+      onClick: () => this.setState({ mapTab: m.key }),
+      btnStyle: this.state.mapTab === m.key
+        ? { padding: "10px 22px", borderRadius: "999px", border: "1px solid #b9803f", background: "#201d1a", color: "#f2ecdf", fontFamily: "'Playfair Display',serif", fontWeight: 600, fontSize: "14px", cursor: "pointer" }
+        : { padding: "10px 22px", borderRadius: "999px", border: "1px solid rgba(43,36,29,0.25)", background: "transparent", color: "#4a4038", fontFamily: "'Playfair Display',serif", fontWeight: 600, fontSize: "14px", cursor: "pointer" }
+    }));
+
+    const uiLabels = {
+      de: { view: "Apartments ansehen", checking: "Wird geprüft…", hide: "Ausblenden", bookNow: "Jetzt buchen", notAvailable: "Nicht verfügbar", resultsTitle: "Verfügbarkeit für Ihre Daten" },
+      en: { view: "View Apartments", checking: "Checking…", hide: "Hide", bookNow: "Book Now", notAvailable: "Not Available", resultsTitle: "Availability for your dates" }
+    }[lang];
+    const checking = this.state.checkStage === "checking";
+    const bookingBtnStyle = { flex: "0 0 auto", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "10px", whiteSpace: "nowrap", fontSize: "14px", letterSpacing: "0.03em", color: "#201d1a", background: "linear-gradient(135deg,#e6c184,#b9803f)", padding: "14px 26px", borderRadius: "4px", fontFamily: "'Playfair Display',serif", fontWeight: 600, border: "none", cursor: checking ? "default" : "pointer", opacity: checking ? 0.7 : 1 };
+    const bookingBtnLabel = checking ? uiLabels.checking : (this.state.showResults ? uiLabels.hide : uiLabels.view);
+    const bookingBtnOnClick = checking ? undefined : this.toggleResults;
+
+    const apartmentResults = APARTMENTS.map(a => {
+      const available = this.state.apartmentStatus[a.key];
+      return {
+        slotId: a.slotId,
+        name: a.name[lang],
+        brief: a.brief[lang],
+        statusLabel: available ? uiLabels.bookNow : uiLabels.notAvailable,
+        statusStyle: available
+          ? { fontSize: "13px", letterSpacing: "0.03em", color: "#201d1a", background: "linear-gradient(135deg,#e6c184,#b9803f)", padding: "9px 18px", borderRadius: "999px", fontFamily: "'Playfair Display',serif", fontWeight: 600, display: "inline-block" }
+          : { fontSize: "13px", letterSpacing: "0.03em", color: "rgba(242,236,224,0.55)", background: "rgba(255,255,255,0.06)", padding: "9px 18px", borderRadius: "999px", fontFamily: "'Playfair Display',serif", fontWeight: 600, display: "inline-block" }
+      };
+    });
+
+    return {
+      t,
+      lang,
+      bookingBtnStyle,
+      bookingBtnLabel,
+      bookingBtnOnClick,
+      showResults: this.state.showResults,
+      isDropdownMode: this.state.resultsMode === "dropdown",
+      isPopupMode: this.state.showResults && this.state.resultsMode === "popup",
+      toggleResults: this.toggleResults,
+      stopPropagation: (e) => e.stopPropagation(),
+      popupOverlayStyle: { position: "fixed", inset: 0, zIndex: 70, background: "rgba(10,9,8,0.72)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" },
+      popupCardStyle: { width: "min(94vw,560px)", maxHeight: "80vh", overflowY: "auto", background: "#29241f", border: "1px solid rgba(185,128,63,0.35)", borderRadius: "14px", padding: "28px", textAlign: "left", boxShadow: "0 30px 70px rgba(0,0,0,0.5)" },
+      setDropdownMode: () => this.setState({ resultsMode: "dropdown" }),
+      setPopupMode: () => this.setState({ resultsMode: "popup" }),
+      dropdownModeBtnStyle: { fontSize: "11px", letterSpacing: "0.04em", padding: "6px 12px", borderRadius: "999px", border: "none", cursor: "pointer", fontFamily: "'Playfair Display',serif", fontWeight: 600, background: this.state.resultsMode === "dropdown" ? "linear-gradient(135deg,#e6c184,#b9803f)" : "transparent", color: this.state.resultsMode === "dropdown" ? "#201d1a" : "rgba(242,236,224,0.55)" },
+      popupModeBtnStyle: { fontSize: "11px", letterSpacing: "0.04em", padding: "6px 12px", borderRadius: "999px", border: "none", cursor: "pointer", fontFamily: "'Playfair Display',serif", fontWeight: 600, background: this.state.resultsMode === "popup" ? "linear-gradient(135deg,#e6c184,#b9803f)" : "transparent", color: this.state.resultsMode === "popup" ? "#201d1a" : "rgba(242,236,224,0.55)" },
+      resultsWrapperStyle: {
+        maxHeight: (this.state.showResults && this.state.resultsMode === "dropdown") ? "900px" : "0px",
+        opacity: (this.state.showResults && this.state.resultsMode === "dropdown") ? 1 : 0,
+        marginTop: (this.state.showResults && this.state.resultsMode === "dropdown") ? "26px" : "0px",
+        overflow: "hidden",
+        transition: "max-height 0.45s ease, opacity 0.35s ease, margin-top 0.45s ease"
+      },
+      resultsTitle: uiLabels.resultsTitle,
+      apartmentResults,
+      showMobileMenu: this.state.showMobileMenu,
+      toggleMobileMenu: () => this.setState(s => ({ showMobileMenu: !s.showMobileMenu })),
+      setLangDe: () => this.setState({ lang: "de", showMobileMenu: false, langMenuOpen: false }),
+      setLangEn: () => this.setState({ lang: "en", showMobileMenu: false, langMenuOpen: false }),
+      langDeBtnStyle: lang === "de" ? activeBtn : inactiveBtn,
+      langEnBtnStyle: lang === "en" ? activeBtn : inactiveBtn,
+      navLinksRowStyle: { display: "flex", alignItems: "center", gap: "28px" },
+      bookNowNavLabel: lang === "de" ? "Jetzt buchen" : "Book Now",
+      currentLangLabel: lang === "de" ? "DE" : "EN",
+      langMenuOpen: this.state.langMenuOpen,
+      toggleLangMenu: () => this.setState(s => ({ langMenuOpen: !s.langMenuOpen })),
+      langDeMenuItemStyle: { display: "block", width: "100%", textAlign: "left", padding: "8px 10px", background: lang === "de" ? "rgba(185,128,63,0.2)" : "transparent", border: "none", borderRadius: "6px", color: "#f2ecdf", fontFamily: "'EB Garamond',serif", fontSize: "13px", cursor: "pointer" },
+      langEnMenuItemStyle: { display: "block", width: "100%", textAlign: "left", padding: "8px 10px", background: lang === "en" ? "rgba(185,128,63,0.2)" : "transparent", border: "none", borderRadius: "6px", color: "#f2ecdf", fontFamily: "'EB Garamond',serif", fontSize: "13px", cursor: "pointer" },
+      hamburgerStyle: { display: "none", flexDirection: "column", gap: "5px", background: "transparent", border: "none", cursor: "pointer", padding: "8px", flexShrink: 0 },
+      isSignedIn: this.state.isSignedIn,
+      isSignedOut: !this.state.isSignedIn,
+      profileMenuOpen: this.state.profileMenuOpen,
+      toggleProfileMenu: () => this.setState(s => ({ profileMenuOpen: !s.profileMenuOpen })),
+      logout: () => this.setState({ isSignedIn: false, profileMenuOpen: false, langMenuOpen: false }),
+      profileName: lang === "de" ? "Gast" : "Guest",
+      profileEmail: "guest@kaiserzeit-himmelbett.de",
+      authBookingsLabel: lang === "de" ? "Buchungen" : "Bookings",
+      authLogoutLabel: lang === "de" ? "Abmelden" : "Log out",
+      authSigninLabel: lang === "de" ? "Anmelden" : "Sign in",
+      mapTabs,
+      isBlumenstrasseTab: this.state.mapTab === "blumenstrasse",
+      isKanalTab: this.state.mapTab === "kanal",
+      activeLandmarks: LANDMARKS[lang][this.state.mapTab],
+      groupOneName: t.groups.items[0].name,
+      groupOneAddress: t.groups.items[0].address,
+      groupTwoName: t.groups.items[1].name,
+      groupTwoAddress: t.groups.items[1].address,
+      amenity0: t.amenities.items[0],
+      amenity1: t.amenities.items[1],
+      amenity2: t.amenities.items[2],
+      amenity3: t.amenities.items[3],
+      showCookiePopup: this.state.showCookiePopup,
+      toggleCookiePopup: this.toggleCookiePopup,
+      cookieCopy: lang === "de"
+        ? { trigger: "Bearbeiten", title: "Bearbeitungsmodus", body: "Text: Doppelklicken Sie auf jeden Text, um ihn direkt zu bearbeiten. Bilder: Ziehen Sie ein neues Bild auf einen Platzhalter, um es zu ersetzen.", acceptAll: "Verstanden", necessaryOnly: "" }
+        : { trigger: "Edit", title: "Editing Guide", body: "Text: Double-click any text to edit it directly. Images: Drag a new photo onto any placeholder to replace it.", acceptAll: "Got it", necessaryOnly: "" }
+    };
+  }
+}
+
+</script>
+</body>
+</html>
