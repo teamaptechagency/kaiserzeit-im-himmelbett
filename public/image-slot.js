@@ -42,6 +42,88 @@
   var state = { images: {}, texts: {}, styles: {}, notes: {} };
   var slots = new Set();
 
+  /* ----------------------------------------------------------- wording ---
+     Every label in the editing chrome lives here, so the toolbar, the
+     background panel, the notes and the sign-in card all follow the DE/EN
+     switch in the site's own nav. Modules read through t() on each render
+     rather than caching a language at load, and re-label on "kz:lang". */
+
+  var STRINGS = {
+    de: {
+      edit: "Bearbeiten", comment: "Kommentar",
+      guideTitle: "Bearbeitungsmodus",
+      guideBody: "Text: Doppelklicken Sie auf einen Text, um ihn zu ändern. Bilder: Ziehen Sie ein Foto auf einen Platzhalter. Hintergrund: Abschnitt anklicken.",
+      guideLocked: "Geben Sie den Schlüssel ein, um Änderungen vorzunehmen.",
+      keyPlaceholder: "Schlüssel", start: "Bearbeiten starten", checking: "Wird geprüft…",
+      allImages: "Alle Bilder", stop: "Bearbeiten beenden", gotIt: "Verstanden",
+      wrongKey: "Falscher Schlüssel",
+
+      slotReplace: "Ersetzen", slotAdd: "Foto hinzufügen",
+      uploading: "Wird hochgeladen…", dropHere: "Hier ablegen", failed: "Fehler",
+
+      modeText: "Text", modeBackground: "Hintergrund", modeNotes: "Notizen",
+      hintText: "Doppelklick auf einen Text zum Ändern. Fotos: einfach darauf ziehen.",
+      hintBackground: "Klicken Sie auf einen Abschnitt, um Farbe oder Bild zu setzen.",
+      hintNotes: "Klicken Sie irgendwo, um eine Notiz zu hinterlassen.",
+      saving: "Speichern…", saved: "Gespeichert ✓", wasReset: "Zurückgesetzt ✓",
+
+      bgTitle: "Hintergrund", bgSection: "Abschnitt", bgColor: "Farbe",
+      bgOverlay: "Überlagerung", ovNone: "Keine", ovDark: "Dunkel", ovLight: "Hell",
+      bgStrength: "Stärke", bgPhoto: "Foto-Deckkraft",
+      bgDrop: "Bild hierher ziehen", bgDropSub: "oder klicken",
+      reset: "Zurücksetzen", done: "Fertig",
+
+      yourName: "Ihr Name", notePlaceholder: "Notiz schreiben…",
+      post: "Senden", cancel: "Abbrechen", reply: "Antworten", replyBox: "Antwort…",
+      resolve: "Erledigt", reopen: "Wieder öffnen", remove: "Löschen",
+      confirmDelete: "Diese Notiz und ihre Antworten löschen?",
+
+      pgHome: "Home", pgApartments: "Apartments", pgApartment: "Apartment",
+      pgBooking: "Buchung", pgProfile: "Profil", pgAbout: "Über uns", pgContact: "Kontakt"
+    },
+    en: {
+      edit: "Edit", comment: "Comment",
+      guideTitle: "Editing Guide",
+      guideBody: "Text: double-click any text to change it. Images: drag a photo onto any placeholder. Background: click a section.",
+      guideLocked: "Enter the key to make changes.",
+      keyPlaceholder: "Key", start: "Start editing", checking: "Checking…",
+      allImages: "All images", stop: "Stop editing", gotIt: "Got it",
+      wrongKey: "Wrong key",
+
+      slotReplace: "Replace", slotAdd: "Add photo",
+      uploading: "Uploading…", dropHere: "Drop here", failed: "Failed",
+
+      modeText: "Text", modeBackground: "Background", modeNotes: "Notes",
+      hintText: "Double-click any text to change it. Photos: just drag one on.",
+      hintBackground: "Click a section to set its colour or image.",
+      hintNotes: "Click anywhere to leave a note.",
+      saving: "Saving…", saved: "Saved ✓", wasReset: "Reset ✓",
+
+      bgTitle: "Background", bgSection: "Section", bgColor: "Colour",
+      bgOverlay: "Overlay", ovNone: "None", ovDark: "Dark", ovLight: "Light",
+      bgStrength: "Strength", bgPhoto: "Photo opacity",
+      bgDrop: "Drag an image here", bgDropSub: "or click",
+      reset: "Reset", done: "Done",
+
+      yourName: "Your name", notePlaceholder: "Write a note…",
+      post: "Post", cancel: "Cancel", reply: "Reply", replyBox: "Reply…",
+      resolve: "Resolve", reopen: "Reopen", remove: "Delete",
+      confirmDelete: "Delete this note and its replies?",
+
+      pgHome: "Home", pgApartments: "Apartments", pgApartment: "Apartment",
+      pgBooking: "Booking", pgProfile: "Profile", pgAbout: "About Us", pgContact: "Contact"
+    }
+  };
+
+  function currentLang() {
+    return stored("kz-lang") === "en" ? "en" : "de";
+  }
+
+  function t(key) {
+    var pack = STRINGS[currentLang()];
+    return (pack && pack[key]) || STRINGS.de[key] || key;
+  }
+
   /* -------------------------------------------------------------- state */
 
   function loadFrom(url) {
@@ -302,7 +384,7 @@
         this.empty.textContent = this.getAttribute("placeholder") || "Foto";
       }
       if (this.editor) {
-        this.editor.label.textContent = url ? "Ersetzen / Replace" : "Foto hinzufügen / Add";
+        this.editor.label.textContent = url ? t("slotReplace") : t("slotAdd");
       }
     }
 
@@ -328,14 +410,14 @@
         if (!file) return;
         box.classList.add("busy");
         box.classList.remove("over");
-        label.textContent = "Wird hochgeladen…";
+        label.textContent = t("uploading");
         tag.textContent = self.slotId;
         upload(self.slotId, file).then(function (data) {
           box.classList.remove("busy");
           publishImage(self.slotId, data.url);
         }, function (err) {
           box.classList.remove("busy");
-          label.textContent = "Fehler";
+          label.textContent = t("failed");
           tag.className = "err";
           tag.textContent = err.message;
           setTimeout(function () { tag.className = "tag"; self.refresh(); }, 4000);
@@ -351,7 +433,7 @@
         box.addEventListener(type, function (e) {
           e.preventDefault(); e.stopPropagation();
           box.classList.add("over");
-          label.textContent = "Hier ablegen / Drop here";
+          label.textContent = t("dropHere");
           tag.textContent = self.slotId;
         });
       });
@@ -368,6 +450,11 @@
 
   if (!customElements.get("image-slot")) customElements.define("image-slot", ImageSlot);
 
+  /* Their drop-target captions are localised too. */
+  window.addEventListener("kz:lang", function () {
+    slots.forEach(function (el) { el.refresh(); });
+  });
+
   window.KZ = {
     ready: ready,
     edit: EDIT,
@@ -377,6 +464,8 @@
     get texts() { return state.texts; },
     get styles() { return state.styles; },
     get notes() { return state.notes; },
+    t: t,
+    lang: currentLang,
     upload: upload,
     setText: setText,
     setStyle: setStyle,
@@ -395,41 +484,7 @@
      it already showed. The prototype's inert copy is hidden so there is only
      one. */
 
-  var COPY = {
-    de: {
-      trigger: "Bearbeiten",
-      comment: "Kommentar",
-      title: "Bearbeitungsmodus",
-      body: "Text: Doppelklicken Sie auf einen Text, um ihn zu ändern. Bilder: Ziehen Sie ein Foto auf einen Platzhalter. Hintergrund: Abschnitt anklicken.",
-      locked: "Geben Sie den Schlüssel ein, um Änderungen vorzunehmen.",
-      placeholder: "Schlüssel",
-      start: "Bearbeiten starten",
-      checking: "Wird geprüft…",
-      active: "Bearbeitung ist aktiv.",
-      images: "Alle Bilder",
-      stop: "Bearbeiten beenden",
-      close: "Verstanden"
-    },
-    en: {
-      trigger: "Edit",
-      comment: "Comment",
-      title: "Editing Guide",
-      body: "Text: double-click any text to change it. Images: drag a photo onto any placeholder. Background: click a section.",
-      locked: "Enter the key to make changes.",
-      placeholder: "Key",
-      start: "Start editing",
-      checking: "Checking…",
-      active: "Editing is on.",
-      images: "All images",
-      stop: "Stop editing",
-      close: "Got it"
-    }
-  };
-
   function buildSignIn() {
-    /* Read from the same stored choice support.js uses, rather than from
-       <html lang>, because the first render may not have run yet. */
-    var t = COPY[stored("kz-lang") === "en" ? "en" : "de"];
 
     var style = document.createElement("style");
     style.textContent = [
@@ -475,7 +530,7 @@
       "<svg width='14' height='14' viewBox='0 0 24 24' fill='none'>" +
       "<path d='M4 20h4L20 8l-4-4L4 16v4z' stroke='#d9a868' stroke-width='1.6' " +
       "stroke-linejoin='round'/></svg><span></span>";
-    trigger.querySelector("span").textContent = t.trigger;
+    trigger.querySelector("span").textContent = t("edit");
 
     /* Commenting is the thing the client does most, so it gets its own
        button rather than being buried a mode-click deep in the toolbar. */
@@ -485,7 +540,7 @@
       "<svg width='14' height='14' viewBox='0 0 24 24' fill='none'>" +
       "<path d='M21 12a8 8 0 0 1-8 8H7l-4 3v-4.5A8 8 0 0 1 11 4h2a8 8 0 0 1 8 8z' " +
       "stroke='#d9a868' stroke-width='1.6' stroke-linejoin='round'/></svg><span></span>";
-    comment.querySelector("span").textContent = t.comment;
+    comment.querySelector("span").textContent = t("comment");
 
     comment.addEventListener("click", function (e) {
       e.stopPropagation();
@@ -516,9 +571,9 @@
       panel.textContent = "";
 
       var title = document.createElement("h4");
-      title.textContent = t.title;
+      title.textContent = t("guideTitle");
       var body = document.createElement("p");
-      body.textContent = EDIT ? t.body : t.locked;
+      body.textContent = EDIT ? t("guideBody") : t("guideLocked");
       panel.appendChild(title);
       panel.appendChild(body);
 
@@ -529,18 +584,18 @@
 
         var input = document.createElement("input");
         input.type = "password";
-        input.placeholder = t.placeholder;
+        input("keyPlaceholder") = t("keyPlaceholder");
         input.autocomplete = "current-password";
 
         var go = document.createElement("button");
         go.className = "go";
-        go.textContent = t.start;
+        go.textContent = t("start");
 
         function submit() {
           var key = input.value.trim();
           if (!key) return input.focus();
           go.disabled = true;
-          go.textContent = t.checking;
+          go.textContent = t("checking");
           error.hidden = true;
           verifyKey(key).then(function () {
             remember(KEY_STORE, key);
@@ -550,7 +605,7 @@
             location.reload();
           }, function (err) {
             go.disabled = false;
-            go.textContent = t.start;
+            go.textContent = t("start");
             error.textContent = err.message;
             error.hidden = false;
             input.select();
@@ -571,7 +626,7 @@
 
       var done = document.createElement("button");
       done.className = "go";
-      done.textContent = t.close;
+      done.textContent = t("gotIt");
       done.addEventListener("click", function () { panel.hidden = true; });
       panel.appendChild(done);
 
@@ -579,9 +634,9 @@
       links.className = "links";
       var admin = document.createElement("a");
       admin.href = "admin.html";
-      admin.textContent = t.images;
+      admin.textContent = t("allImages");
       var stop = document.createElement("button");
-      stop.textContent = t.stop;
+      stop.textContent = t("stop");
       stop.addEventListener("click", function () {
         remember(KEY_STORE, null);
         remember(EDIT_FLAG, null);
@@ -598,6 +653,12 @@
     trigger.addEventListener("click", function () {
       if (panel.hidden) render();
       panel.hidden = !panel.hidden;
+    });
+
+    window.addEventListener("kz:lang", function () {
+      trigger.querySelector("span").textContent = t("edit");
+      comment.querySelector("span").textContent = t("comment");
+      if (!panel.hidden) render();
     });
 
     document.addEventListener("click", function (e) {

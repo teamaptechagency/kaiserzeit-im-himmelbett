@@ -28,26 +28,10 @@
   var open = null;      /* id of the note whose card is open */
   var draft = null;     /* an unsaved pin being written */
 
-  var EN = KZ.stored("kz-lang") === "en";
-  var T = EN ? {
-    mode: "Notes",
-    hint: "Click anywhere to leave a note.",
-    you: "Your name",
-    placeholder: "Write a note…",
-    save: "Post", cancel: "Cancel", reply: "Reply", replyBox: "Reply…",
-    resolve: "Resolve", reopen: "Reopen", remove: "Delete",
-    confirm: "Delete this note and its replies?",
-    resolved: "Resolved", saving: "Saving…", saved: "Saved"
-  } : {
-    mode: "Notizen",
-    hint: "Klicken Sie irgendwo, um eine Notiz zu hinterlassen.",
-    you: "Ihr Name",
-    placeholder: "Notiz schreiben…",
-    save: "Senden", cancel: "Abbrechen", reply: "Antworten", replyBox: "Antwort…",
-    resolve: "Erledigt", reopen: "Wieder öffnen", remove: "Löschen",
-    confirm: "Diese Notiz und ihre Antworten löschen?",
-    resolved: "Erledigt", saving: "Wird gespeichert…", saved: "Gespeichert"
-  };
+  /* Wording comes from the shared dictionary in image-slot.js and is read at
+     render time, so the cards follow the site's DE/EN switch rather than
+     freezing whatever language the page loaded in. */
+  var T = KZ.t;
 
   /* ---------------------------------------------------------------- chrome */
 
@@ -92,8 +76,8 @@
   layer.id = "kz-notes";
   document.body.appendChild(layer);
 
-  var button = UI.addMode("notes", T.mode, {
-    hint: T.hint,
+  var button = UI.addMode("notes", "modeNotes", {
+    hintKey: "hintNotes",
     enter: function () { active = true; document.body.classList.add("kz-notes"); paint(); },
     exit: function () {
       active = false;
@@ -147,9 +131,11 @@
 
   function when(at) {
     if (!at) return "";
+    /* Resolved per call, so timestamps re-format when the language changes. */
+    var locale = KZ.lang() === "en" ? "en-GB" : "de-DE";
     var d = new Date(at);
-    return d.toLocaleDateString(EN ? "en-GB" : "de-DE", { day: "numeric", month: "short" }) +
-      " " + d.toLocaleTimeString(EN ? "en-GB" : "de-DE", { hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleDateString(locale, { day: "numeric", month: "short" }) +
+      " " + d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
   }
 
   function line(who, at, text) {
@@ -171,9 +157,9 @@
   }
 
   function save(id, value, done) {
-    UI.say(T.saving, true);
+    UI.say(T("saving"), true);
     KZ.setNote(id, value).then(function () {
-      UI.say(T.saved);
+      UI.say(T("saved"));
       if (done) done();
       paint();
     }, function (err) {
@@ -226,14 +212,14 @@
 
     var input = document.createElement("textarea");
     input.rows = 2;
-    input.placeholder = T.replyBox;
+    input.placeholder = T("replyBox");
     box.appendChild(input);
 
     var row = document.createElement("div");
     row.className = "row";
     var post = document.createElement("button");
     post.className = "primary";
-    post.textContent = T.reply;
+    post.textContent = T("reply");
     post.addEventListener("click", function () {
       var text = input.value.trim();
       if (!text) return input.focus();
@@ -250,7 +236,7 @@
     links.className = "links";
 
     var resolve = document.createElement("button");
-    resolve.textContent = note.resolved ? T.reopen : T.resolve;
+    resolve.textContent = note.resolved ? T("reopen") : T("resolve");
     resolve.addEventListener("click", function () {
       var next = JSON.parse(JSON.stringify(note));
       next.resolved = !next.resolved;
@@ -259,9 +245,9 @@
 
     var remove = document.createElement("button");
     remove.className = "danger";
-    remove.textContent = T.remove;
+    remove.textContent = T("remove");
     remove.addEventListener("click", function () {
-      if (!window.confirm(T.confirm)) return;
+      if (!window.confirm(T("confirmDelete"))) return;
       open = null;
       save(id, null);
     });
@@ -284,25 +270,25 @@
     var name = null;
     if (!author()) {
       name = document.createElement("input");
-      name.placeholder = T.you;
+      name.placeholder = T("yourName");
       box.appendChild(name);
     }
 
     var input = document.createElement("textarea");
     input.rows = 3;
-    input.placeholder = T.placeholder;
+    input.placeholder = T("notePlaceholder");
     box.appendChild(input);
 
     var row = document.createElement("div");
     row.className = "row";
 
     var cancel = document.createElement("button");
-    cancel.textContent = T.cancel;
+    cancel.textContent = T("cancel");
     cancel.addEventListener("click", function () { draft = null; paint(); });
 
     var post = document.createElement("button");
     post.className = "primary";
-    post.textContent = T.save;
+    post.textContent = T("post");
     post.addEventListener("click", function () {
       var text = input.value.trim();
       if (!text) return input.focus();
@@ -374,6 +360,7 @@
 
   window.addEventListener("resize", reflow);
   window.addEventListener("dc:render", reflow);
+  window.addEventListener("kz:lang", reflow);   /* re-renders cards in the new language */
   window.addEventListener("kz:image", reflow);
   window.addEventListener("kz:notes", reflow);
   window.addEventListener("load", reflow);
