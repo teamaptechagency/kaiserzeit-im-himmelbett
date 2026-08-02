@@ -9,6 +9,9 @@ This is **not** the production site. See [DESIGN-HANDOFF.md](DESIGN-HANDOFF.md)
 for what the real build still needs (WordPress, a real booking integration,
 i18n, payments, legal pages).
 
+[PLAYBOOK.md](PLAYBOOK.md) writes this up as a reusable recipe — the shape,
+the decisions behind it, and the traps — for doing the same on another site.
+
 ---
 
 ## What the client can do
