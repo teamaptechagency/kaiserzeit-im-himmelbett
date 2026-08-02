@@ -20,6 +20,7 @@
   var GOLD = "#d9a868";
   var mode = "text";           /* "text" | "background" */
   var panel = null;
+  var panelSection = null;   /* which section the panel is editing */
 
   /* ---------------------------------------------------------------- chrome */
 
@@ -75,12 +76,12 @@
   var bar = document.createElement("div");
   bar.id = "kz-bar";
   bar.innerHTML =
-    "<span style='color:" + GOLD + ";letter-spacing:.12em;text-transform:uppercase;font-size:11px'>" +
-    "Bearbeiten</span>" +
-    "<button data-mode='text' aria-pressed='true'>Text</button>" +
-    "<button data-mode='background' aria-pressed='false'>Hintergrund</button>" +
+    "<span class='kz-label' style='color:" + GOLD + ";letter-spacing:.12em;" +
+    "text-transform:uppercase;font-size:11px'></span>" +
+    "<button data-mode='text' data-label='modeText' aria-pressed='true'></button>" +
+    "<button data-mode='background' data-label='modeBackground' aria-pressed='false'></button>" +
     "<span class='kz-hint'></span>" +
-    "<a href='admin.html' style='color:" + GOLD + "'>Alle Bilder</a>" +
+    "<a class='kz-admin' href='admin.html' style='color:" + GOLD + "'></a>" +
     "<span class='kz-status'></span>";
   document.body.appendChild(bar);
   document.body.style.paddingBottom = "56px";
@@ -89,16 +90,18 @@
   var status = bar.querySelector(".kz-status");
 
   /* Modes are a registry so notes.js can add its own without this file
-     knowing anything about comments. */
+     knowing anything about comments. Labels and hints are held as dictionary
+     keys rather than resolved strings, so a language switch can re-resolve
+     them without rebuilding the toolbar. */
   var MODES = {
-    text: { hint: "Doppelklick auf einen Text zum Ändern. Fotos: einfach darauf ziehen." },
-    background: { hint: "Klicken Sie auf einen Abschnitt, um Farbe oder Bild zu setzen." }
+    text: { hintKey: "hintText" },
+    background: { hintKey: "hintBackground" }
   };
 
   function setMode(next) {
     var previous = mode;
     mode = next;
-    hint.textContent = (MODES[next] && MODES[next].hint) || "";
+    hint.textContent = KZ.t((MODES[next] && MODES[next].hintKey) || "");
     document.body.classList.toggle("kz-bg", next === "background");
     bar.querySelectorAll("button[data-mode]").forEach(function (b) {
       b.setAttribute("aria-pressed", String(b.dataset.mode === next));
@@ -119,17 +122,37 @@
     say: say,
     setMode: setMode,
     isMode: function (id) { return mode === id; },
-    addMode: function (id, label, options) {
+    addMode: function (id, labelKey, options) {
       MODES[id] = options || {};
       var button = document.createElement("button");
       button.dataset.mode = id;
+      button.dataset.label = labelKey;
       button.setAttribute("aria-pressed", "false");
-      button.textContent = label;
+      button.textContent = KZ.t(labelKey);
       /* Sits with the other mode buttons, before the hint text. */
       bar.insertBefore(button, hint);
       return button;
     }
   };
+
+  /* Re-resolves every label from the dictionary. The toolbar is not part of
+     the rendered template, so nothing else would update it when the visitor
+     uses the site's own DE/EN switch. */
+  function relabel() {
+    bar.querySelector(".kz-label").textContent = KZ.t("edit");
+    bar.querySelector(".kz-admin").textContent = KZ.t("allImages");
+    bar.querySelectorAll("button[data-label]").forEach(function (b) {
+      /* Keeps the notes count, which lives in a child span. */
+      var extra = b.querySelector("span");
+      b.textContent = KZ.t(b.dataset.label);
+      if (extra) b.appendChild(extra);
+    });
+    hint.textContent = KZ.t((MODES[mode] && MODES[mode].hintKey) || "");
+    PAGES.forEach(function (entry, i) { picker.options[i].textContent = KZ.t(entry[1]); });
+    if (panel && panelSection) openPanel(panelSection);   /* rebuild in the new language */
+  }
+
+  window.addEventListener("kz:lang", relabel);
 
   var statusTimer;
   function say(message, sticky) {
@@ -151,13 +174,13 @@
   }, true);
 
   var PAGES = [
-    ["Home.dc.html", "Home"],
-    ["Apartments.dc.html", "Apartments"],
-    ["Apartment.dc.html", "Apartment"],
-    ["Booking.dc.html", "Buchung"],
-    ["Profile.dc.html", "Profil"],
-    ["About Us.dc.html", "Über uns"],
-    ["Contact.dc.html", "Kontakt"]
+    ["Home.dc.html", "pgHome"],
+    ["Apartments.dc.html", "pgApartments"],
+    ["Apartment.dc.html", "pgApartment"],
+    ["Booking.dc.html", "pgBooking"],
+    ["Profile.dc.html", "pgProfile"],
+    ["About Us.dc.html", "pgAbout"],
+    ["Contact.dc.html", "pgContact"]
   ];
 
   var picker = document.createElement("select");
@@ -165,7 +188,7 @@
   PAGES.forEach(function (entry) {
     var option = document.createElement("option");
     option.value = entry[0];
-    option.textContent = entry[1];
+    option.textContent = KZ.t(entry[1]);
     if (entry[0] === DC.page) option.selected = true;
     picker.appendChild(option);
   });
@@ -175,6 +198,7 @@
     location.href = picker.value + (KZ.editFromUrl ? "?edit=1" : "");
   });
   bar.insertBefore(picker, bar.querySelector(".kz-hint"));
+  relabel();
 
   /* ------------------------------------------------------------------ text */
 
@@ -241,9 +265,9 @@
        override entirely. */
     var key = DC.page + "|" + DC.lang() + "|" + current.source;
     var trimmed = value.trim();
-    say("Speichern…", true);
+    say(KZ.t("saving"), true);
     KZ.setText(key, trimmed === current.source.trim() ? null : trimmed)
-      .then(function () { say("Gespeichert ✓"); },
+      .then(function () { say(KZ.t("saved")); },
             function (err) { say(err.message); DC.rerender(); });
   }
 
@@ -304,11 +328,13 @@
 
   function closePanel() {
     if (panel) { panel.remove(); panel = null; }
+    panelSection = null;
     if (hovered) { hovered.classList.remove("kz-target"); hovered = null; }
   }
 
   function openPanel(section) {
     closePanel();
+    panelSection = section;
     var tid = section.getAttribute("data-kz-el");
     var key = DC.page + "|[data-kz-el=\"" + tid + "\"]";
     var current = KZ.styles[key] || {};
@@ -321,24 +347,24 @@
     panel = document.createElement("div");
     panel.id = "kz-panel";
     panel.innerHTML =
-      "<h4>Hintergrund</h4>" +
-      "<div style='font-size:11px;opacity:.55'>Abschnitt " + tid + "</div>" +
-      "<label>Farbe</label>" +
+      "<h4>" + KZ.t("bgTitle") + "</h4>" +
+      "<div style='font-size:11px;opacity:.55'>" + KZ.t("bgSection") + " " + tid + "</div>" +
+      "<label>" + KZ.t("bgColor") + "</label>" +
       "<input type='color' value='" + (current.color || "#201d1a") + "'>" +
-      "<label>Überlagerung</label>" +
+      "<label>" + KZ.t("bgOverlay") + "</label>" +
       "<div class='kz-seg'>" +
-      "<button data-ov='none'>Keine</button>" +
-      "<button data-ov='dark'>Dunkel</button>" +
-      "<button data-ov='light'>Hell</button></div>" +
-      "<label>Stärke <span class='kz-val'></span></label>" +
+      "<button data-ov='none'>" + KZ.t("ovNone") + "</button>" +
+      "<button data-ov='dark'>" + KZ.t("ovDark") + "</button>" +
+      "<button data-ov='light'>" + KZ.t("ovLight") + "</button></div>" +
+      "<label>" + KZ.t("bgStrength") + " <span class='kz-val'></span></label>" +
       "<input type='range' class='kz-strength' min='0' max='95' step='5'>" +
       (hasPhoto
-        ? "<label>Foto-Deckkraft <span class='kz-val2'></span></label>" +
+        ? "<label>" + KZ.t("bgPhoto") + " <span class='kz-val2'></span></label>" +
           "<input type='range' class='kz-photo' min='10' max='100' step='5'>"
         : "") +
-      "<div class='kz-drop'>Bild hierher ziehen<br><span style='opacity:.6'>oder klicken</span></div>" +
-      "<div class='kz-row'><button data-act='clear'>Zurücksetzen</button>" +
-      "<button data-act='close'>Fertig</button></div>";
+      "<div class='kz-drop'>" + KZ.t("bgDrop") + "<br><span style='opacity:.6'>" + KZ.t("bgDropSub") + "</span></div>" +
+      "<div class='kz-row'><button data-act='clear'>" + KZ.t("reset") + "</button>" +
+      "<button data-act='close'>" + KZ.t("done") + "</button></div>";
     document.body.appendChild(panel);
 
     var color = panel.querySelector("input[type=color]");
@@ -368,8 +394,8 @@
 
     function save(patch) {
       current = Object.assign({}, KZ.styles[key] || {}, current, patch);
-      say("Speichern…", true);
-      KZ.setStyle(key, current).then(function () { say("Gespeichert ✓"); },
+      say(KZ.t("saving"), true);
+      KZ.setStyle(key, current).then(function () { say(KZ.t("saved")); },
                                      function (err) { say(err.message); });
       showValues();
     }
@@ -437,8 +463,8 @@
       var act = e.target.dataset && e.target.dataset.act;
       if (act === "close") closePanel();
       if (act === "clear") {
-        say("Speichern…", true);
-        KZ.setStyle(key, {}).then(function () { say("Zurückgesetzt ✓"); closePanel(); },
+        say(KZ.t("saving"), true);
+        KZ.setStyle(key, {}).then(function () { say(KZ.t("wasReset")); closePanel(); },
                                   function (err) { say(err.message); });
       }
     });

@@ -45,17 +45,14 @@
 <body>
 
 <div class="bar">
-  <a href="Home.dc.html?edit=1">← Zur Website (Bearbeiten)</a>
-  <button id="reload">Aktualisieren</button>
+  <a href="Home.dc.html" id="back"></a>
+  <button id="reload"></button>
   <span class="status" id="status"></span>
 </div>
 
 <header>
-  <h1>Bilder verwalten</h1>
-  <div class="sub">
-    Ziehen Sie ein Foto auf einen Platzhalter — es wird sofort gespeichert.<br>
-    <span style="opacity:.7">Drag a photo onto any placeholder; it saves immediately.</span>
-  </div>
+  <h1 id="title"></h1>
+  <div class="sub" id="intro"></div>
 </header>
 
 <main>
@@ -72,48 +69,63 @@
  * see DESIGN-HANDOFF.md. Editing in place on the real pages (?edit=1) is
  * usually nicer; this page is for spotting what is still missing.
  */
+const EN = KZ.lang() === "en";
+const pick = (de, en) => (EN ? en : de);
+
+const gallery = (prefix, count) =>
+  [...Array(count).keys()].map(i => [`${prefix}${i}`, pick(`Galerie ${i+1}`, `Gallery ${i+1}`)]);
+
+const heroPair = (key) => [
+  [`apt-hero-${key}`, pick("Kopfbild (21:9)", "Header image (21:9)")],
+  [`apt-hero-${key}-pano`, pick("360°-Panorama (breit)", "360° panorama (wide)")]
+];
+
 const GROUPS = [
-  { title: "Startseite", note: "Home.dc.html", slots: [
-    ["hero-bg", "Hero-Hintergrund (Textur)"],
-    ["intro-photo", "Intro: Apartment-Innenraum"],
-    ["hosts-photo", "Gastgeber Ivi & Jörg"],
-    ["vintage-map-blumenstrasse", "Karte Blumenstraße"],
-    ["vintage-map-kanal", "Karte Nest am Kanal"]
+  { title: pick("Startseite", "Home page"), note: "Home.dc.html", slots: [
+    ["hero-bg", pick("Hero-Hintergrund (Textur)", "Hero background (texture)")],
+    ["intro-photo", pick("Intro: Apartment-Innenraum", "Intro: apartment interior")],
+    ["hosts-photo", pick("Gastgeber Ivi & Jörg", "Hosts Ivi & Jörg")],
+    ["vintage-map-blumenstrasse", pick("Karte Blumenstraße", "Map Blumenstraße")],
+    ["vintage-map-kanal", pick("Karte Nest am Kanal", "Map Nest am Kanal")]
   ]},
-  { title: "Apartments-Seite", note: "Apartments.dc.html", slots: [
-    ["apartments-hero", "Kopfbild der Übersicht"]
+  { title: pick("Apartments-Seite", "Apartments page"), note: "Apartments.dc.html", slots: [
+    ["apartments-hero", pick("Kopfbild der Übersicht", "Listing header image")]
   ]},
-  { title: "Häuser", note: "Gruppenkarten auf Start- und Apartments-Seite", slots: [
+  { title: pick("Häuser", "Properties"),
+    note: pick("Gruppenkarten auf Start- und Apartments-Seite",
+               "Group cards on the home and apartments pages"), slots: [
     ["group-blumenstrasse", "City, Messe & Zoo"],
     ["group-kanal", "Kanal & Künstlerviertel"]
   ]},
-  { title: "Apartment-Karten", note: "Vorschaubilder in Listen und Suchergebnissen", slots: [
+  { title: pick("Apartment-Karten", "Apartment cards"),
+    note: pick("Vorschaubilder in Listen und Suchergebnissen",
+               "Thumbnails in listings and search results"), slots: [
     ["apt-residenz", "Residenz"],
     ["apt-cozy", "Cozy"],
     ["apt-belle-etage", "Belle Étage"],
     ["apt-nest", "Nest am Kanal"]
   ]},
-  { title: "Residenz", note: "Detailseite", slots: [
-    ["apt-hero-residenz", "Kopfbild (21:9)"],
-    ["apt-hero-residenz-pano", "360°-Panorama (breit)"],
-    ...[0,1,2,3,4,5].map(i => [`res-g${i}`, `Galerie ${i+1}`])
-  ]},
-  { title: "Cozy", note: "Detailseite", slots: [
-    ["apt-hero-cozy", "Kopfbild (21:9)"],
-    ["apt-hero-cozy-pano", "360°-Panorama (breit)"],
-    ...[0,1,2,3,4,5].map(i => [`cozy-g${i}`, `Galerie ${i+1}`])
-  ]},
-  { title: "Belle Étage", note: "Detailseite", slots: [
-    ["apt-hero-belle", "Kopfbild (21:9)"],
-    ["apt-hero-belle-pano", "360°-Panorama (breit)"],
-    ...[0,1,2,3,4,5].map(i => [`belle-g${i}`, `Galerie ${i+1}`])
-  ]},
-  { title: "Nest am Kanal", note: "Detailseite — eigenes Layout mit 8 Galeriebildern", slots: [
-    ["apt-hero-nest", "Kopfbild (21:9)"],
-    ["apt-hero-nest-pano", "360°-Panorama (breit)"],
-    ...[0,1,2,3,4,5,6,7].map(i => [`nest-g${i}`, `Galerie ${i+1}`])
-  ]}
+  { title: "Residenz", note: pick("Detailseite", "Detail page"),
+    slots: [...heroPair("residenz"), ...gallery("res-g", 6)] },
+  { title: "Cozy", note: pick("Detailseite", "Detail page"),
+    slots: [...heroPair("cozy"), ...gallery("cozy-g", 6)] },
+  { title: "Belle Étage", note: pick("Detailseite", "Detail page"),
+    slots: [...heroPair("belle"), ...gallery("belle-g", 6)] },
+  { title: "Nest am Kanal",
+    note: pick("Detailseite — eigenes Layout mit 8 Galeriebildern",
+               "Detail page — its own layout with 8 gallery images"),
+    slots: [...heroPair("nest"), ...gallery("nest-g", 8)] }
 ];
+
+document.getElementById("back").textContent = pick("← Zur Website", "← Back to the site");
+document.getElementById("reload").textContent = pick("Aktualisieren", "Refresh");
+document.getElementById("title").textContent = pick("Bilder verwalten", "Manage images");
+document.getElementById("intro").textContent = pick(
+  "Ziehen Sie ein Foto auf einen Platzhalter — es wird sofort gespeichert.",
+  "Drag a photo onto any placeholder; it saves immediately."
+);
+document.title = pick("Bilder — KAISERZEIT im Himmelbett", "Images — KAISERZEIT im Himmelbett");
+document.documentElement.lang = EN ? "en" : "de";
 
 const statusEl = document.getElementById("status");
 let statusTimer;
@@ -128,14 +140,15 @@ function tally() {
   const all = GROUPS.flatMap(g => g.slots.map(s => s[0]));
   const done = all.filter(id => KZ.images[id]).length;
   document.getElementById("fill").style.width = (done / all.length * 100) + "%";
-  document.getElementById("count").textContent = `${done} von ${all.length} Bildern gesetzt`;
+  document.getElementById("count").textContent =
+    pick(`${done} von ${all.length} Bildern gesetzt`, `${done} of ${all.length} images set`);
 }
 
 function cell(id, label) {
   const wrap = document.createElement("div");
   wrap.className = "cell";
   wrap.innerHTML =
-    `<div class="drop"><span class="msg">Ziehen oder klicken</span></div>` +
+    `<div class="drop"><span class="msg">${pick("Ziehen oder klicken","Drag or click")}</span></div>` +
     `<div class="meta"><b></b><code></code></div>`;
   wrap.querySelector("b").textContent = label;
   wrap.querySelector("code").textContent = id;
@@ -155,22 +168,22 @@ function cell(id, label) {
       img.alt = label;
       drop.prepend(img);
       drop.classList.add("filled");
-      msg.textContent = "Ersetzen";
+      msg.textContent = pick("Ersetzen", "Replace");
     } else {
       drop.classList.remove("filled");
-      msg.textContent = "Ziehen oder klicken";
+      msg.textContent = pick("Ziehen oder klicken", "Drag or click");
     }
     tally();
   }
 
   function send(chosen) {
     if (!chosen) return;
-    msg.textContent = "Wird hochgeladen…";
+    msg.textContent = pick("Wird hochgeladen…", "Uploading…");
     drop.classList.remove("filled");
     KZ.upload(id, chosen).then(data => {
       KZ.publishImage(id, data.url);
       paint();
-      say("Gespeichert ✓");
+      say(pick("Gespeichert ✓", "Saved ✓"));
     }, err => {
       msg.textContent = err.message;
       say(err.message, "err");

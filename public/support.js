@@ -458,11 +458,17 @@
     pending = false;
     if (!instance || !template) return;
 
+    var previousLang = currentLang;
     currentLang = (instance.state && instance.state.lang) || "de";
     /* Kept in step so screen readers and the editing chrome follow the
        visible language. */
     if (document.documentElement.lang !== currentLang) {
       document.documentElement.lang = currentLang;
+    }
+    /* The editing chrome is not part of the rendered template, so it has to
+       be told when the visitor switches language. */
+    if (previousLang !== currentLang) {
+      window.dispatchEvent(new CustomEvent("kz:lang", { detail: { lang: currentLang } }));
     }
 
     var scope;
