@@ -83,14 +83,37 @@
       var selector = key.slice(split + 1);
       var value = state.styles[key] || {};
       var decls = "";
+
       if (value.color) decls += "background-color:" + value.color + " !important;";
-      if (value.image) {
-        decls += "background-image:url('" + value.image.replace(/'/g, "%27") + "') !important;";
-        decls += "background-size:cover !important;background-position:center !important;";
+
+      /* The tint is a background layer rather than an overlay element, so it
+         sits behind the text instead of dimming it. Layers paint front to
+         back, so the tint has to come first to land on top of the photo. */
+      var layers = [];
+      if (value.overlay && value.strength > 0) {
+        var rgb = value.overlay === "light" ? "255,255,255" : "0,0,0";
+        var tint = "rgba(" + rgb + "," + value.strength + ")";
+        layers.push("linear-gradient(" + tint + "," + tint + ")");
+      }
+      if (value.image) layers.push("url('" + value.image.replace(/'/g, "%27") + "')");
+
+      if (layers.length) {
+        decls += "background-image:" + layers.join(",") + " !important;";
+        if (value.image) {
+          decls += "background-size:cover !important;background-position:center !important;" +
+                   "background-repeat:no-repeat !important;";
+        }
       } else if (value.image === "") {
         decls += "background-image:none !important;";
       }
+
       if (decls) css += selector + "{" + decls + "}\n";
+
+      /* Sections whose photo is an <image-slot> child, like the hero, are not
+         reached by a background layer — dim the element itself instead. */
+      if (typeof value.photo === "number") {
+        css += selector + " image-slot{opacity:" + value.photo + " !important;}\n";
+      }
     }
     sheet.textContent = css;
   }
@@ -375,6 +398,7 @@
   var COPY = {
     de: {
       trigger: "Bearbeiten",
+      comment: "Kommentar",
       title: "Bearbeitungsmodus",
       body: "Text: Doppelklicken Sie auf einen Text, um ihn zu ändern. Bilder: Ziehen Sie ein Foto auf einen Platzhalter. Hintergrund: Abschnitt anklicken.",
       locked: "Geben Sie den Schlüssel ein, um Änderungen vorzunehmen.",
@@ -388,6 +412,7 @@
     },
     en: {
       trigger: "Edit",
+      comment: "Comment",
       title: "Editing Guide",
       body: "Text: double-click any text to change it. Images: drag a photo onto any placeholder. Background: click a section.",
       locked: "Enter the key to make changes.",
@@ -413,6 +438,7 @@
       /* Clears the editor toolbar when it is on screen. */
       "#kz-signin{position:fixed;bottom:" + (EDIT ? "74px" : "26px") + ";left:26px;",
       "z-index:61;font-family:'EB Garamond',Georgia,serif;}",
+      "#kz-signin .row{display:flex;gap:8px;align-items:center;}",
       "#kz-signin .trigger{display:flex;align-items:center;gap:8px;",
       "border:1px solid rgba(185,128,63,0.4);border-radius:999px;padding:10px 16px;",
       "background:#29241f;color:#f2ecdf;font-family:'Playfair Display',serif;",
@@ -451,12 +477,39 @@
       "stroke-linejoin='round'/></svg><span></span>";
     trigger.querySelector("span").textContent = t.trigger;
 
+    /* Commenting is the thing the client does most, so it gets its own
+       button rather than being buried a mode-click deep in the toolbar. */
+    var comment = document.createElement("button");
+    comment.className = "trigger";
+    comment.innerHTML =
+      "<svg width='14' height='14' viewBox='0 0 24 24' fill='none'>" +
+      "<path d='M21 12a8 8 0 0 1-8 8H7l-4 3v-4.5A8 8 0 0 1 11 4h2a8 8 0 0 1 8 8z' " +
+      "stroke='#d9a868' stroke-width='1.6' stroke-linejoin='round'/></svg><span></span>";
+    comment.querySelector("span").textContent = t.comment;
+
+    comment.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (!EDIT) {
+        /* Same key as editing — open the panel rather than failing silently. */
+        panel.hidden = false;
+        render();
+        return;
+      }
+      panel.hidden = true;
+      if (window.KZEditor) window.KZEditor.setMode("notes");
+    });
+
     var panel = document.createElement("div");
     panel.className = "panel";
     panel.hidden = true;
 
+    var row = document.createElement("div");
+    row.className = "row";
+    row.appendChild(trigger);
+    row.appendChild(comment);
+
     host.appendChild(panel);
-    host.appendChild(trigger);
+    host.appendChild(row);
     document.body.appendChild(host);
 
     function render() {

@@ -34,6 +34,10 @@
     "#kz-bar button[aria-pressed=true]{background:linear-gradient(135deg,#e6c184,#b9803f);",
     "color:#201d1a;border-color:transparent;}",
     "#kz-bar .kz-hint{opacity:.65;}",
+    "#kz-bar .kz-pages{font:inherit;background:#29241f;color:#f2ecdf;cursor:pointer;",
+    "border:1px solid rgba(185,128,63,.45);border-radius:999px;padding:6px 12px;}",
+    /* Links stay editable but stop behaving as links. */
+    "#dc-root a{cursor:text;}",
     "#kz-bar .kz-status{min-width:90px;text-align:right;color:" + GOLD + ";}",
     /* Text editing */
     "[data-kz-text]:hover{outline:1px dashed rgba(217,168,104,.65);outline-offset:2px;cursor:text;}",
@@ -51,6 +55,14 @@
     "text-transform:uppercase;color:rgba(242,236,224,.55);}",
     "#kz-panel input[type=color]{width:100%;height:34px;padding:0;border:1px solid ",
     "rgba(185,128,63,.35);border-radius:8px;background:transparent;cursor:pointer;}",
+    "#kz-panel .kz-val,#kz-panel .kz-val2{float:right;letter-spacing:0;color:" + GOLD + ";}",
+    "#kz-panel .kz-seg{display:flex;gap:6px;}",
+    "#kz-panel .kz-seg button{flex:1;font:inherit;cursor:pointer;border-radius:999px;",
+    "padding:6px 4px;font-size:12px;border:1px solid rgba(185,128,63,.4);",
+    "background:transparent;color:#f2ecdf;}",
+    "#kz-panel .kz-seg button[aria-pressed=true]{background:linear-gradient(135deg,#e6c184,#b9803f);",
+    "color:#201d1a;border-color:transparent;}",
+    "#kz-panel input[type=range]{width:100%;accent-color:" + GOLD + ";margin:2px 0 0;}",
     "#kz-panel .kz-row{display:flex;gap:8px;margin-top:12px;}",
     "#kz-panel button{flex:1;font:inherit;cursor:pointer;border-radius:999px;padding:7px 10px;",
     "border:1px solid rgba(185,128,63,.45);background:transparent;color:#f2ecdf;}",
@@ -105,6 +117,7 @@
   window.KZEditor = {
     bar: bar,
     say: say,
+    setMode: setMode,
     isMode: function (id) { return mode === id; },
     addMode: function (id, label, options) {
       MODES[id] = options || {};
@@ -125,20 +138,43 @@
     if (!sticky) statusTimer = setTimeout(function () { status.textContent = ""; }, 2500);
   }
 
-  /* Only needed when edit mode came from ?edit=1 — a signed-in session is
-     remembered across pages on its own, and rewriting every link would put a
-     query string on URLs that do not need one. */
-  if (KZ.editFromUrl) {
-    document.addEventListener("click", function (e) {
-      var link = e.target.closest && e.target.closest("a[href]");
-      if (!link || e.defaultPrevented) return;
-      var url;
-      try { url = new URL(link.getAttribute("href"), location.href); } catch (err) { return; }
-      if (url.origin !== location.origin || url.searchParams.has("edit")) return;
-      url.searchParams.set("edit", "1");
-      link.setAttribute("href", url.pathname + url.search + url.hash);
-    }, true);
-  }
+  /* Links are inert while editing. Their text is editable like anything
+     else, and a stray single click would otherwise navigate away mid-edit —
+     or drag the client off to another page when they meant to fix a word.
+     The href itself is never changed; only the wording is. Moving between
+     pages goes through the picker below instead. */
+  document.addEventListener("click", function (e) {
+    var link = e.target.closest && e.target.closest("#dc-root a[href]");
+    if (!link) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+
+  var PAGES = [
+    ["Home.dc.html", "Home"],
+    ["Apartments.dc.html", "Apartments"],
+    ["Apartment.dc.html", "Apartment"],
+    ["Booking.dc.html", "Buchung"],
+    ["Profile.dc.html", "Profil"],
+    ["About Us.dc.html", "Über uns"],
+    ["Contact.dc.html", "Kontakt"]
+  ];
+
+  var picker = document.createElement("select");
+  picker.className = "kz-pages";
+  PAGES.forEach(function (entry) {
+    var option = document.createElement("option");
+    option.value = entry[0];
+    option.textContent = entry[1];
+    if (entry[0] === DC.page) option.selected = true;
+    picker.appendChild(option);
+  });
+  picker.addEventListener("change", function () {
+    /* ?edit=1 is carried only when that is how this session was unlocked; a
+       signed-in session is remembered on its own. */
+    location.href = picker.value + (KZ.editFromUrl ? "?edit=1" : "");
+  });
+  bar.insertBefore(picker, bar.querySelector(".kz-hint"));
 
   /* ------------------------------------------------------------------ text */
 
@@ -277,6 +313,11 @@
     var key = DC.page + "|[data-kz-el=\"" + tid + "\"]";
     var current = KZ.styles[key] || {};
 
+    /* Only offered where it does something: the hero and a few other
+       sections carry their photo as an <image-slot> child, which a background
+       layer cannot reach. */
+    var hasPhoto = !!section.querySelector("image-slot");
+
     panel = document.createElement("div");
     panel.id = "kz-panel";
     panel.innerHTML =
@@ -284,6 +325,17 @@
       "<div style='font-size:11px;opacity:.55'>Abschnitt " + tid + "</div>" +
       "<label>Farbe</label>" +
       "<input type='color' value='" + (current.color || "#201d1a") + "'>" +
+      "<label>Überlagerung</label>" +
+      "<div class='kz-seg'>" +
+      "<button data-ov='none'>Keine</button>" +
+      "<button data-ov='dark'>Dunkel</button>" +
+      "<button data-ov='light'>Hell</button></div>" +
+      "<label>Stärke <span class='kz-val'></span></label>" +
+      "<input type='range' class='kz-strength' min='0' max='95' step='5'>" +
+      (hasPhoto
+        ? "<label>Foto-Deckkraft <span class='kz-val2'></span></label>" +
+          "<input type='range' class='kz-photo' min='10' max='100' step='5'>"
+        : "") +
       "<div class='kz-drop'>Bild hierher ziehen<br><span style='opacity:.6'>oder klicken</span></div>" +
       "<div class='kz-row'><button data-act='clear'>Zurücksetzen</button>" +
       "<button data-act='close'>Fertig</button></div>";
@@ -291,6 +343,22 @@
 
     var color = panel.querySelector("input[type=color]");
     var drop = panel.querySelector(".kz-drop");
+    var strength = panel.querySelector(".kz-strength");
+    var photo = panel.querySelector(".kz-photo");
+    var readout = panel.querySelector(".kz-val");
+    var readout2 = panel.querySelector(".kz-val2");
+
+    strength.value = Math.round((current.strength || 0) * 100);
+    if (photo) photo.value = Math.round((current.photo == null ? 1 : current.photo) * 100);
+
+    function showValues() {
+      readout.textContent = strength.value + "%";
+      if (readout2) readout2.textContent = photo.value + "%";
+      panel.querySelectorAll("[data-ov]").forEach(function (b) {
+        var isActive = (current.overlay || "none") === b.dataset.ov;
+        b.setAttribute("aria-pressed", String(isActive));
+      });
+    }
 
     var file = document.createElement("input");
     file.type = "file";
@@ -299,13 +367,47 @@
     panel.appendChild(file);
 
     function save(patch) {
-      var next = Object.assign({}, KZ.styles[key] || {}, patch);
+      current = Object.assign({}, KZ.styles[key] || {}, current, patch);
       say("Speichern…", true);
-      KZ.setStyle(key, next).then(function () { say("Gespeichert ✓"); },
-                                  function (err) { say(err.message); });
+      KZ.setStyle(key, current).then(function () { say("Gespeichert ✓"); },
+                                     function (err) { say(err.message); });
+      showValues();
     }
 
-    color.addEventListener("input", function () { save({ color: color.value }); });
+    /* Applied live while dragging, saved once on release, so the slider stays
+       smooth instead of firing a request per step. */
+    function live(patch) {
+      current = Object.assign({}, current, patch);
+      KZ.styles[key] = current;
+      KZ.applyStyles();
+      showValues();
+    }
+
+    color.addEventListener("input", function () { live({ color: color.value }); });
+    color.addEventListener("change", function () { save({ color: color.value }); });
+
+    strength.addEventListener("input", function () {
+      live({ strength: Number(strength.value) / 100, overlay: current.overlay || "dark" });
+    });
+    strength.addEventListener("change", function () {
+      save({ strength: Number(strength.value) / 100, overlay: current.overlay || "dark" });
+    });
+
+    if (photo) {
+      photo.addEventListener("input", function () { live({ photo: Number(photo.value) / 100 }); });
+      photo.addEventListener("change", function () { save({ photo: Number(photo.value) / 100 }); });
+    }
+
+    panel.addEventListener("click", function (e) {
+      var choice = e.target.dataset && e.target.dataset.ov;
+      if (!choice) return;
+      if (choice === "none") save({ overlay: null, strength: 0 });
+      else save({ overlay: choice, strength: Number(strength.value) / 100 || 0.35 });
+      if (choice !== "none" && !Number(strength.value)) strength.value = 35;
+      showValues();
+    });
+
+    showValues();
 
     function send(chosen) {
       if (!chosen) return;

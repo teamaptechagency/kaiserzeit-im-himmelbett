@@ -27,7 +27,7 @@ Once signed in:
 |---|---|
 | **Photos** | Drag an image onto any placeholder, or click it to browse |
 | **Copy** | Double-click any text, type, press Enter |
-| **Backgrounds** | Switch to *Hintergrund*, click a section, pick a colour or drop in an image |
+| **Backgrounds** | Switch to *Hintergrund*, click a section: colour, a dark or light overlay with adjustable strength, photo opacity, or a background image |
 | **Comments** | Switch to *Notizen*, click anywhere — beside a heading, on a photo, in the margin |
 
 Comments are for the review conversation: a pin drops where you clicked, with
@@ -134,6 +134,24 @@ form. The patcher reuses nodes, so typing behaves normally.
 `lang: "de"` in its own state, so switching to English used to last exactly
 one page. The choice is stored and applied before the first paint, so one
 switch holds everywhere and English never flashes as German first.
+
+**Links are inert while editing, and hrefs are never touched.** Link wording
+is editable like any other text, so a stray single click would otherwise
+navigate away mid-edit. Clicks on links inside `#dc-root` are swallowed and
+the page picker in the toolbar is how you move around instead. Only the text
+changes; the destination stays exactly as designed.
+
+**The background overlay is a background layer, not an element on top.** A
+tint drawn over the section would dim the headline along with the photo. It is
+applied as a `linear-gradient` layer in `background-image`, which paints
+behind the text. Sections that carry their photo as an `<image-slot>` child —
+the hero — cannot be reached that way at all, so those get a photo-opacity
+control instead, and it only appears where there is a photo to dim.
+
+**Style values are validated server-side.** They are interpolated into a
+stylesheet that every later viewer loads, so `/api/content` accepts only a hex
+colour, a known overlay name, clamped numbers and an upload URL. A value like
+`red;} body{display:none} .x{` is dropped rather than stored.
 
 **Comment pins are anchored to elements, not coordinates.** A pin stores the
 `data-kz-el` of whatever was under the cursor plus a fraction of that
