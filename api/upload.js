@@ -4,8 +4,7 @@
  * Body is the raw image, content-type says which format. Requires the
  * x-kz-key header to match EDIT_KEY.
  */
-import { del, list, put } from "@vercel/blob";
-import { EXTENSIONS, SLOT_PREFIX, authorize, json, validSlot } from "./_store.js";
+import { EXTENSIONS, authorize, json, validSlot, writeImage } from "./_store.js";
 
 export const config = { runtime: "edge" };
 
@@ -28,27 +27,6 @@ export default async function handler(request) {
   if (!body.byteLength) return json({ error: "empty upload" }, 400);
   if (body.byteLength > MAX_BYTES) return json({ error: "image is larger than 12 MB" }, 413);
 
-  const pathname = `${SLOT_PREFIX}${slot}.${extension}`;
-
-  const blob = await put(pathname, body, {
-    access: "public",
-    contentType: type,
-    addRandomSuffix: false,
-    allowOverwrite: true,
-    cacheControlMaxAge: 60
-  });
-
-  /* A re-upload in a different format would otherwise leave the old file
-     behind, and the slot would have two entries in the listing. */
-  try {
-    const { blobs } = await list({ prefix: `${SLOT_PREFIX}${slot}.` });
-    const stale = blobs
-      .filter((b) => b.pathname !== pathname && /^[^.]+\.[^.]+$/.test(b.pathname.slice(SLOT_PREFIX.length)))
-      .map((b) => b.url);
-    if (stale.length) await del(stale);
-  } catch (error) {
-    console.error("could not remove superseded blobs", error);
-  }
-
-  return json({ ok: true, slot, url: `${blob.url}?v=${Date.now()}` });
+  const url = await writeImage(slot, extension, type, body);
+  return json({ ok: true, slot, url });
 }

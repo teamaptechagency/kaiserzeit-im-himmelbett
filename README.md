@@ -59,18 +59,23 @@ to local paths. Review, then commit. From that point the repo renders the
 client's final version on its own with no backend — clone it, open it, and the
 real photos are there.
 
-PowerShell is used because Node is not installed on the machine this was built
-on; the script only does HTTP requests and file writes.
+PowerShell rather than Node, so it runs on a bare Windows machine; it only
+does HTTP requests and file writes.
 
 ## Running it locally
 
 ```bash
-powershell -ExecutionPolicy Bypass -File scripts\serve.ps1 -Port 8787
+npm install && npm run dev
 ```
 
-Then open <http://localhost:8787/>. This serves `public/` only and knows
-nothing about `/api/*`, so the pages fall back to whatever is in
-`public/assets/uploads/state.json`. Editing needs a real deployment.
+Then open <http://localhost:8788/?edit=1> (key: `local`). This runs the real
+`api/` handlers against a folder on disk instead of Vercel Blob, so uploading
+photos, editing copy and setting backgrounds all work exactly as they do in
+production — no Vercel account needed. Uploads land in `.local-store/`, which
+is gitignored.
+
+There is also `scripts/serve.ps1` for a files-only server with no `/api` at
+all, which is what a fresh clone looks like.
 
 ---
 
@@ -89,6 +94,11 @@ needed to run them lives alongside:
 | `public/responsive.css` | Phone corrections the prototypes never specified |
 | `public/admin.html` | Grid of all 46 photo slots |
 | `api/` | `state` (read), `upload` (photos), `content` (copy + backgrounds) |
+| `scripts/dev.mjs` | Local server running the real API against the filesystem |
+
+`api/_store.js` keeps two storage backends behind one interface — Vercel Blob
+in production, the filesystem when `KZ_LOCAL_STORE` is set — so validation,
+merging and listing are the same code in both.
 
 ### Notes worth knowing
 
