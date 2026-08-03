@@ -131,13 +131,13 @@ function tick(window, times = 1) {
 
   check("toolbar appears when signed in", !!doc.getElementById("kz-bar"));
   const modes = [...doc.querySelectorAll("#kz-bar button[data-mode]")].map((b) => b.dataset.mode);
-  check("three modes registered", modes.join(",") === "text,background,notes", modes.join(","));
+  check("four modes registered", modes.join(",") === "text,background,style,notes", modes.join(","));
   check("page picker present", !!doc.querySelector("#kz-bar .kz-pages"));
   check("text is marked editable", doc.querySelectorAll("[data-kz-text]").length > 20,
     String(doc.querySelectorAll("[data-kz-text]").length));
 
   /* Every mode's enter/exit path, and the panels they open. */
-  for (const mode of ["background", "notes", "text"]) {
+  for (const mode of ["background", "style", "notes", "text"]) {
     doc.querySelector(`#kz-bar button[data-mode=${mode}]`).click();
     await tick(window, 2);
   }
@@ -152,7 +152,17 @@ function tick(window, times = 1) {
   const bg = doc.getElementById("kz-panel");
   check("background panel opens", !!bg);
   check("background panel has its controls",
-    !!bg?.querySelector("input[type=color]") && bg?.querySelectorAll("[data-ov]").length === 3);
+    !!bg?.querySelector("input[type=color]") && bg?.querySelectorAll("[data-ov]").length === 4,
+    String(bg?.querySelectorAll("[data-ov]").length));
+  check("custom overlay colour is offered", !!bg?.querySelector(".kz-ovcolor"));
+
+  /* The font panel — site-wide, so its own mode rather than per section. */
+  doc.querySelector("#kz-bar button[data-mode=style]").click();
+  await tick(window, 2);
+  const fonts = doc.getElementById("kz-panel");
+  check("font panel offers three pairings",
+    fonts?.querySelectorAll(".kz-font").length === 3,
+    String(fonts?.querySelectorAll(".kz-font").length));
 
   /* The notes composer, which is where T.saved broke. */
   doc.querySelector("#kz-bar button[data-mode=notes]").click();

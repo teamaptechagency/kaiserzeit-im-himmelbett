@@ -69,7 +69,15 @@
     "border:1px solid rgba(185,128,63,.45);background:transparent;color:#f2ecdf;}",
     "#kz-panel .kz-drop{margin-top:8px;border:1px dashed rgba(185,128,63,.45);border-radius:8px;",
     "padding:14px 8px;text-align:center;font-size:12px;cursor:pointer;}",
-    "#kz-panel .kz-drop.over{background:rgba(185,128,63,.25);}"
+    "#kz-panel .kz-drop.over{background:rgba(185,128,63,.25);}",
+    "#kz-panel .kz-font{display:block;width:100%;text-align:left;margin-top:8px;",
+    "padding:9px 12px;border-radius:10px;}",
+    "#kz-panel .kz-font b{display:block;font-weight:600;font-family:'Playfair Display',serif;}",
+    "#kz-panel .kz-font span{font-size:11px;opacity:.6;}",
+    "#kz-panel .kz-font[aria-pressed=true]{background:linear-gradient(135deg,#e6c184,#b9803f);",
+    "color:#201d1a;border-color:transparent;}",
+    "#kz-panel .kz-font[aria-pressed=true] span{opacity:.75;}",
+    "#kz-panel [hidden]{display:none;}"
   ].join("");
   document.head.appendChild(css);
 
@@ -355,7 +363,10 @@
       "<div class='kz-seg'>" +
       "<button data-ov='none'>" + KZ.t("ovNone") + "</button>" +
       "<button data-ov='dark'>" + KZ.t("ovDark") + "</button>" +
-      "<button data-ov='light'>" + KZ.t("ovLight") + "</button></div>" +
+      "<button data-ov='light'>" + KZ.t("ovLight") + "</button>" +
+      "<button data-ov='custom'>" + KZ.t("ovCustom") + "</button></div>" +
+      "<label class='kz-ovcolor-label'>" + KZ.t("ovColor") + "</label>" +
+      "<input type='color' class='kz-ovcolor' value='" + (current.overlayColor || "#8a5a2f") + "'>" +
       "<label>" + KZ.t("bgStrength") + " <span class='kz-val'></span></label>" +
       "<input type='range' class='kz-strength' min='0' max='95' step='5'>" +
       (hasPhoto
@@ -377,6 +388,9 @@
     strength.value = Math.round((current.strength || 0) * 100);
     if (photo) photo.value = Math.round((current.photo == null ? 1 : current.photo) * 100);
 
+    var overlayColor = panel.querySelector(".kz-ovcolor");
+    var overlayColorLabel = panel.querySelector(".kz-ovcolor-label");
+
     function showValues() {
       readout.textContent = strength.value + "%";
       if (readout2) readout2.textContent = photo.value + "%";
@@ -384,6 +398,10 @@
         var isActive = (current.overlay || "none") === b.dataset.ov;
         b.setAttribute("aria-pressed", String(isActive));
       });
+      /* Only meaningful once "Custom" is the chosen tint. */
+      var custom = current.overlay === "custom";
+      overlayColor.hidden = !custom;
+      overlayColorLabel.hidden = !custom;
     }
 
     var file = document.createElement("input");
@@ -424,12 +442,24 @@
       photo.addEventListener("change", function () { save({ photo: Number(photo.value) / 100 }); });
     }
 
+    overlayColor.addEventListener("input", function () {
+      live({ overlay: "custom", overlayColor: overlayColor.value });
+    });
+    overlayColor.addEventListener("change", function () {
+      save({ overlay: "custom", overlayColor: overlayColor.value });
+    });
+
     panel.addEventListener("click", function (e) {
       var choice = e.target.dataset && e.target.dataset.ov;
       if (!choice) return;
-      if (choice === "none") save({ overlay: null, strength: 0 });
-      else save({ overlay: choice, strength: Number(strength.value) / 100 || 0.35 });
-      if (choice !== "none" && !Number(strength.value)) strength.value = 35;
+      if (choice === "none") {
+        save({ overlay: null, strength: 0 });
+      } else {
+        if (!Number(strength.value)) strength.value = 35;
+        var patch = { overlay: choice, strength: Number(strength.value) / 100 };
+        if (choice === "custom") patch.overlayColor = overlayColor.value;
+        save(patch);
+      }
       showValues();
     });
 
@@ -471,6 +501,61 @@
   }
 
   /* --------------------------------------------------------------- wiring */
+
+  /* ------------------------------------------------------------- fonts --
+     Site-wide rather than per section, so it gets its own mode with a small
+     panel instead of living in the background picker. */
+
+  var FONT_CHOICES = [
+    ["original", "fontOriginal", "fontOriginalNote"],
+    ["modern", "fontModern", "fontModernNote"],
+    ["classic", "fontClassic", "fontClassicNote"]
+  ];
+  var fontPanel = null;
+
+  function closeFonts() {
+    if (fontPanel) { fontPanel.remove(); fontPanel = null; }
+  }
+
+  function openFonts() {
+    closeFonts();
+    fontPanel = document.createElement("div");
+    fontPanel.id = "kz-panel";
+    fontPanel.innerHTML = "<h4>" + KZ.t("fontsTitle") + "</h4>";
+
+    var chosen = (KZ.theme && KZ.theme.fonts) || "original";
+
+    FONT_CHOICES.forEach(function (entry) {
+      var button = document.createElement("button");
+      button.className = "kz-font";
+      button.setAttribute("aria-pressed", String(entry[0] === chosen));
+      button.innerHTML = "<b></b><span></span>";
+      button.querySelector("b").textContent = KZ.t(entry[1]);
+      button.querySelector("span").textContent = KZ.t(entry[2]);
+      button.addEventListener("click", function () {
+        say(KZ.t("saving"), true);
+        KZ.setFonts(entry[0]).then(function () { say(KZ.t("saved")); openFonts(); },
+                                   function (err) { say(err.message); });
+      });
+      fontPanel.appendChild(button);
+    });
+
+    var close = document.createElement("div");
+    close.className = "kz-row";
+    var done = document.createElement("button");
+    done.textContent = KZ.t("done");
+    done.addEventListener("click", closeFonts);
+    close.appendChild(done);
+    fontPanel.appendChild(close);
+
+    document.body.appendChild(fontPanel);
+  }
+
+  window.KZEditor.addMode("style", "modeStyle", {
+    hintKey: "hintStyle",
+    enter: openFonts,
+    exit: closeFonts
+  });
 
   window.addEventListener("dc:render", markText);
   markText();

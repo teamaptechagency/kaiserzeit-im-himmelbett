@@ -35,7 +35,10 @@ function cleanStyle(value) {
       out.image = url;
     }
   }
-  if (value.overlay === "dark" || value.overlay === "light") out.overlay = value.overlay;
+  if (["dark", "light", "custom"].includes(value.overlay)) out.overlay = value.overlay;
+  if (typeof value.overlayColor === "string" && /^#[0-9a-f]{3,8}$/i.test(value.overlayColor.trim())) {
+    out.overlayColor = value.overlayColor.trim();
+  }
   if (value.strength != null) out.strength = Math.min(0.95, Math.max(0, Number(value.strength) || 0));
   if (value.photo != null) out.photo = Math.min(1, Math.max(0, Number(value.photo) || 0));
 
@@ -108,12 +111,17 @@ export default async function handler(req, res) {
   const styles = pick("styles");
   const notes = pick("notes");
   const slots = pick("slots");
+  const theme = pick("theme");
+
+  /* Site-wide, so it is a single object rather than a keyed map. */
+  const FONT_SETS = ["original", "modern", "classic"];
 
   /* An empty patch is the sign-in check: it has already passed authorize(),
      so answering here lets the login button verify a key without a fourth
      function and without a pointless write. */
   const total = Object.keys(texts).length + Object.keys(styles).length +
-                Object.keys(notes).length + Object.keys(slots).length;
+                Object.keys(notes).length + Object.keys(slots).length +
+                Object.keys(theme).length;
   if (!total) return send(res, 200, { ok: true, verified: true });
   if (total > MAX_KEYS) return send(res, 400, { error: "too many keys in one request" });
 
@@ -154,11 +162,18 @@ export default async function handler(req, res) {
       if (!slot) delete content.slots[key];
       else content.slots[key] = slot;
     }
+    if ("fonts" in theme) {
+      if (FONT_SETS.includes(theme.fonts) && theme.fonts !== "original") {
+        content.theme.fonts = theme.fonts;
+      } else {
+        delete content.theme.fonts;   /* "original" is the design's own */
+      }
+    }
 
     await writeContent(content);
     send(res, 200, {
       ok: true, texts: content.texts, styles: content.styles,
-      notes: content.notes, slots: content.slots
+      notes: content.notes, slots: content.slots, theme: content.theme
     });
   } catch (error) {
     console.error("content save failed", error);

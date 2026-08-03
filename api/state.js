@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     send(res, 200, {
       ok: true, images,
       texts: content.texts, styles: content.styles,
-      notes: content.notes, slots: content.slots
+      notes: content.notes, slots: content.slots, theme: content.theme
     });
   } catch (error) {
     /* Before the blob store is connected there is nothing to serve, and an
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
        bundled assets and original copy. */
     console.error("state failed", error);
     send(res, 200, {
-      ok: false, images: {}, texts: {}, styles: {}, notes: {}, slots: {},
+      ok: false, images: {}, texts: {}, styles: {}, notes: {}, slots: {}, theme: {},
       error: String(error && error.message ? error.message : error)
     });
   }
