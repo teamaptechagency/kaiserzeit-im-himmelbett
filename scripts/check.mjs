@@ -54,6 +54,13 @@ async function boot({ signedIn, brokenStorage }) {
   window.document.elementFromPoint = () =>
     window.document.querySelector("#dc-root [data-kz-el]") || window.document.body;
 
+  /* Every box is 0x0 without layout, and notes.js skips a pin whose anchor
+     has no size — so without this no pin would ever render here. */
+  window.Element.prototype.getBoundingClientRect = function () {
+    return { x: 0, y: 0, top: 0, left: 0, right: 400, bottom: 300, width: 400, height: 300,
+             toJSON() { return this; } };
+  };
+
   if (signedIn) {
     window.localStorage.setItem("kz-edit-key", "local");
     window.localStorage.setItem("kz-edit-on", "1");
@@ -176,6 +183,34 @@ function tick(window, times = 1) {
   check("note composer opens", !!composer);
   check("composer has a text field and buttons",
     !!composer?.querySelector("textarea") && composer?.querySelectorAll("button").length >= 2);
+
+  /* Deleting must not depend on window.confirm — jsdom does not implement it
+     and embedded browsers block it, which is what made deletion look broken. */
+  check("nothing calls window.confirm",
+    !/\bwindow\.confirm\s*\(/.test(await read("notes.js")));
+
+  STATE.notes = {
+    n1: { page: "Home.dc.html", el: "1", x: 0.5, y: 0.5, author: "Ivi",
+          text: "Delete me", at: 1, resolved: false, replies: [] }
+  };
+  const { window: w2, errors: e2 } = await boot({ signedIn: true });
+  const d2 = w2.document;
+  d2.querySelector("#kz-bar button[data-mode=notes]").click();
+  await tick(w2, 2);
+  d2.querySelector(".kz-pin")?.click();
+  await tick(w2, 2);
+  const noteCard = d2.querySelector("#kz-notes .kz-card");
+  check("an existing note renders a card", !!noteCard);
+  const del = [...(noteCard?.querySelectorAll(".links:not(.confirm) button") || [])]
+    .find((b) => /Löschen|Delete/.test(b.textContent));
+  check("the card offers Delete", !!del);
+  del?.click();
+  await tick(w2);
+  const confirmRow = noteCard?.querySelector(".confirm");
+  check("Delete asks inline rather than via a browser dialog",
+    !!confirmRow && confirmRow.hidden === false);
+  check("confirming does not throw", e2.length === 0, e2.join("; "));
+  STATE.notes = {};
 
   /* Both languages, since every label is resolved through the dictionary. */
   window.localStorage.setItem("kz-lang", "en");
