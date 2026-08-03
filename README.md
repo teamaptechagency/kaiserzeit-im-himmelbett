@@ -53,8 +53,12 @@ carries the key and is rejected without it.
 ## Deploying
 
 1. Import the repo into Vercel.
-2. Add a **Blob** store to the project (Storage → Create → Blob). This sets
-   `BLOB_READ_WRITE_TOKEN` automatically.
+2. Add a **Blob** store (Storage → Create → Blob) **and connect it to this
+   project**, which is what sets `BLOB_READ_WRITE_TOKEN`. Creating the store
+   alone only gives you `BLOB_STORE_ID` and `BLOB_WEBHOOK_PUBLIC_KEY`, and the
+   SDK reads neither — uploads then fail with "No token found". Check under
+   Environment Variables that `BLOB_READ_WRITE_TOKEN` is listed; the preview
+   says so itself if it is not.
 3. Add an environment variable **`EDIT_KEY`** — any passphrase. Give it to the
    client; it is the only thing standing between the internet and the upload
    endpoint.

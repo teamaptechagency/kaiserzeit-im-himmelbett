@@ -77,7 +77,12 @@
     "#kz-panel .kz-font[aria-pressed=true]{background:linear-gradient(135deg,#e6c184,#b9803f);",
     "color:#201d1a;border-color:transparent;}",
     "#kz-panel .kz-font[aria-pressed=true] span{opacity:.75;}",
-    "#kz-panel [hidden]{display:none;}"
+    "#kz-panel [hidden]{display:none;}",
+    "#kz-warn{position:fixed;left:0;right:0;bottom:56px;z-index:99999;background:#4a2420;",
+    "border-top:1px solid #a8493f;color:#f7e6e2;padding:10px 16px;",
+    "font:13px/1.5 'EB Garamond',Georgia,serif;text-align:center;}",
+    "#kz-warn b{display:block;font-family:'Playfair Display',serif;color:#e8a598;}",
+    "#kz-warn span{opacity:.85;}"
   ].join("");
   document.head.appendChild(css);
 
@@ -161,6 +166,20 @@
   }
 
   window.addEventListener("kz:lang", relabel);
+
+  /* Nothing can be saved without storage, and the SDK's own wording is no
+     help, so this states the problem once and stays until it is fixed rather
+     than surfacing as a failure on every action. */
+  KZ.ready.then(function () {
+    if (!KZ.serverError) return;
+    var warn = document.createElement("div");
+    warn.id = "kz-warn";
+    warn.innerHTML = "<b></b><span></span>";
+    warn.querySelector("b").textContent = KZ.t("notSaving");
+    warn.querySelector("span").textContent = KZ.serverError;
+    document.body.appendChild(warn);
+    document.body.style.paddingBottom = "112px";
+  });
 
   var statusTimer;
   function say(message, sticky) {
@@ -540,11 +559,73 @@
       fontPanel.appendChild(button);
     });
 
+    /* Corner rounding, in the three groups the design actually uses. Leaving
+       a group untouched keeps the design's own values; Reset clears all
+       three. */
+    var corners = document.createElement("h4");
+    corners.textContent = KZ.t("radiusTitle");
+    corners.style.marginTop = "18px";
+    fontPanel.appendChild(corners);
+
+    [["radiusButton", "radButtons"], ["radiusCard", "radCards"], ["radiusField", "radFields"]]
+      .forEach(function (entry) {
+        var key = entry[0];
+        var stored = KZ.theme ? KZ.theme[key] : undefined;
+
+        var label = document.createElement("label");
+        label.textContent = KZ.t(entry[1]) + " ";
+        var readout = document.createElement("span");
+        readout.className = "kz-val";
+        label.appendChild(readout);
+
+        var slider = document.createElement("input");
+        slider.type = "range";
+        slider.min = "0";
+        slider.max = "40";
+        slider.step = "1";
+        slider.value = String(typeof stored === "number" ? stored : 0);
+
+        function show() {
+          readout.textContent = typeof KZ.theme[key] === "number"
+            ? KZ.theme[key] + "px" : "—";
+        }
+
+        slider.addEventListener("input", function () {
+          /* Live while dragging, one save on release. */
+          KZ.theme[key] = Number(slider.value);
+          KZ.applyRadius();
+          show();
+        });
+        slider.addEventListener("change", function () {
+          say(KZ.t("saving"), true);
+          KZ.setRadius(key, Number(slider.value))
+            .then(function () { say(KZ.t("saved")); show(); },
+                  function (err) { say(err.message); });
+        });
+
+        fontPanel.appendChild(label);
+        fontPanel.appendChild(slider);
+        show();
+      });
+
     var close = document.createElement("div");
     close.className = "kz-row";
+
+    var reset = document.createElement("button");
+    reset.textContent = KZ.t("reset");
+    reset.addEventListener("click", function () {
+      say(KZ.t("saving"), true);
+      Promise.all(["radiusButton", "radiusCard", "radiusField"].map(function (key) {
+        return KZ.setRadius(key, null);
+      })).then(function () { say(KZ.t("wasReset")); openFonts(); },
+               function (err) { say(err.message); });
+    });
+
     var done = document.createElement("button");
     done.textContent = KZ.t("done");
     done.addEventListener("click", closeFonts);
+
+    close.appendChild(reset);
     close.appendChild(done);
     fontPanel.appendChild(close);
 

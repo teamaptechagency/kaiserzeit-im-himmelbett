@@ -41,6 +41,7 @@
 
   var state = { images: {}, texts: {}, styles: {}, notes: {}, slots: {}, theme: {} };
   var slots = new Set();
+  var serverError = null;
 
   /* ----------------------------------------------------------- wording ---
      Every label in the editing chrome lives here, so the toolbar, the
@@ -57,6 +58,7 @@
       keyPlaceholder: "Schlüssel", start: "Bearbeiten starten", checking: "Wird geprüft…",
       allImages: "Alle Bilder", stop: "Bearbeiten beenden", gotIt: "Verstanden",
       wrongKey: "Falscher Schlüssel",
+      notSaving: "Änderungen werden nicht gespeichert",
 
       slotReplace: "Ersetzen", slotAdd: "Foto hinzufügen",
       uploading: "Wird hochgeladen…", dropHere: "Hier ablegen", failed: "Fehler",
@@ -74,7 +76,8 @@
       ovCustom: "Eigene", ovColor: "Überlagerungsfarbe",
       reset: "Zurücksetzen", done: "Fertig",
 
-      modeStyle: "Schrift", hintStyle: "Wählen Sie eine Schriftkombination für die ganze Website.",
+      modeStyle: "Stil", hintStyle: "Schrift und Rundungen für die ganze Website.",
+      radiusTitle: "Ecken", radButtons: "Schaltflächen", radCards: "Karten", radFields: "Felder",
       fontsTitle: "Schriftart", fontOriginal: "Original", fontModern: "Modern",
       fontClassic: "Klassisch",
       fontOriginalNote: "Playfair Display + EB Garamond",
@@ -97,6 +100,7 @@
       keyPlaceholder: "Key", start: "Start editing", checking: "Checking…",
       allImages: "All images", stop: "Stop editing", gotIt: "Got it",
       wrongKey: "Wrong key",
+      notSaving: "Changes are not being saved",
 
       slotReplace: "Replace", slotAdd: "Add photo",
       uploading: "Uploading…", dropHere: "Drop here", failed: "Failed",
@@ -114,7 +118,8 @@
       ovCustom: "Custom", ovColor: "Overlay colour",
       reset: "Reset", done: "Done",
 
-      modeStyle: "Fonts", hintStyle: "Pick a font pairing for the whole site.",
+      modeStyle: "Style", hintStyle: "Fonts and corner rounding for the whole site.",
+      radiusTitle: "Corners", radButtons: "Buttons", radCards: "Cards", radFields: "Fields",
       fontsTitle: "Typeface", fontOriginal: "Original", fontModern: "Modern",
       fontClassic: "Classic",
       fontOriginalNote: "Playfair Display + EB Garamond",
@@ -159,8 +164,13 @@
         state.slots = data.slots || {};
         state.theme = data.theme || {};
       }
+      /* A server that cannot reach its storage still answers, with the reason.
+         Kept so the editing chrome can say so plainly rather than letting the
+         first upload fail with an SDK message. */
+      serverError = data && data.ok === false ? data.error : null;
       applyStyles();
       applyFonts();
+      applyRadius();
       slots.forEach(function (el) { el.refresh(); });
       return state;
     });
@@ -234,6 +244,38 @@
     ].join("\n");
   }
 
+  /* Corner rounding, grouped the way the design uses it. 50% is deliberately
+     left out: those are avatars and circular icons, which should stay round.
+     Matching on the normalised style attribute avoids touching the markup,
+     the same way the fonts do. */
+  var RADIUS_GROUPS = {
+    radiusButton: ["999px"],
+    radiusCard: ["2px", "10px", "12px", "14px", "16px"],
+    radiusField: ["4px", "6px", "8px"]
+  };
+
+  function applyRadius() {
+    var rules = document.getElementById("kz-radius-overrides");
+    var css = "";
+
+    for (var group in RADIUS_GROUPS) {
+      var value = state.theme && state.theme[group];
+      if (typeof value !== "number") continue;
+      var selectors = RADIUS_GROUPS[group].map(function (px) {
+        return "#dc-root [style*=\"border-radius:" + px + "\"]";
+      });
+      css += selectors.join(",") + "{border-radius:" + value + "px !important;}\n";
+    }
+
+    if (!css) { if (rules) rules.remove(); return; }
+    if (!rules) {
+      rules = document.createElement("style");
+      rules.id = "kz-radius-overrides";
+      document.head.appendChild(rules);
+    }
+    rules.textContent = css;
+  }
+
   function applyStyles() {
     if (!sheet) {
       sheet = document.createElement("style");
@@ -298,6 +340,9 @@
       remember(KEY_STORE, null);
       remember(EDIT_FLAG, null);
     }
+    /* 503 means the server is fine but its storage is not wired up; keep that
+       message, it names the variable to add. */
+    if (res.status === 503 && data.error) serverError = data.error;
     return new Error(data.error || "Fehler / failed (" + res.status + ")");
   }
 
@@ -398,6 +443,16 @@
     slots.forEach(function (el) { if (el.slotId === id) el.refresh(); });
     var patch = { slots: {} };
     patch.slots[id] = value == null ? null : value;
+    return saveContent(patch);
+  }
+
+  /* null for a group means "back to the design's own values". */
+  function setRadius(group, value) {
+    if (value == null) delete state.theme[group];
+    else state.theme[group] = value;
+    applyRadius();
+    var patch = { theme: {} };
+    patch.theme[group] = value == null ? null : value;
     return saveContent(patch);
   }
 
@@ -669,6 +724,7 @@
     get notes() { return state.notes; },
     get slots() { return state.slots; },
     get theme() { return state.theme; },
+    get serverError() { return serverError; },
     t: t,
     lang: currentLang,
     upload: upload,
@@ -681,7 +737,9 @@
     remember: remember,
     publishImage: publishImage,
     applyStyles: applyStyles,
-    applyFonts: applyFonts
+    applyFonts: applyFonts,
+    applyRadius: applyRadius,
+    setRadius: setRadius
   };
 
   /* ------------------------------------------------------- sign-in button --
