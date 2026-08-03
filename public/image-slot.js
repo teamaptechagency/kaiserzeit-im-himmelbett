@@ -59,6 +59,8 @@
       allImages: "Alle Bilder", stop: "Bearbeiten beenden", gotIt: "Verstanden",
       wrongKey: "Falscher Schlüssel",
       notSaving: "Änderungen werden nicht gespeichert",
+      tooBig: "Bild zu groß, bitte kleiner als 12 MB",
+      noServer: "Server nicht erreichbar -- bitte Verbindung prüfen und erneut versuchen",
 
       slotReplace: "Ersetzen", slotAdd: "Foto hinzufügen",
       uploading: "Wird hochgeladen…", dropHere: "Hier ablegen", failed: "Fehler",
@@ -78,7 +80,7 @@
 
       modeStyle: "Stil", hintStyle: "Schrift und Rundungen für die ganze Website.",
       radiusTitle: "Ecken", radButtons: "Schaltflächen", radCards: "Karten", radFields: "Felder",
-      fontsTitle: "Schriftart", fontOriginal: "Original", fontModern: "Modern",
+      fontsTitle: "Typografie", fontOriginal: "Original", fontModern: "Modern",
       fontClassic: "Klassisch",
       fontOriginalNote: "Playfair Display + EB Garamond",
       fontModernNote: "Cormorant Garamond + Jost",
@@ -101,6 +103,8 @@
       allImages: "All images", stop: "Stop editing", gotIt: "Got it",
       wrongKey: "Wrong key",
       notSaving: "Changes are not being saved",
+      tooBig: "Image too large, please use one under 12 MB",
+      noServer: "Could not reach the server -- check the connection and try again",
 
       slotReplace: "Replace", slotAdd: "Add photo",
       uploading: "Uploading…", dropHere: "Drop here", failed: "Failed",
@@ -120,7 +124,7 @@
 
       modeStyle: "Style", hintStyle: "Fonts and corner rounding for the whole site.",
       radiusTitle: "Corners", radButtons: "Buttons", radCards: "Cards", radFields: "Fields",
-      fontsTitle: "Typeface", fontOriginal: "Original", fontModern: "Modern",
+      fontsTitle: "Typography", fontOriginal: "Original", fontModern: "Modern",
       fontClassic: "Classic",
       fontOriginalNote: "Playfair Display + EB Garamond",
       fontModernNote: "Cormorant Garamond + Jost",
@@ -153,8 +157,17 @@
       .catch(function () { return null; });
   }
 
+  var apiReachable = true;
+
   var ready = loadFrom("/api/state")
-    .then(function (data) { return data || loadFrom("assets/uploads/state.json"); })
+    .then(function (data) {
+      if (data) return data;
+      /* Either there is no backend — a plain clone, where the checked-in
+         state is the right answer — or the deployment is broken. Which one
+         it is only becomes clear when the fallback is missing too. */
+      apiReachable = false;
+      return loadFrom("assets/uploads/state.json");
+    })
     .then(function (data) {
       if (data) {
         state.images = data.images || {};
@@ -167,7 +180,9 @@
       /* A server that cannot reach its storage still answers, with the reason.
          Kept so the editing chrome can say so plainly rather than letting the
          first upload fail with an SDK message. */
-      serverError = data && data.ok === false ? data.error : null;
+      serverError = data && data.ok === false ? data.error
+        : (!apiReachable && !data) ? t("noServer")
+        : null;
       applyStyles();
       applyFonts();
       applyRadius();
@@ -364,20 +379,62 @@
     });
   }
 
+  /* Serverless functions reject a request body over about 4.5 MB before it
+     ever reaches the handler, and the browser reports that as a bare "Failed
+     to fetch". Photos straight off a phone are routinely larger, so they are
+     resized here first. A preview never needs more than this, and it makes
+     uploads quick as well as possible. */
+  var MAX_EDGE = 2200;
+  var SHRINK_OVER = 3 * 1024 * 1024;
+
+  function shrink(file) {
+    if (file.size <= SHRINK_OVER || file.type === "image/svg+xml") {
+      return Promise.resolve(file);
+    }
+    return new Promise(function (resolve) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var scale = Math.min(1, MAX_EDGE / Math.max(img.width, img.height));
+        var canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(function (blob) {
+          /* Keep the original if re-encoding somehow made it bigger. */
+          resolve(blob && blob.size < file.size ? blob : file);
+        }, "image/jpeg", 0.85);
+      };
+      /* A format the browser cannot decode goes up untouched and is caught by
+         the size check below. */
+      img.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  }
+
   function upload(slot, file) {
     var key = editKey();
     if (!key) return Promise.reject(new Error("kein Schlüssel / no key"));
     if (!/^image\//.test(file.type)) return Promise.reject(new Error("Nur Bilder / images only"));
-    if (file.size > MAX_BYTES) return Promise.reject(new Error("Max. 12 MB"));
 
-    return fetch("/api/upload?slot=" + encodeURIComponent(slot), {
-      method: "POST",
-      headers: { "content-type": file.type, "x-kz-key": key },
-      body: file
-    }).then(function (res) {
-      return res.json().catch(function () { return {}; }).then(function (data) {
-        if (!res.ok) throw failed(res, data);
-        return data;
+    return shrink(file).then(function (payload) {
+      if (payload.size > MAX_BYTES) throw new Error(t("tooBig"));
+      var type = payload.type || file.type;
+
+      return fetch("/api/upload?slot=" + encodeURIComponent(slot), {
+        method: "POST",
+        headers: { "content-type": type, "x-kz-key": key },
+        body: payload
+      }).catch(function () {
+        /* fetch only rejects on a network-level failure; the server never
+           answered, so say something more useful than "Failed to fetch". */
+        throw new Error(t("noServer"));
+      }).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (data) {
+          if (!res.ok) throw failed(res, data);
+          return data;
+        });
       });
     });
   }
