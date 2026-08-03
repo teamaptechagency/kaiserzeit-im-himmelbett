@@ -121,7 +121,8 @@ function shape(data) {
   return {
     texts: (data && data.texts) || {},
     styles: (data && data.styles) || {},
-    notes: (data && data.notes) || {}
+    notes: (data && data.notes) || {},
+    slots: (data && data.slots) || {}
   };
 }
 

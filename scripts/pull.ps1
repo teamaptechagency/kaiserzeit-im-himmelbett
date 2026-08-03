@@ -99,7 +99,12 @@ if ($state.notes) {
   foreach ($entry in $state.notes.PSObject.Properties) { $notes[$entry.Name] = $entry.Value }
 }
 
-$out = [ordered]@{ images = $localImages; texts = $texts; styles = $styles; notes = $notes }
+$slotFits = [ordered]@{}
+if ($state.slots) {
+  foreach ($entry in $state.slots.PSObject.Properties) { $slotFits[$entry.Name] = $entry.Value }
+}
+
+$out = [ordered]@{ images = $localImages; texts = $texts; styles = $styles; notes = $notes; slots = $slotFits }
 $json = $out | ConvertTo-Json -Depth 8
 [System.IO.File]::WriteAllText((Join-Path $outDir "state.json"), $json, [System.Text.UTF8Encoding]::new($false))
 
