@@ -66,6 +66,10 @@
     ".kz-card .links{display:flex;gap:12px;margin-top:10px;font-size:12px;}",
     ".kz-card .links button{flex:0 0 auto;border:none;padding:0;background:none;color:" + GOLD + ";}",
     ".kz-card .links button.danger{color:#e8a598;}",
+    ".kz-card .confirm{align-items:center;flex-wrap:wrap;}",
+    ".kz-card .confirm[hidden]{display:none;}",
+    ".kz-card .links[hidden]{display:none;}",
+    ".kz-card .confirm span{opacity:.8;}",
     ".kz-card hr{border:none;border-top:1px solid rgba(185,128,63,.2);margin:10px 0;}",
     "#kz-bar .kz-count{display:inline-block;min-width:17px;padding:0 4px;margin-left:6px;",
     "border-radius:999px;background:" + GOLD + ";color:#201d1a;font-size:11px;text-align:center;}"
@@ -247,11 +251,37 @@
       save(id, next);
     });
 
+    /* Confirmed inside the card rather than through window.confirm. A native
+       dialog is blocked outright in some embedded contexts — where it simply
+       returns false and the delete looks broken — and it is a heavy
+       interruption for something this small. */
     var remove = document.createElement("button");
     remove.className = "danger";
     remove.textContent = T("remove");
+
+    var confirmRow = document.createElement("div");
+    confirmRow.className = "links confirm";
+    confirmRow.hidden = true;
+    var yes = document.createElement("button");
+    yes.className = "danger";
+    yes.textContent = T("confirmYes");
+    var no = document.createElement("button");
+    no.textContent = T("cancel");
+    var question = document.createElement("span");
+    question.textContent = T("confirmDelete");
+    confirmRow.appendChild(question);
+    confirmRow.appendChild(yes);
+    confirmRow.appendChild(no);
+
     remove.addEventListener("click", function () {
-      if (!window.confirm(T("confirmDelete"))) return;
+      links.hidden = true;
+      confirmRow.hidden = false;
+    });
+    no.addEventListener("click", function () {
+      confirmRow.hidden = true;
+      links.hidden = false;
+    });
+    yes.addEventListener("click", function () {
       open = null;
       save(id, null);
     });
@@ -259,6 +289,7 @@
     links.appendChild(resolve);
     links.appendChild(remove);
     box.appendChild(links);
+    box.appendChild(confirmRow);
 
     setTimeout(function () { input.focus(); }, 0);
     return box;

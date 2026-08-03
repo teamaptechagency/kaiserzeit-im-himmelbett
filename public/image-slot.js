@@ -87,7 +87,7 @@
       yourName: "Ihr Name", notePlaceholder: "Notiz schreiben…",
       post: "Senden", cancel: "Abbrechen", reply: "Antworten", replyBox: "Antwort…",
       resolve: "Erledigt", reopen: "Wieder öffnen", remove: "Löschen",
-      confirmDelete: "Diese Notiz und ihre Antworten löschen?",
+      confirmDelete: "Wirklich löschen?", confirmYes: "Ja, löschen",
 
       pgHome: "Home", pgApartments: "Apartments", pgApartment: "Apartment",
       pgBooking: "Buchung", pgProfile: "Profil", pgAbout: "Über uns", pgContact: "Kontakt"
@@ -129,7 +129,7 @@
       yourName: "Your name", notePlaceholder: "Write a note…",
       post: "Post", cancel: "Cancel", reply: "Reply", replyBox: "Reply…",
       resolve: "Resolve", reopen: "Reopen", remove: "Delete",
-      confirmDelete: "Delete this note and its replies?",
+      confirmDelete: "Delete this note?", confirmYes: "Yes, delete",
 
       pgHome: "Home", pgApartments: "Apartments", pgApartment: "Apartment",
       pgBooking: "Booking", pgProfile: "Profile", pgAbout: "About Us", pgContact: "Contact"
