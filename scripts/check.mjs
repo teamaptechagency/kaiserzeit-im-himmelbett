@@ -192,6 +192,23 @@ function tick(window, times = 1) {
   check("font panel offers three pairings",
     fonts?.querySelectorAll(".kz-font").length === 3,
     String(fonts?.querySelectorAll(".kz-font").length));
+  check("font panel also offers the three corner groups",
+    fonts?.querySelectorAll("input[type=range]").length === 3,
+    String(fonts?.querySelectorAll("input[type=range]").length));
+
+  /* A save that never answers must not hold up the interface: the choice is
+     applied first and saved after, or a slow connection looks like a dead
+     click. */
+  const realFetch = window.fetch;
+  window.fetch = (url, opts) =>
+    String(url).includes("/api/content") ? new Promise(() => {}) : realFetch(url, opts);
+
+  [...doc.querySelectorAll(".kz-font")][1].click();
+  await tick(window, 2);
+  const pressed = [...doc.querySelectorAll(".kz-font")].map((b) => b.getAttribute("aria-pressed"));
+  check("a pending save does not block the panel updating",
+    pressed.join(",") === "false,true,false", pressed.join(","));
+  window.fetch = realFetch;
 
   /* The notes composer, which is where T.saved broke. */
   doc.querySelector("#kz-bar button[data-mode=notes]").click();

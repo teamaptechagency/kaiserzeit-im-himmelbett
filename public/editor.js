@@ -566,9 +566,15 @@
       button.querySelector("b").textContent = KZ.t(entry[1]);
       button.querySelector("span").textContent = KZ.t(entry[2]);
       button.addEventListener("click", function () {
+        /* KZ.setFonts applies the change before it saves, so the panel is
+           redrawn straight away rather than after the round trip — otherwise
+           the button does not look chosen until the server answers, which on
+           a slow connection reads as the click being ignored. */
         say(KZ.t("saving"), true);
-        KZ.setFonts(entry[0]).then(function () { say(KZ.t("saved")); openFonts(); },
-                                   function (err) { say(err.message); });
+        var saving = KZ.setFonts(entry[0]);
+        openFonts();
+        saving.then(function () { say(KZ.t("saved")); },
+                    function (err) { say(err.message); openFonts(); });
       });
       fontPanel.appendChild(button);
     });
@@ -629,10 +635,12 @@
     reset.textContent = KZ.t("reset");
     reset.addEventListener("click", function () {
       say(KZ.t("saving"), true);
-      Promise.all(["radiusButton", "radiusCard", "radiusField"].map(function (key) {
+      var saving = Promise.all(["radiusButton", "radiusCard", "radiusField"].map(function (key) {
         return KZ.setRadius(key, null);
-      })).then(function () { say(KZ.t("wasReset")); openFonts(); },
-               function (err) { say(err.message); });
+      }));
+      openFonts();
+      saving.then(function () { say(KZ.t("wasReset")); },
+                  function (err) { say(err.message); openFonts(); });
     });
 
     var done = document.createElement("button");
