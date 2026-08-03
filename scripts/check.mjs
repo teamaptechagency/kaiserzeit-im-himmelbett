@@ -165,6 +165,23 @@ function tick(window, times = 1) {
     !!bg?.querySelector("input[type=color]") && bg?.querySelectorAll("[data-ov]").length === 4,
     String(bg?.querySelectorAll("[data-ov]").length));
   check("custom overlay colour is offered", !!bg?.querySelector(".kz-ovcolor"));
+  check("text colour offers auto/dark/light",
+    bg?.querySelectorAll("[data-text]").length === 3,
+    String(bg?.querySelectorAll("[data-text]").length));
+
+  /* "background-color:#f2ecdf" contains "color:#f2ecdf", so an unanchored
+     substring match would recolour text on anything merely carrying that
+     background. Every generated colour rule must anchor the declaration. */
+  [...doc.querySelectorAll("[data-text]")].find((b) => b.dataset.text === "light")?.click();
+  await tick(window, 2);
+  const sheet = doc.getElementById("kz-style-overrides")?.textContent || "";
+  const colourRules = sheet.split("\n").filter((l) => /\[style/.test(l));
+  check("text-colour rules anchor the declaration",
+    colourRules.length > 0 &&
+    colourRules.every((l) => !/\[style\*="color:/.test(l)),
+    colourRules[0]?.slice(0, 80));
+  check("gold accents are remapped, not flattened",
+    sheet.includes("#d9a868"), sheet.slice(0, 80));
 
   /* The template is one wrapping <div> around <nav> and the sections, so
      walking up to the child of #dc-root picked that wrapper every time — the

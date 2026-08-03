@@ -76,6 +76,7 @@
       bgStrength: "Stärke", bgPhoto: "Foto-Deckkraft",
       bgDrop: "Bild hierher ziehen", bgDropSub: "oder klicken",
       ovCustom: "Eigene", ovColor: "Überlagerungsfarbe",
+      bgText: "Textfarbe", txtAuto: "Auto", txtDark: "Dunkel", txtLight: "Hell",
       reset: "Zurücksetzen", done: "Fertig",
 
       modeStyle: "Stil", hintStyle: "Schrift und Rundungen für die ganze Website.",
@@ -120,6 +121,7 @@
       bgStrength: "Strength", bgPhoto: "Photo opacity",
       bgDrop: "Drag an image here", bgDropSub: "or click",
       ovCustom: "Custom", ovColor: "Overlay colour",
+      bgText: "Text colour", txtAuto: "Auto", txtDark: "Dark", txtLight: "Light",
       reset: "Reset", done: "Done",
 
       modeStyle: "Style", hintStyle: "Fonts and corner rounding for the whole site.",
@@ -308,6 +310,34 @@
     rules.textContent = css;
   }
 
+  /* Making a section's text readable on a changed background. Rather than
+     forcing one colour on everything — which would flatten the gold accents
+     and the gradient headings — the design's own text tokens are swapped for
+     their opposite number. Anything not listed keeps its colour. */
+  var TEXT_MAP = {
+    light: [                       /* for a background made dark */
+      ["#2b241d", "#f7f1e6"],
+      ["#4a4038", "#f2ecdf"],
+      ["#8a5a2f", "#d9a868"]
+    ],
+    dark: [                        /* for a background made light */
+      ["#f7f1e6", "#2b241d"],
+      ["#f2ecdf", "#4a4038"],
+      ["#e9e0d0", "#4a4038"],
+      ["rgba(242,236,224,", "rgba(74,64,56,0.8)"],
+      ["rgba(233,224,208,", "rgba(74,64,56,0.8)"],
+      ["#d9a868", "#8a5a2f"]
+    ]
+  };
+
+  /* "background-color:#f2ecdf" contains "color:#f2ecdf", so a plain substring
+     match would recolour text on elements that merely have that background.
+     A declaration only ever starts the attribute or follows a semicolon. */
+  function colourSelectors(scope, value) {
+    return scope + ' [style^="color:' + value + '"],' +
+           scope + ' [style*=";color:' + value + '"]';
+  }
+
   function applyStyles() {
     if (!sheet) {
       sheet = document.createElement("style");
@@ -354,6 +384,14 @@
          reached by a background layer — dim the element itself instead. */
       if (typeof value.photo === "number") {
         css += selector + " image-slot{opacity:" + value.photo + " !important;}\n";
+      }
+
+      var swaps = TEXT_MAP[value.text];
+      if (swaps) {
+        for (var i = 0; i < swaps.length; i++) {
+          css += colourSelectors(selector, swaps[i][0]) +
+                 "{color:" + swaps[i][1] + " !important;}\n";
+        }
       }
     }
     sheet.textContent = css;

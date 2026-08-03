@@ -108,8 +108,15 @@ original setting.
 Switch to **Background** on the toolbar and click any section. You can set a
 colour, lay a tint over it — dark, light, or any colour you pick — and adjust
 how strong the tint is. You can also make a photo more or less transparent, or
-drop in a background image. **Reset** puts the section back to the original
-design.
+drop in a background image.
+
+**Text colour** sits in the same panel. If you make a light section dark, set
+it to **Light** and the writing in that section switches to the pale colours
+used elsewhere on dark backgrounds — headings, body text and the gold accents
+all adjust together, so it still looks like the same design. **Dark** does the
+reverse. **Auto** leaves it as designed.
+
+**Reset** puts the whole section back to the original design.
 
 ## Changing the typeface and the corners
 

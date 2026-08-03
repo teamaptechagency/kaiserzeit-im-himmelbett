@@ -400,6 +400,11 @@
       "<button data-ov='custom'>" + KZ.t("ovCustom") + "</button></div>" +
       "<label class='kz-ovcolor-label'>" + KZ.t("ovColor") + "</label>" +
       "<input type='color' class='kz-ovcolor' value='" + (current.overlayColor || "#8a5a2f") + "'>" +
+      "<label>" + KZ.t("bgText") + "</label>" +
+      "<div class='kz-seg'>" +
+      "<button data-text='auto'>" + KZ.t("txtAuto") + "</button>" +
+      "<button data-text='dark'>" + KZ.t("txtDark") + "</button>" +
+      "<button data-text='light'>" + KZ.t("txtLight") + "</button></div>" +
       "<label>" + KZ.t("bgStrength") + " <span class='kz-val'></span></label>" +
       "<input type='range' class='kz-strength' min='0' max='95' step='5'>" +
       (hasPhoto
@@ -435,6 +440,10 @@
       var custom = current.overlay === "custom";
       overlayColor.hidden = !custom;
       overlayColorLabel.hidden = !custom;
+
+      panel.querySelectorAll("[data-text]").forEach(function (b) {
+        b.setAttribute("aria-pressed", String((current.text || "auto") === b.dataset.text));
+      });
     }
 
     var file = document.createElement("input");
@@ -483,6 +492,13 @@
     });
 
     panel.addEventListener("click", function (e) {
+      var text = e.target.dataset && e.target.dataset.text;
+      if (text) {
+        save({ text: text === "auto" ? null : text });
+        showValues();
+        return;
+      }
+
       var choice = e.target.dataset && e.target.dataset.ov;
       if (!choice) return;
       if (choice === "none") {
