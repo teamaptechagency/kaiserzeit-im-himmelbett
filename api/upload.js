@@ -4,7 +4,9 @@
  * Body is the raw image, content-type says which format. Requires the
  * x-kz-key header to match EDIT_KEY.
  */
-import { EXTENSIONS, authorize, query, readBody, send, validSlot, writeImage } from "./_store.js";
+import {
+  EXTENSIONS, authorize, query, readBody, send, storageProblem, validSlot, writeImage
+} from "./_store.js";
 
 const MAX_BYTES = 12 * 1024 * 1024;
 
@@ -13,6 +15,9 @@ export default async function handler(req, res) {
 
   const denied = authorize(req);
   if (denied) return send(res, 401, { error: denied });
+
+  const problem = storageProblem();
+  if (problem) return send(res, 503, { error: problem });
 
   const slot = query(req, "slot");
   if (!validSlot(slot)) return send(res, 400, { error: "invalid slot id" });

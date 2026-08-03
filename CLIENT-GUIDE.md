@@ -111,9 +111,11 @@ how strong the tint is. You can also make a photo more or less transparent, or
 drop in a background image. **Reset** puts the section back to the original
 design.
 
-## Changing the typeface
+## Changing the typeface and the corners
 
-**Fonts** on the toolbar offers three pairings for the whole site:
+**Style** on the toolbar holds two things that apply to the whole site at once.
+
+**Typeface** — three pairings:
 
 | | |
 |---|---|
@@ -121,7 +123,12 @@ design.
 | **Modern** | Cormorant Garamond + Jost |
 | **Classic** | Libre Baskerville + Lato |
 
-This changes every page at once. Pick Original to go back.
+**Corners** — how rounded things are, in three groups: **Buttons**, **Cards**
+and **Fields**. Move a slider and everything in that group changes together,
+so the site stays consistent. Round avatars stay round.
+
+**Reset** puts the corners back exactly as designed, and Original does the
+same for the typeface — so try anything you like.
 
 ---
 

@@ -4,9 +4,19 @@
  * Public on purpose: the preview has to render the client's photos and copy
  * for anyone holding the link. Only writing is key-protected.
  */
-import { readContent, readImages, send } from "./_store.js";
+import { readContent, readImages, send, storageProblem } from "./_store.js";
 
 export default async function handler(req, res) {
+  /* Answered before touching the SDK, so the page can say what to fix rather
+     than showing a bare "No token found". */
+  const problem = storageProblem();
+  if (problem) {
+    return send(res, 200, {
+      ok: false, images: {}, texts: {}, styles: {}, notes: {}, slots: {}, theme: {},
+      error: problem
+    });
+  }
+
   try {
     const [images, content] = await Promise.all([readImages(), readContent()]);
     send(res, 200, {

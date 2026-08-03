@@ -9,7 +9,9 @@
  * moment could drop one change. Notes are keyed by their own id, so two
  * people commenting on different spots merge cleanly.
  */
-import { authorize, readBody, readContent, send, writeContent } from "./_store.js";
+import {
+  authorize, readBody, readContent, send, storageProblem, writeContent
+} from "./_store.js";
 
 const MAX_KEYS = 40;
 const MAX_TEXT = 5000;
@@ -122,7 +124,12 @@ export default async function handler(req, res) {
   const total = Object.keys(texts).length + Object.keys(styles).length +
                 Object.keys(notes).length + Object.keys(slots).length +
                 Object.keys(theme).length;
-  if (!total) return send(res, 200, { ok: true, verified: true });
+  /* The sign-in probe is answered before storage, so a key can still be
+     verified while the store is being connected. */
+  if (!total) return send(res, 200, { ok: true, verified: true, storage: storageProblem() });
+
+  const problem = storageProblem();
+  if (problem) return send(res, 503, { error: problem });
   if (total > MAX_KEYS) return send(res, 400, { error: "too many keys in one request" });
 
   for (const value of Object.values(texts)) {
@@ -168,6 +175,15 @@ export default async function handler(req, res) {
       } else {
         delete content.theme.fonts;   /* "original" is the design's own */
       }
+    }
+    /* Corner rounding, in three groups. null puts a group back to the
+       design's own values rather than storing a number that happens to
+       match. */
+    for (const key of ["radiusButton", "radiusCard", "radiusField"]) {
+      if (!(key in theme)) continue;
+      const value = theme[key];
+      if (value === null || value === "") delete content.theme[key];
+      else content.theme[key] = Math.min(40, Math.max(0, Number(value) || 0));
     }
 
     await writeContent(content);

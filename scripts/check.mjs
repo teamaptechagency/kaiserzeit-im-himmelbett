@@ -35,7 +35,7 @@ const STATE = {
   slots: { "intro-photo": { fit: "contain", position: "top", zoom: 1.4 } }
 };
 
-async function boot({ signedIn }) {
+async function boot({ signedIn, brokenStorage }) {
   const page = await read("Home.dc.html");
 
   const dom = new JSDOM(page, {
@@ -63,7 +63,10 @@ async function boot({ signedIn }) {
   window.fetch = (url) => {
     const target = String(url);
     if (target.includes("/api/state")) {
-      return Promise.resolve({ ok: true, json: () => Promise.resolve(STATE) });
+      const body = brokenStorage
+        ? { ...STATE, ok: false, error: "BLOB_READ_WRITE_TOKEN is missing." }
+        : STATE;
+      return Promise.resolve({ ok: true, json: () => Promise.resolve(body) });
     }
     if (target.includes("/api/content")) {
       return Promise.resolve({ ok: true, json: () => Promise.resolve({ ok: true }) });
@@ -201,6 +204,20 @@ function tick(window, times = 1) {
     shadow?.querySelector("[part=empty]")?.hidden === true && photo?.hidden === false);
 
   check("no errors while signed in", errors.length === 0, errors.join("; "));
+}
+
+/* ------------------------------------- storage not wired up on the server */
+{
+  const { window, errors } = await boot({ signedIn: true, brokenStorage: true });
+  const doc = window.document;
+
+  const warn = doc.getElementById("kz-warn");
+  check("a storage problem is shown, not hidden", !!warn);
+  check("the warning names the missing variable",
+    !!warn && warn.textContent.includes("BLOB_READ_WRITE_TOKEN"),
+    warn?.textContent);
+  check("the site still renders while storage is down", !!doc.getElementById("dc-root"));
+  check("no errors when storage is down", errors.length === 0, errors.join("; "));
 }
 
 /* ---------------------------------------------------------------- report */

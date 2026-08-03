@@ -36,6 +36,21 @@ const LOCAL_ROOT = () => process.env.KZ_LOCAL_STORE || "";
    a missing token surfaces when a route is called rather than at boot. */
 const blob = () => import("@vercel/blob");
 
+/* Connecting a Blob store adds BLOB_STORE_ID and BLOB_WEBHOOK_PUBLIC_KEY, but
+   the SDK reads BLOB_READ_WRITE_TOKEN and nothing else — and its own error for
+   the missing one ("No token found") gives no clue which variable or where.
+   Checked up front so the answer names the fix. */
+export function storageProblem() {
+  if (LOCAL_ROOT()) return null;
+  if (process.env.BLOB_READ_WRITE_TOKEN) return null;
+  return process.env.BLOB_STORE_ID
+    ? "A Blob store is linked but BLOB_READ_WRITE_TOKEN is missing. " +
+      "In Vercel: Storage -> your Blob store -> Connect Project, which adds it. " +
+      "Then redeploy."
+    : "No Blob store is connected. In Vercel: Storage -> Create -> Blob, " +
+      "connect it to this project, then redeploy.";
+}
+
 /* ------------------------------------------------------------- responses */
 
 export function send(res, status, body) {
