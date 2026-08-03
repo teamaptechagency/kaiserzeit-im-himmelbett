@@ -166,6 +166,25 @@ function tick(window, times = 1) {
     String(bg?.querySelectorAll("[data-ov]").length));
   check("custom overlay colour is offered", !!bg?.querySelector(".kz-ovcolor"));
 
+  /* The template is one wrapping <div> around <nav> and the sections, so
+     walking up to the child of #dc-root picked that wrapper every time — the
+     panel always said "Section 1" and its colour was hidden behind the
+     sections. Clicking inside a section must resolve to that section. */
+  const sections = [...doc.querySelectorAll("#dc-root section")].slice(0, 3);
+  const resolved = [];
+  for (const sec of sections) {
+    doc.getElementById("kz-panel")?.querySelector("[data-act=close]")?.click();
+    await tick(window);
+    (sec.querySelector("h1,h2,p,span") || sec)
+      .dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await tick(window);
+    const label = doc.getElementById("kz-panel")?.querySelectorAll("div")[0]?.textContent || "";
+    resolved.push(label.replace(/\D+/g, "") === sec.getAttribute("data-kz-el"));
+  }
+  check("clicking a section targets that section, not the page wrapper",
+    sections.length >= 3 && resolved.every(Boolean),
+    `${sections.length} sections, matched ${resolved.filter(Boolean).length}`);
+
   /* The font panel — site-wide, so its own mode rather than per section. */
   doc.querySelector("#kz-bar button[data-mode=style]").click();
   await tick(window, 2);

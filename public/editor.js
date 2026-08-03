@@ -324,11 +324,25 @@
 
   /* ------------------------------------------------------------ background */
 
+  /* The template is a single wrapping <div> holding <nav> and the sections,
+     so walking up to the child of #dc-root always landed on that wrapper —
+     every click reported "Section 1" and its colour was hidden behind the
+     sections painted over it. Target the real section instead. */
   function sectionFor(target) {
+    if (!target || !target.closest) return null;
     var root = document.getElementById("dc-root");
+    var section = target.closest("section, nav, footer, header");
+    if (section && root.contains(section) && section.hasAttribute("data-kz-el")) {
+      return section;
+    }
+    /* Nothing semantic above it: fall back to the outermost block below the
+       page wrapper, rather than the wrapper itself. */
     var el = target;
-    while (el && el.parentElement && el.parentElement !== root) el = el.parentElement;
-    return el && el.hasAttribute("data-kz-el") ? el : null;
+    while (el && el.parentElement && el.parentElement !== root &&
+           el.parentElement.parentElement !== root) {
+      el = el.parentElement;
+    }
+    return el && el.hasAttribute && el.hasAttribute("data-kz-el") ? el : null;
   }
 
   var hovered = null;
