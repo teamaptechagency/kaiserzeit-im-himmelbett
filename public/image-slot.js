@@ -209,20 +209,36 @@
   /* Alternative pairings for the whole site. "original" is the design's own
      and stores nothing. Each is a Google font already suited to the brand's
      heritage feel. */
+  /* Only the weights the design actually uses — a heading weight with its
+     italic, and two body weights. Asking for more just makes the switch feel
+     slow while extra files download. */
   var FONTS = {
     modern: {
       display: "'Cormorant Garamond',Georgia,serif",
       body: "'Jost',system-ui,sans-serif",
-      url: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Jost:wght@300;400;500&display=swap"
+      url: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Jost:wght@400;500&display=swap"
     },
     classic: {
       display: "'Libre Baskerville',Georgia,serif",
       body: "'Lato',system-ui,sans-serif",
-      url: "https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap"
+      url: "https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lato:wght@400;700&display=swap"
     }
   };
 
   var fontLink = null;
+
+  /* The pages preconnect to fonts.googleapis.com but not to fonts.gstatic.com,
+     where the files themselves are served — so the first switch paid for a
+     fresh DNS lookup and TLS handshake before a byte of font arrived. */
+  function preconnectFonts() {
+    if (document.getElementById("kz-font-preconnect")) return;
+    var link = document.createElement("link");
+    link.id = "kz-font-preconnect";
+    link.rel = "preconnect";
+    link.href = "https://fonts.gstatic.com";
+    link.crossOrigin = "anonymous";
+    document.head.appendChild(link);
+  }
 
   /* The design writes its fonts inline on hundreds of elements, so they are
      re-pointed by matching the normalised style attribute rather than by
@@ -240,6 +256,7 @@
     }
 
     if (!fontLink) {
+      preconnectFonts();
       fontLink = document.createElement("link");
       fontLink.rel = "stylesheet";
       document.head.appendChild(fontLink);
