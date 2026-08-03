@@ -42,6 +42,19 @@ function cleanStyle(value) {
   return Object.keys(out).length ? out : null;
 }
 
+/* How a photo sits in its slot: whether it fills or fits, how far it is
+   zoomed, and which edge is kept when it is cropped. */
+function cleanSlot(value) {
+  if (!value || typeof value !== "object") return null;
+
+  const out = {};
+  if (value.fit === "cover" || value.fit === "contain") out.fit = value.fit;
+  if (["top", "center", "bottom"].includes(value.position)) out.position = value.position;
+  if (value.zoom != null) out.zoom = Math.min(3, Math.max(1, Number(value.zoom) || 1));
+
+  return Object.keys(out).length ? out : null;
+}
+
 /* Notes are the one place a client types free-form content that is stored
    and replayed to other viewers, so the shape is pinned down here rather
    than trusted from the browser. */
@@ -94,11 +107,13 @@ export default async function handler(req, res) {
   const texts = pick("texts");
   const styles = pick("styles");
   const notes = pick("notes");
+  const slots = pick("slots");
 
   /* An empty patch is the sign-in check: it has already passed authorize(),
      so answering here lets the login button verify a key without a fourth
      function and without a pointless write. */
-  const total = Object.keys(texts).length + Object.keys(styles).length + Object.keys(notes).length;
+  const total = Object.keys(texts).length + Object.keys(styles).length +
+                Object.keys(notes).length + Object.keys(slots).length;
   if (!total) return send(res, 200, { ok: true, verified: true });
   if (total > MAX_KEYS) return send(res, 400, { error: "too many keys in one request" });
 
@@ -134,9 +149,17 @@ export default async function handler(req, res) {
       }
       content.notes[key] = note;
     }
+    for (const [key, value] of Object.entries(slots)) {
+      const slot = cleanSlot(value);
+      if (!slot) delete content.slots[key];
+      else content.slots[key] = slot;
+    }
 
     await writeContent(content);
-    send(res, 200, { ok: true, texts: content.texts, styles: content.styles, notes: content.notes });
+    send(res, 200, {
+      ok: true, texts: content.texts, styles: content.styles,
+      notes: content.notes, slots: content.slots
+    });
   } catch (error) {
     console.error("content save failed", error);
     send(res, 500, { error: String(error && error.message ? error.message : error) });

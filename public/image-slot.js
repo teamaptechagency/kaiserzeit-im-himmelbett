@@ -39,7 +39,7 @@
   var EDIT = EDIT_FROM_URL || (stored(EDIT_FLAG) === "1" && !!stored(KEY_STORE));
   var MAX_BYTES = 12 * 1024 * 1024;
 
-  var state = { images: {}, texts: {}, styles: {}, notes: {} };
+  var state = { images: {}, texts: {}, styles: {}, notes: {}, slots: {} };
   var slots = new Set();
 
   /* ----------------------------------------------------------- wording ---
@@ -140,6 +140,7 @@
         state.texts = data.texts || {};
         state.styles = data.styles || {};
         state.notes = data.notes || {};
+        state.slots = data.slots || {};
       }
       applyStyles();
       slots.forEach(function (el) { el.refresh(); });
@@ -304,6 +305,18 @@
     return saveContent(patch);
   }
 
+  /* How a photo sits in its frame. Keyed by slot id rather than by page,
+     because the same slot shows on more than one page and should look the
+     same in both. */
+  function setSlot(id, value) {
+    if (value == null) delete state.slots[id];
+    else state.slots[id] = value;
+    slots.forEach(function (el) { if (el.slotId === id) el.refresh(); });
+    var patch = { slots: {} };
+    patch.slots[id] = value == null ? null : value;
+    return saveContent(patch);
+  }
+
   function publishImage(slot, url) {
     state.images[slot] = url;
     slots.forEach(function (el) { if (el.slotId === slot) el.refresh(); });
@@ -313,6 +326,11 @@
   /* -------------------------------------------------------- <image-slot> */
 
   var STYLE = [
+    /* Author rules beat the browser's own [hidden]{display:none}, so the
+       rules below would otherwise keep both the <img> and the placeholder
+       painted at once — an uploaded photo ended up sitting underneath the
+       placeholder box, looking like it had not arrived. */
+    "[hidden]{display:none!important;}",
     ":host{display:block;position:relative;}",
     "[part=frame]{position:relative;width:100%;height:100%;overflow:hidden;",
     "background:#2a2521;border-radius:inherit;}",
@@ -331,7 +349,17 @@
     ":host(:hover) .edit,.edit.busy,.edit.over{opacity:1;}",
     ".edit.over{background:rgba(185,128,63,0.75);color:#201d1a;}",
     ".tag{font-size:9px;opacity:0.7;word-break:break-all;}",
-    ".err{color:#e8a598;font-size:10px;}"
+    ".err{color:#e8a598;font-size:10px;}",
+    /* Fit controls, shown only on a slot that already holds a photo and is
+       big enough for them to be usable. */
+    ".tools{display:none;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:6px;}",
+    ".edit.tunable .tools{display:flex;}",
+    ".tools button{border:1px solid rgba(242,236,224,0.35);background:rgba(0,0,0,0.35);",
+    "color:#f2ecdf;border-radius:999px;padding:3px 8px;font:inherit;font-size:10px;",
+    "cursor:pointer;line-height:1.4;}",
+    ".tools button[aria-pressed=true]{background:linear-gradient(135deg,#e6c184,#b9803f);",
+    "color:#201d1a;border-color:transparent;}",
+    ".tools input[type=range]{width:82px;accent-color:#d9a868;margin:0;}"
   ].join("");
 
   var TEMPLATE = document.createElement("template");
@@ -377,6 +405,13 @@
         this.img.src = url;
         this.img.hidden = false;
         this.empty.hidden = true;
+
+        /* The design picks a default per slot with fit="…"; the client can
+           override it, zoom in, and choose which edge survives the crop. */
+        var cfg = state.slots[this.slotId] || {};
+        this.img.style.objectFit = cfg.fit || this.getAttribute("fit") || "cover";
+        this.img.style.objectPosition = "center " + (cfg.position || "center");
+        this.img.style.transform = cfg.zoom && cfg.zoom !== 1 ? "scale(" + cfg.zoom + ")" : "";
       } else {
         this.img.hidden = true;
         this.img.removeAttribute("src");
@@ -385,6 +420,7 @@
       }
       if (this.editor) {
         this.editor.label.textContent = url ? t("slotReplace") : t("slotAdd");
+        this.editor.sync(url);
       }
     }
 
@@ -397,8 +433,83 @@
       tag.className = "tag";
       box.appendChild(label);
       box.appendChild(tag);
+
+      /* Fit, zoom and crop edge. Clicks are stopped here so they adjust the
+         photo instead of reopening the file picker underneath. */
+      var tools = document.createElement("div");
+      tools.className = "tools";
+      tools.addEventListener("click", function (e) { e.stopPropagation(); });
+      box.appendChild(tools);
+
+      function config() { return state.slots[self.slotId] || {}; }
+
+      function apply(patch) {
+        var next = Object.assign({}, config(), patch);
+        /* Back to the design's own default rather than storing a no-op. */
+        if (next.fit === (self.getAttribute("fit") || "cover")) delete next.fit;
+        if (next.zoom === 1) delete next.zoom;
+        if (next.position === "center") delete next.position;
+        setSlot(self.slotId, Object.keys(next).length ? next : null);
+      }
+
+      function pill(label, isOn, onPick) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = label;
+        b.setAttribute("aria-pressed", String(isOn()));
+        b.addEventListener("click", function (e) { e.stopPropagation(); onPick(); });
+        return b;
+      }
+
+      var fitCover = pill("Cover", function () { return (config().fit || self.getAttribute("fit") || "cover") === "cover"; },
+        function () { apply({ fit: "cover" }); });
+      var fitContain = pill("Fit", function () { return config().fit === "contain"; },
+        function () { apply({ fit: "contain" }); });
+      var posTop = pill("↑", function () { return config().position === "top"; },
+        function () { apply({ position: config().position === "top" ? "center" : "top" }); });
+      var posBottom = pill("↓", function () { return config().position === "bottom"; },
+        function () { apply({ position: config().position === "bottom" ? "center" : "bottom" }); });
+
+      var zoom = document.createElement("input");
+      zoom.type = "range";
+      zoom.min = "100";
+      zoom.max = "300";
+      zoom.step = "5";
+
+      /* Saving anything triggers a refresh, which re-reads the stored value.
+         Without this the slider would snap back under the user's finger if a
+         save landed mid-drag. */
+      var tuning = false;
+
+      zoom.addEventListener("click", function (e) { e.stopPropagation(); });
+      zoom.addEventListener("input", function (e) {
+        e.stopPropagation();
+        tuning = true;
+        /* Live while dragging, saved on release, so a drag is one request. */
+        self.img.style.transform = "scale(" + (Number(zoom.value) / 100) + ")";
+      });
+      zoom.addEventListener("change", function (e) {
+        e.stopPropagation();
+        tuning = false;
+        apply({ zoom: Number(zoom.value) / 100 });
+      });
+
+      [fitCover, fitContain, posTop, posBottom, zoom].forEach(function (n) { tools.appendChild(n); });
+
+      this.editor = {
+        box: box, label: label, tag: tag,
+        sync: function (url) {
+          /* Too small to be worth it on a 36px avatar. */
+          box.classList.toggle("tunable", !!url && self.clientWidth >= 110 && self.clientHeight >= 70);
+          var cfg = config();
+          if (!tuning) zoom.value = String(Math.round((cfg.zoom || 1) * 100));
+          fitCover.setAttribute("aria-pressed", String((cfg.fit || self.getAttribute("fit") || "cover") === "cover"));
+          fitContain.setAttribute("aria-pressed", String(cfg.fit === "contain"));
+          posTop.setAttribute("aria-pressed", String(cfg.position === "top"));
+          posBottom.setAttribute("aria-pressed", String(cfg.position === "bottom"));
+        }
+      };
       this.frame.appendChild(box);
-      this.editor = { box: box, label: label, tag: tag };
 
       var input = document.createElement("input");
       input.type = "file";
@@ -464,12 +575,14 @@
     get texts() { return state.texts; },
     get styles() { return state.styles; },
     get notes() { return state.notes; },
+    get slots() { return state.slots; },
     t: t,
     lang: currentLang,
     upload: upload,
     setText: setText,
     setStyle: setStyle,
     setNote: setNote,
+    setSlot: setSlot,
     stored: stored,
     remember: remember,
     publishImage: publishImage,

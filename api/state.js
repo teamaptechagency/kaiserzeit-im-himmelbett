@@ -11,7 +11,8 @@ export default async function handler(req, res) {
     const [images, content] = await Promise.all([readImages(), readContent()]);
     send(res, 200, {
       ok: true, images,
-      texts: content.texts, styles: content.styles, notes: content.notes
+      texts: content.texts, styles: content.styles,
+      notes: content.notes, slots: content.slots
     });
   } catch (error) {
     /* Before the blob store is connected there is nothing to serve, and an
@@ -19,7 +20,7 @@ export default async function handler(req, res) {
        bundled assets and original copy. */
     console.error("state failed", error);
     send(res, 200, {
-      ok: false, images: {}, texts: {}, styles: {}, notes: {},
+      ok: false, images: {}, texts: {}, styles: {}, notes: {}, slots: {},
       error: String(error && error.message ? error.message : error)
     });
   }

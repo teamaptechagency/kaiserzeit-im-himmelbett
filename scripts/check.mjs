@@ -26,8 +26,14 @@ const check = (name, pass, detail = "") => results.push({ name, pass, detail });
 
 const read = (file) => readFile(path.join(publicDir, file), "utf8");
 
-/* An empty state, as a fresh preview would return. */
-const STATE = { ok: true, images: {}, texts: {}, styles: {}, notes: {} };
+/* One photo already in place, so the slot editor and its fit controls get
+   built — that path only runs for a slot that holds an image. */
+const STATE = {
+  ok: true,
+  images: { "intro-photo": "assets/uploads/intro-photo.png" },
+  texts: {}, styles: {}, notes: {},
+  slots: { "intro-photo": { fit: "contain", position: "top", zoom: 1.4 } }
+};
 
 async function boot({ signedIn }) {
   const page = await read("Home.dc.html");
@@ -164,6 +170,25 @@ function tick(window, times = 1) {
   await tick(window, 2);
   const label = doc.querySelector("#kz-bar .kz-label")?.textContent;
   check("toolbar follows the language switch", label === "Edit", String(label));
+
+  /* The photo slot: its editor, its fit controls, and that a stored fit is
+     actually applied rather than just stored. */
+  const slot = doc.querySelector("image-slot#intro-photo");
+  check("photo slot exists", !!slot);
+  check("slot with a photo gets an editor", !!slot?.editor);
+  const shadow = slot?.shadowRoot;
+  check("fit controls are built",
+    shadow?.querySelectorAll(".tools button").length === 4 &&
+    !!shadow?.querySelector(".tools input[type=range]"),
+    String(shadow?.querySelectorAll(".tools button").length));
+  const photo = shadow?.querySelector("img");
+  check("stored fit is applied to the photo",
+    photo?.style.objectFit === "contain" &&
+    photo?.style.objectPosition === "center top" &&
+    photo?.style.transform === "scale(1.4)",
+    `${photo?.style.objectFit} / ${photo?.style.objectPosition} / ${photo?.style.transform}`);
+  check("the placeholder is hidden behind a photo, not over it",
+    shadow?.querySelector("[part=empty]")?.hidden === true && photo?.hidden === false);
 
   check("no errors while signed in", errors.length === 0, errors.join("; "));
 }
