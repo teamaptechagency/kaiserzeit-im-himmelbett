@@ -91,6 +91,16 @@ is gitignored.
 There is also `scripts/serve.ps1` for a files-only server with no `/api` at
 all, which is what a fresh clone looks like.
 
+```bash
+npm test
+```
+
+Loads a real page in jsdom and drives the buttons — signs in, switches every
+mode, opens the background panel and the note composer, flips the language —
+asserting nothing throws. Run it after touching anything in `public/`. Three
+regressions here lived inside click handlers, so booting the modules or
+syntax-checking them proved nothing; only pressing something did.
+
 ---
 
 ## How it fits together

@@ -584,7 +584,7 @@
 
         var input = document.createElement("input");
         input.type = "password";
-        input("keyPlaceholder") = t("keyPlaceholder");
+        input.placeholder = t("keyPlaceholder");
         input.autocomplete = "current-password";
 
         var go = document.createElement("button");
