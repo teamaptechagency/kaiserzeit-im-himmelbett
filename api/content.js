@@ -38,6 +38,7 @@ function cleanStyle(value) {
     }
   }
   if (["dark", "light", "custom"].includes(value.overlay)) out.overlay = value.overlay;
+  if (value.text === "light" || value.text === "dark") out.text = value.text;
   if (typeof value.overlayColor === "string" && /^#[0-9a-f]{3,8}$/i.test(value.overlayColor.trim())) {
     out.overlayColor = value.overlayColor.trim();
   }
