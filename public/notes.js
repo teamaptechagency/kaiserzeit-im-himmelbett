@@ -82,6 +82,7 @@
     exit: function () {
       active = false;
       document.body.classList.remove("kz-notes");
+      /* Existing pins stay on screen; only the half-written one goes. */
       draft = null; open = null;
       paint();
     }
@@ -173,7 +174,10 @@
   function paint() {
     layer.textContent = "";
     badge();
-    if (!active) return;
+
+    /* Pins show throughout edit mode, not only in Notes mode. Hiding them
+       elsewhere made comments look lost after signing back in, since you land
+       in Text mode. Only *placing* a new one needs Notes mode. */
 
     mine().forEach(function (id, index) {
       var note = KZ.notes[id];

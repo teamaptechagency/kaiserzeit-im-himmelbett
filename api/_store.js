@@ -122,7 +122,8 @@ function shape(data) {
     texts: (data && data.texts) || {},
     styles: (data && data.styles) || {},
     notes: (data && data.notes) || {},
-    slots: (data && data.slots) || {}
+    slots: (data && data.slots) || {},
+    theme: (data && data.theme) || {}
   };
 }
 

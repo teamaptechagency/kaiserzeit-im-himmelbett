@@ -39,7 +39,7 @@
   var EDIT = EDIT_FROM_URL || (stored(EDIT_FLAG) === "1" && !!stored(KEY_STORE));
   var MAX_BYTES = 12 * 1024 * 1024;
 
-  var state = { images: {}, texts: {}, styles: {}, notes: {}, slots: {} };
+  var state = { images: {}, texts: {}, styles: {}, notes: {}, slots: {}, theme: {} };
   var slots = new Set();
 
   /* ----------------------------------------------------------- wording ---
@@ -71,7 +71,15 @@
       bgOverlay: "Überlagerung", ovNone: "Keine", ovDark: "Dunkel", ovLight: "Hell",
       bgStrength: "Stärke", bgPhoto: "Foto-Deckkraft",
       bgDrop: "Bild hierher ziehen", bgDropSub: "oder klicken",
+      ovCustom: "Eigene", ovColor: "Überlagerungsfarbe",
       reset: "Zurücksetzen", done: "Fertig",
+
+      modeStyle: "Schrift", hintStyle: "Wählen Sie eine Schriftkombination für die ganze Website.",
+      fontsTitle: "Schriftart", fontOriginal: "Original", fontModern: "Modern",
+      fontClassic: "Klassisch",
+      fontOriginalNote: "Playfair Display + EB Garamond",
+      fontModernNote: "Cormorant Garamond + Jost",
+      fontClassicNote: "Libre Baskerville + Lato",
 
       yourName: "Ihr Name", notePlaceholder: "Notiz schreiben…",
       post: "Senden", cancel: "Abbrechen", reply: "Antworten", replyBox: "Antwort…",
@@ -103,7 +111,15 @@
       bgOverlay: "Overlay", ovNone: "None", ovDark: "Dark", ovLight: "Light",
       bgStrength: "Strength", bgPhoto: "Photo opacity",
       bgDrop: "Drag an image here", bgDropSub: "or click",
+      ovCustom: "Custom", ovColor: "Overlay colour",
       reset: "Reset", done: "Done",
+
+      modeStyle: "Fonts", hintStyle: "Pick a font pairing for the whole site.",
+      fontsTitle: "Typeface", fontOriginal: "Original", fontModern: "Modern",
+      fontClassic: "Classic",
+      fontOriginalNote: "Playfair Display + EB Garamond",
+      fontModernNote: "Cormorant Garamond + Jost",
+      fontClassicNote: "Libre Baskerville + Lato",
 
       yourName: "Your name", notePlaceholder: "Write a note…",
       post: "Post", cancel: "Cancel", reply: "Reply", replyBox: "Reply…",
@@ -141,8 +157,10 @@
         state.styles = data.styles || {};
         state.notes = data.notes || {};
         state.slots = data.slots || {};
+        state.theme = data.theme || {};
       }
       applyStyles();
+      applyFonts();
       slots.forEach(function (el) { el.refresh(); });
       return state;
     });
@@ -151,6 +169,70 @@
      onto the elements. Inline styles are owned by the template diff, and a
      re-render would wipe anything written there. */
   var sheet = null;
+
+  /* The tint needs an alpha channel, so a picked #rrggbb becomes rgba(). */
+  function hexToRgb(hex) {
+    if (typeof hex !== "string") return null;
+    var m = hex.trim().replace("#", "");
+    if (m.length === 3) m = m[0] + m[0] + m[1] + m[1] + m[2] + m[2];
+    if (!/^[0-9a-f]{6}$/i.test(m)) return null;
+    return parseInt(m.slice(0, 2), 16) + "," +
+           parseInt(m.slice(2, 4), 16) + "," +
+           parseInt(m.slice(4, 6), 16);
+  }
+
+  /* Alternative pairings for the whole site. "original" is the design's own
+     and stores nothing. Each is a Google font already suited to the brand's
+     heritage feel. */
+  var FONTS = {
+    modern: {
+      display: "'Cormorant Garamond',Georgia,serif",
+      body: "'Jost',system-ui,sans-serif",
+      url: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Jost:wght@300;400;500&display=swap"
+    },
+    classic: {
+      display: "'Libre Baskerville',Georgia,serif",
+      body: "'Lato',system-ui,sans-serif",
+      url: "https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap"
+    }
+  };
+
+  var fontLink = null;
+
+  /* The design writes its fonts inline on hundreds of elements, so they are
+     re-pointed by matching the normalised style attribute rather than by
+     touching the markup. support.js serialises declarations without spaces,
+     which makes these selectors stable. */
+  function applyFonts() {
+    var choice = state.theme && state.theme.fonts;
+    var set = FONTS[choice];
+
+    if (!set) {
+      if (fontLink) { fontLink.remove(); fontLink = null; }
+      var old = document.getElementById("kz-font-overrides");
+      if (old) old.remove();
+      return;
+    }
+
+    if (!fontLink) {
+      fontLink = document.createElement("link");
+      fontLink.rel = "stylesheet";
+      document.head.appendChild(fontLink);
+    }
+    if (fontLink.href !== set.url) fontLink.href = set.url;
+
+    var rules = document.getElementById("kz-font-overrides");
+    if (!rules) {
+      rules = document.createElement("style");
+      rules.id = "kz-font-overrides";
+      document.head.appendChild(rules);
+    }
+    rules.textContent = [
+      "#dc-root [style*=\"font-family:'Playfair Display'\"]{font-family:" + set.display + " !important;}",
+      "#dc-root [style*=\"font-family:'EB Garamond'\"]{font-family:" + set.body + " !important;}",
+      "#dc-root{font-family:" + set.body + " !important;}"
+    ].join("\n");
+  }
 
   function applyStyles() {
     if (!sheet) {
@@ -174,7 +256,9 @@
          back, so the tint has to come first to land on top of the photo. */
       var layers = [];
       if (value.overlay && value.strength > 0) {
-        var rgb = value.overlay === "light" ? "255,255,255" : "0,0,0";
+        var rgb = value.overlay === "light" ? "255,255,255"
+          : value.overlay === "custom" ? hexToRgb(value.overlayColor) || "0,0,0"
+          : "0,0,0";
         var tint = "rgba(" + rgb + "," + value.strength + ")";
         layers.push("linear-gradient(" + tint + "," + tint + ")");
       }
@@ -315,6 +399,14 @@
     var patch = { slots: {} };
     patch.slots[id] = value == null ? null : value;
     return saveContent(patch);
+  }
+
+  /* Site-wide, so unlike the others it is not keyed by page or slot. */
+  function setFonts(choice) {
+    if (!choice || choice === "original") delete state.theme.fonts;
+    else state.theme.fonts = choice;
+    applyFonts();
+    return saveContent({ theme: { fonts: choice || "original" } });
   }
 
   function publishImage(slot, url) {
@@ -576,6 +668,7 @@
     get styles() { return state.styles; },
     get notes() { return state.notes; },
     get slots() { return state.slots; },
+    get theme() { return state.theme; },
     t: t,
     lang: currentLang,
     upload: upload,
@@ -583,10 +676,12 @@
     setStyle: setStyle,
     setNote: setNote,
     setSlot: setSlot,
+    setFonts: setFonts,
     stored: stored,
     remember: remember,
     publishImage: publishImage,
-    applyStyles: applyStyles
+    applyStyles: applyStyles,
+    applyFonts: applyFonts
   };
 
   /* ------------------------------------------------------- sign-in button --

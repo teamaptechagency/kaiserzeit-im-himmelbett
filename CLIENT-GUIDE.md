@@ -51,6 +51,12 @@ A numbered pin stays where you clicked. We reply underneath it, and mark it
 *Resolve* once it is done. The number on the toolbar shows how many are still
 open.
 
+Pins stay visible the whole time you are signed in, whichever tool you are
+using, and they are still there when you come back another day. Nothing you do
+here is kept only in your browser — photos, wording, backgrounds and comments
+are all stored on the server, so they survive closing the tab, signing out, or
+opening the link on a different device.
+
 Please comment freely — "this photo is too dark", "this text should be
 bigger", "wrong address here". A note pinned to the exact spot is far clearer
 than an email describing it, and nothing gets lost.
@@ -85,12 +91,37 @@ To undo, set the text back to what it was.
 
 ---
 
+## Sizing a photo
+
+Hover a photo you have added and a small row of controls appears on it:
+
+- **Cover / Fit** — fill the space and crop, or show the whole photo
+- **↑ / ↓** — when it is cropped, which part to keep
+- **Slider** — zoom in, up to three times
+
+These are remembered per photo, so the same picture looks the same everywhere
+it appears. Put them all back to the start and the photo returns to the
+original setting.
+
 ## Changing a section's background
 
 Switch to **Background** on the toolbar and click any section. You can set a
-colour, lay a dark or light tint over it and adjust how strong it is, make a
-photo more or less transparent, or drop in a background image. **Reset** puts
-the section back to the original design.
+colour, lay a tint over it — dark, light, or any colour you pick — and adjust
+how strong the tint is. You can also make a photo more or less transparent, or
+drop in a background image. **Reset** puts the section back to the original
+design.
+
+## Changing the typeface
+
+**Fonts** on the toolbar offers three pairings for the whole site:
+
+| | |
+|---|---|
+| **Original** | Playfair Display + EB Garamond — as designed |
+| **Modern** | Cormorant Garamond + Jost |
+| **Classic** | Libre Baskerville + Lato |
+
+This changes every page at once. Pick Original to go back.
 
 ---
 

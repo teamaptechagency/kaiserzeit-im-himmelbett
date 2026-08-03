@@ -31,6 +31,8 @@ Once signed in:
 | **Photos** | Drag an image onto any placeholder, or click it to browse |
 | **Copy** | Double-click any text, type, press Enter |
 | **Backgrounds** | Switch to *Hintergrund*, click a section: colour, a dark or light overlay with adjustable strength, photo opacity, or a background image |
+| **Photo fit** | Hover a photo: Cover/Fit, crop edge, zoom |
+| **Fonts** | *Schrift* — three pairings, applied site-wide |
 | **Comments** | Switch to *Notizen*, click anywhere — beside a heading, on a photo, in the margin |
 
 Comments are for the review conversation: a pin drops where you clicked, with
@@ -165,6 +167,17 @@ control instead, and it only appears where there is a photo to dim.
 stylesheet that every later viewer loads, so `/api/content` accepts only a hex
 colour, a known overlay name, clamped numbers and an upload URL. A value like
 `red;} body{display:none} .x{` is dropped rather than stored.
+
+**Nothing is kept in the browser except the key and the language.** Photos,
+copy, backgrounds, photo fit, fonts and comments all live server-side, so they
+survive signing out and reappear on any device. Comment pins therefore show
+throughout edit mode rather than only in Notes mode — hiding them elsewhere
+made them look lost after signing back in, since you land in Text mode.
+
+**Alternative fonts re-point the design's inline families.** The pages set
+`font-family` inline on hundreds of elements, so a pairing is applied by
+matching the normalised style attribute — `[style*="font-family:'Playfair
+Display'"]` — rather than by touching the markup.
 
 **Comment pins are anchored to elements, not coordinates.** A pin stores the
 `data-kz-el` of whatever was under the cursor plus a fraction of that
