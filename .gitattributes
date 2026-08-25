@@ -1,0 +1,27 @@
+* text=auto eol=lf
+
+# The design handoff, kept exactly as delivered.
+#
+# These seven pages and the runtime that reads them are served byte for byte:
+# support.js re-fetches the page source and parses it itself, and the whole
+# port was built around not touching them. Letting git normalise their line
+# endings would rewrite the one set of files whose point is that they have
+# not been rewritten — so it does not get to.
+resources/pages/*.dc.html  -text
+resources/pages/admin.html -text
+public/support.js          -text
+public/image-slot.js       -text
+public/editor.js           -text
+public/notes.js            -text
+public/responsive.css      -text
+_legacy-node/**            -text
+
+*.blade.php diff=html
+*.css diff=css
+*.html diff=html
+*.md diff=markdown
+*.php diff=php
+
+/.github export-ignore
+CHANGELOG.md export-ignore
+.styleci.yml export-ignore

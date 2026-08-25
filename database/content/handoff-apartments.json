@@ -1,0 +1,185 @@
+{
+  "About Us.dc.html": null,
+  "Apartment.dc.html": {
+    "residenz": {
+      "heroSlot": "apt-hero-residenz",
+      "gallery": [
+        "res-g0",
+        "res-g1",
+        "res-g2",
+        "res-g3",
+        "res-g4",
+        "res-g5"
+      ],
+      "rate": 169,
+      "group": {
+        "de": "City, Messe & Zoo",
+        "en": "City, Messe & Zoo"
+      },
+      "address": "Blumenstraße 1, 04105 Leipzig",
+      "name": {
+        "de": "Residenz",
+        "en": "Residenz"
+      },
+      "desc": {
+        "de": "Unser größtes Apartment mit hohen Altbaudecken, originalem Stuck und einem königlichen Himmelbett im Zentrum von Leipzig.",
+        "en": "Our largest apartment, with soaring period ceilings, original stucco, and a regal canopy bed in the centre of Leipzig."
+      },
+      "features": {
+        "de": [
+          "Königliches Himmelbett-Zimmer",
+          "Vollausgestattete Küche",
+          "Lichtdurchflutetes Wohnzimmer",
+          "Selbstständige Anreise"
+        ],
+        "en": [
+          "Regal canopy-bed room",
+          "Fully equipped kitchen",
+          "Bright, light-filled living room",
+          "Self check-in"
+        ]
+      }
+    },
+    "cozy": {
+      "heroSlot": "apt-hero-cozy",
+      "gallery": [
+        "cozy-g0",
+        "cozy-g1",
+        "cozy-g2",
+        "cozy-g3",
+        "cozy-g4",
+        "cozy-g5"
+      ],
+      "rate": 129,
+      "group": {
+        "de": "City, Messe & Zoo",
+        "en": "City, Messe & Zoo"
+      },
+      "address": "Blumenstraße 1, 04105 Leipzig",
+      "name": {
+        "de": "Cozy",
+        "en": "Cozy"
+      },
+      "desc": {
+        "de": "Kompakt und liebevoll eingerichtet – ideal für kurze Aufenthalte oder Alleinreisende, ohne auf Charakter zu verzichten.",
+        "en": "Compact and thoughtfully furnished – ideal for shorter stays or solo travellers, without sacrificing character."
+      },
+      "features": {
+        "de": [
+          "Eigenes Himmelbett",
+          "Kompakte Küchenzeile",
+          "Kostenloses WLAN",
+          "Zentrale Lage"
+        ],
+        "en": [
+          "Its own canopy bed",
+          "Compact kitchenette",
+          "Free Wi-Fi",
+          "Central location"
+        ]
+      }
+    },
+    "belle-etage": {
+      "heroSlot": "apt-hero-belle",
+      "gallery": [
+        "belle-g0",
+        "belle-g1",
+        "belle-g2",
+        "belle-g3",
+        "belle-g4",
+        "belle-g5"
+      ],
+      "rate": 189,
+      "group": {
+        "de": "City, Messe & Zoo",
+        "en": "City, Messe & Zoo"
+      },
+      "address": "Blumenstraße 1, 04105 Leipzig",
+      "name": {
+        "de": "Belle Étage",
+        "en": "Belle Étage"
+      },
+      "desc": {
+        "de": "Elegante Beletage-Wohnung mit Erkerfenstern, Kronleuchtern und großzügigem Wohn- und Schlafbereich.",
+        "en": "Elegant belle-étage apartment with bay windows, chandeliers, and a spacious living and sleeping area."
+      },
+      "features": {
+        "de": [
+          "Erkerfenster mit Stadtblick",
+          "Kronleuchter im Wohnbereich",
+          "Himmelbett-Suite",
+          "Vollausgestattete Küche"
+        ],
+        "en": [
+          "Bay windows with city views",
+          "Chandelier in the living area",
+          "Canopy-bed suite",
+          "Fully equipped kitchen"
+        ]
+      }
+    },
+    "nest": {
+      "heroSlot": "apt-hero-nest",
+      "gallery": [
+        "nest-g0",
+        "nest-g1",
+        "nest-g2",
+        "nest-g3",
+        "nest-g4",
+        "nest-g5"
+      ],
+      "gallery2": [
+        "nest-g6",
+        "nest-g7"
+      ],
+      "rate": 149,
+      "group": {
+        "de": "Kanal & Künstlerviertel",
+        "en": "Kanal & Künstlerviertel"
+      },
+      "address": "Helmholtzstraße 12, 04177 Leipzig",
+      "name": {
+        "de": "Nest am Kanal",
+        "en": "Nest am Kanal"
+      },
+      "desc": {
+        "de": "Ruhig am Wasser gelegen, mitten im Künstlerviertel – modern und stilvoll ausgestattet, mit direktem Kanalblick.",
+        "en": "Quietly set on the water, in the heart of the artists' quarter – modern and stylish, with a direct canal view."
+      },
+      "features": {
+        "de": [
+          "Direkter Kanalblick",
+          "Modernes Interieur",
+          "Himmelbett-Zimmer",
+          "Selbstständige Anreise"
+        ],
+        "en": [
+          "Direct canal view",
+          "Modern interior",
+          "Canopy-bed room",
+          "Self check-in"
+        ]
+      }
+    }
+  },
+  "Apartments.dc.html": null,
+  "Booking.dc.html": {
+    "key": "residenz",
+    "name": "Residenz",
+    "rate": 169
+  },
+  "Contact.dc.html": null,
+  "Home.dc.html": {
+    "key": "residenz",
+    "slotId": "apt-residenz",
+    "name": {
+      "de": "Residenz",
+      "en": "Residenz"
+    },
+    "brief": {
+      "de": "Geräumige Altbauwohnung mit hohen Decken und Stuck.",
+      "en": "Spacious period apartment with soaring ceilings and stucco."
+    }
+  },
+  "Profile.dc.html": null
+}

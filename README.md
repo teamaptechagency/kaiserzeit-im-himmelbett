@@ -1,3 +1,13 @@
+> **This repo is now a Laravel app.** The Node/Vercel build described below has
+> been ported to PHP — same pages, same editor, MySQL instead of Vercel Blob,
+> with a browser installer at `/install`. See [LARAVEL.md](LARAVEL.md) for the
+> port; the Node source is kept under `_legacy-node/`.
+>
+> **One thing below is deliberately out of date:** there is no longer an *Edit*
+> button in the corner and no key to type. The client **signs in at `/login`**,
+> and every page is editable for as long as that session lasts. What they can
+> change is unchanged — only how they get in has moved.
+
 # KAISERZEIT im Himmelbett — clickable preview
 
 A live, clickable version of the design handoff, so the client can walk through

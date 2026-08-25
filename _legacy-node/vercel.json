@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/", "destination": "/Home.dc.html" },
+    { "source": "/admin", "destination": "/admin.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*).dc.html",
+      "headers": [{ "key": "cache-control", "value": "no-store" }]
+    },
+    {
+      "source": "/(support|image-slot|editor).js",
+      "headers": [{ "key": "cache-control", "value": "no-store" }]
+    }
+  ]
+}

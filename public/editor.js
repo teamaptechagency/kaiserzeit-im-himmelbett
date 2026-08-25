@@ -1,5 +1,5 @@
 /*
- * editor.js — client-facing editing, loaded only when the URL has ?edit=1.
+ * editor.js — client-facing editing, loaded only for a signed-in admin.
  *
  * Three things the client can change without touching code:
  *
@@ -94,7 +94,7 @@
     "<button data-mode='text' data-label='modeText' aria-pressed='true'></button>" +
     "<button data-mode='background' data-label='modeBackground' aria-pressed='false'></button>" +
     "<span class='kz-hint'></span>" +
-    "<a class='kz-admin' href='admin.html' style='color:" + GOLD + "'></a>" +
+    "<a class='kz-admin' href='/photos' style='color:" + GOLD + "'></a>" +
     "<span class='kz-status'></span>";
   document.body.appendChild(bar);
   document.body.style.paddingBottom = "56px";
@@ -220,9 +220,9 @@
     picker.appendChild(option);
   });
   picker.addEventListener("change", function () {
-    /* ?edit=1 is carried only when that is how this session was unlocked; a
-       signed-in session is remembered on its own. */
-    location.href = picker.value + (KZ.editFromUrl ? "?edit=1" : "");
+    /* Nothing to carry between pages any more: editing follows the session,
+       so every page is already editable for as long as it lasts. */
+    location.href = picker.value;
   });
   bar.insertBefore(picker, bar.querySelector(".kz-hint"));
   relabel();

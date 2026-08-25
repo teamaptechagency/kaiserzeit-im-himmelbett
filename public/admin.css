@@ -1,0 +1,384 @@
+/*
+ * The admin panel.
+ *
+ * Same ink-and-gold palette as the site, but denser: this is a screen people
+ * work in for an hour at a time, not one they arrive at from a search result.
+ * Rows are tight, type is smaller, and nothing animates.
+ */
+
+:root {
+  --ink:      #1b1815;
+  --panel:    #232019;
+  --panel-2:  #2a2620;
+  --line:     #3a332c;
+  --cream:    #f2ecdf;
+  --muted:    #a2988a;
+  --gold:     #d9a868;
+  --bronze:   #b9803f;
+  --ok:       #7fa87f;
+  --warn:     #d9a86a;
+  --bad:      #d98a6a;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+a { color: var(--gold); text-decoration: none; }
+a:hover { color: var(--cream); }
+
+code, .mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85em;
+}
+
+/* ------------------------------------------------------------- shell --- */
+
+.ad { display: flex; min-height: 100vh; }
+
+.ad__side {
+  width: 240px;
+  flex: none;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0 0;
+}
+
+.ad__brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 18px 20px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 16px;
+  color: var(--cream);
+}
+
+.ad__mark {
+  width: 34px; height: 34px;
+  display: grid; place-items: center;
+  border: 1px solid var(--bronze);
+  border-radius: 50%;
+  color: var(--gold);
+  font-size: 12px;
+  letter-spacing: 0.07em;
+  flex: none;
+}
+
+.ad__brand small { display: block; font-family: "EB Garamond", serif; font-size: 12px; color: var(--muted); }
+
+.ad__navhead {
+  margin: 14px 18px 6px;
+  font-size: 11px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ad__nav { list-style: none; margin: 0 0 6px; padding: 0; }
+
+.ad__nav a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 18px;
+  color: var(--cream);
+  font-size: 15px;
+  border-left: 2px solid transparent;
+}
+
+.ad__nav a:hover { background: rgba(255,255,255,0.03); }
+
+.ad__nav a.is-here {
+  background: rgba(217,168,104,0.10);
+  border-left-color: var(--gold);
+  color: var(--gold);
+}
+
+.ad__badge {
+  font-style: normal;
+  font-size: 12px;
+  min-width: 20px;
+  text-align: center;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--bronze);
+  color: var(--ink);
+}
+
+.ad__me {
+  margin-top: auto;
+  padding: 14px 18px 18px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.ad__mename { margin: 0; }
+.ad__merole { margin: 0 0 8px; font-size: 12px; color: var(--muted); }
+.ad__melinks { display: flex; gap: 14px; align-items: center; font-size: 13px; }
+.ad__melinks form { margin: 0; }
+.ad__melinks button {
+  background: none; border: 0; padding: 0;
+  font: inherit; font-size: 13px; color: var(--gold); cursor: pointer;
+}
+.ad__melinks button:hover { color: var(--cream); }
+
+/* -------------------------------------------------------------- main --- */
+
+.ad__main { flex: 1; min-width: 0; padding: 26px 30px 60px; }
+
+.ad__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.ad__head h1 {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  font-size: 26px;
+}
+
+.ad__actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.ad__flash {
+  border: 1px solid var(--ok);
+  background: rgba(127,168,127,0.10);
+  border-radius: 8px;
+  padding: 11px 15px;
+  margin-bottom: 18px;
+  font-size: 15px;
+}
+
+.ad__flash--bad { border-color: var(--bad); background: rgba(217,138,106,0.10); }
+.ad__flash p { margin: 0 0 4px; }
+.ad__flash p:last-child { margin: 0; }
+
+/* ------------------------------------------------------------- cards --- */
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+}
+
+.card h2 {
+  margin: 0 0 4px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.card__hint { margin: 0 0 14px; font-size: 14px; color: var(--muted); }
+
+.grid { display: grid; gap: 16px; }
+.grid--4 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.grid--2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+
+/* ------------------------------------------------------------- stats --- */
+
+.stat { text-align: left; }
+.stat__n {
+  display: block;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 30px;
+  line-height: 1.1;
+  color: var(--gold);
+}
+.stat__l { font-size: 13px; color: var(--muted); }
+.stat--alert .stat__n { color: var(--warn); }
+
+/* A bar chart with no library: one div per day, height set inline. */
+.spark { display: flex; align-items: flex-end; gap: 2px; height: 90px; margin-top: 10px; }
+.spark i {
+  flex: 1;
+  background: linear-gradient(180deg, var(--gold), var(--bronze));
+  border-radius: 2px 2px 0 0;
+  min-height: 2px;
+}
+.spark i:hover { background: var(--cream); }
+
+/* ------------------------------------------------------------ tables --- */
+
+.tw { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+
+th, td {
+  text-align: left;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+th {
+  font-size: 12px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+td.num, th.num { text-align: right; white-space: nowrap; }
+.dim { color: var(--muted); }
+.empty { padding: 26px 12px; color: var(--muted); text-align: center; }
+
+/* ------------------------------------------------------------- chips --- */
+
+.chip {
+  display: inline-block;
+  font-size: 12px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.chip--ok      { border-color: var(--ok);   color: var(--ok); }
+.chip--warn    { border-color: var(--warn); color: var(--warn); }
+.chip--bad     { border-color: var(--bad);  color: var(--bad); }
+.chip--gold    { border-color: var(--bronze); color: var(--gold); }
+
+/* ------------------------------------------------------------- forms --- */
+
+.field { margin-bottom: 15px; }
+
+.field > label {
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  margin-bottom: 5px;
+  color: var(--cream);
+}
+
+.field input[type="text"],
+.field input[type="email"],
+.field input[type="password"],
+.field input[type="number"],
+.field input[type="date"],
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 9px 11px;
+  background: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--cream);
+  font: inherit;
+  font-size: 15px;
+}
+
+.field textarea { min-height: 92px; resize: vertical; line-height: 1.5; }
+.field select { appearance: none; }
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none;
+  border-color: var(--bronze);
+}
+
+.field small { display: block; margin-top: 5px; font-size: 13px; color: var(--muted); }
+
+.row { display: flex; gap: 14px; flex-wrap: wrap; }
+.row > .field { flex: 1 1 200px; }
+
+.check { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 14px; font-size: 15px; }
+.check input { margin-top: 4px; flex: none; }
+.check small { display: block; font-size: 13px; color: var(--muted); }
+
+/* Two languages side by side, so a gap in one is visible while typing. */
+.langs { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.langs .field { margin-bottom: 0; }
+.lang-tag {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-right: 6px;
+}
+
+/* ------------------------------------------------------------ buttons --- */
+
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--bronze);
+  background: transparent;
+  color: var(--gold);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn:hover { color: var(--cream); border-color: var(--cream); }
+
+.btn--go { background: var(--gold); border-color: var(--gold); color: var(--ink); font-weight: 600; }
+.btn--go:hover { background: var(--cream); border-color: var(--cream); color: var(--ink); }
+
+.btn--bad { border-color: var(--bad); color: var(--bad); }
+.btn--bad:hover { background: var(--bad); color: var(--ink); border-color: var(--bad); }
+
+.btn--sm { padding: 4px 10px; font-size: 13px; }
+
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.tabs a { padding: 5px 13px; border: 1px solid var(--line); border-radius: 999px; font-size: 14px; color: var(--muted); }
+.tabs a.is-here { border-color: var(--bronze); color: var(--gold); background: rgba(217,168,104,0.08); }
+
+.inline { display: inline; margin: 0; }
+
+/* ------------------------------------------------------------- misc ---- */
+
+.key {
+  display: block;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 17px;
+  letter-spacing: 0.06em;
+  padding: 11px 13px;
+  background: var(--ink);
+  border: 1px solid var(--bronze);
+  border-radius: 6px;
+  word-break: break-all;
+}
+
+.codes { columns: 2; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 15px; margin: 10px 0 0; padding-left: 20px; }
+
+.pager { display: flex; gap: 8px; align-items: center; margin-top: 16px; font-size: 14px; }
+.pager .dim { margin-left: auto; }
+
+.diff { font-size: 13px; margin: 0; }
+.diff li { margin-bottom: 2px; }
+.diff del { color: var(--bad); text-decoration: line-through; }
+.diff ins { color: var(--ok); text-decoration: none; }
+
+@media (max-width: 880px) {
+  .ad { flex-direction: column; }
+  .ad__side { width: auto; flex-direction: column; }
+  .ad__nav { display: flex; flex-wrap: wrap; }
+  .ad__nav a { border-left: 0; border-bottom: 2px solid transparent; }
+  .ad__nav a.is-here { border-left: 0; border-bottom-color: var(--gold); }
+  .ad__me { margin-top: 0; }
+  .ad__main { padding: 20px 16px 50px; }
+}
