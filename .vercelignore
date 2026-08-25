@@ -1,0 +1,12 @@
+# The old Node build, kept in the repo for reference. Nothing runs from it.
+_legacy-node
+
+# Checks that are run by hand against a live server, not part of a deploy.
+tests
+
+# Local development only.
+.claude
+storage/logs
+storage/framework/cache
+storage/framework/sessions
+storage/framework/views

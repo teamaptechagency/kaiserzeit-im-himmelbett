@@ -1,8 +1,16 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "git": {
-    "deploymentEnabled": {
-      "laravel-cms": false
+  "version": 2,
+  "functions": {
+    "api/index.php": {
+      "runtime": "vercel-php@0.7.3",
+      "maxDuration": 30
     }
-  }
+  },
+  "routes": [
+    { "src": "/assets/(.*)", "dest": "/public/assets/$1" },
+    { "src": "/build/(.*)", "dest": "/public/build/$1" },
+    { "src": "/(.*\\.(?:css|js|map|png|jpe?g|gif|svg|webp|avif|ico|woff2?|ttf|eot))", "dest": "/public/$1" },
+    { "src": "/(.*)", "dest": "/api/index.php" }
+  ]
 }
