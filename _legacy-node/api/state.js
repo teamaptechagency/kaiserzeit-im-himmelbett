@@ -1,0 +1,37 @@
+/*
+ * GET /api/state — everything the client has changed.
+ *
+ * Public on purpose: the preview has to render the client's photos and copy
+ * for anyone holding the link. Only writing is key-protected.
+ */
+import { readContent, readImages, send, storageProblem } from "./_store.js";
+
+export default async function handler(req, res) {
+  /* Answered before touching the SDK, so the page can say what to fix rather
+     than showing a bare "No token found". */
+  const problem = storageProblem();
+  if (problem) {
+    return send(res, 200, {
+      ok: false, images: {}, texts: {}, styles: {}, notes: {}, slots: {}, theme: {},
+      error: problem
+    });
+  }
+
+  try {
+    const [images, content] = await Promise.all([readImages(), readContent()]);
+    send(res, 200, {
+      ok: true, images,
+      texts: content.texts, styles: content.styles,
+      notes: content.notes, slots: content.slots, theme: content.theme
+    });
+  } catch (error) {
+    /* Before the blob store is connected there is nothing to serve, and an
+       empty state is the correct answer — the pages then fall back to their
+       bundled assets and original copy. */
+    console.error("state failed", error);
+    send(res, 200, {
+      ok: false, images: {}, texts: {}, styles: {}, notes: {}, slots: {}, theme: {},
+      error: String(error && error.message ? error.message : error)
+    });
+  }
+}

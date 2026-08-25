@@ -11,20 +11,25 @@
  *
  * All three come from /api/state on the live preview, or from the checked-in
  * assets/uploads/state.json in a clone with no backend. Editing is off unless
- * the URL carries ?edit=1, which also pulls in editor.js.
+ * an admin is signed in, which is also what pulls in editor.js.
  *
  * <image-slot> exposes ::part(frame) and ::part(empty); the pages style both.
  */
 (function () {
   "use strict";
 
-  /* Editing is unlocked either by ?edit=1 or by having signed in through the
-     button in the corner. The sign-in is remembered in localStorage, so the
-     site can be edited straight from its normal public URL — but only by
-     someone who knows EDIT_KEY. Everyone else sees a read-only page. */
-  var KEY_STORE = "kz-edit-key";
-  var EDIT_FLAG = "kz-edit-on";
-  var EDIT_FROM_URL = new URLSearchParams(location.search).has("edit");
+  /* Editing follows the admin session: sign in and every page is editable,
+     sign out and the site is a read-only preview with no editing chrome on it
+     at all. There is no key to type and no button offering to take one.
+
+     The session cookie is httpOnly, so this cannot read it. The server sets a
+     second cookie carrying one bit — "you are signed in" — because the slots
+     have to know whether to attach their drop targets at the moment they are
+     built, and that decision cannot wait for /api/state to answer. The bit is
+     a hint for the interface, never a credential: forging it produces an
+     editor whose every save the server refuses, and the real answer in
+     state.canEdit replaces it as soon as it arrives. */
+  var EDITOR_COOKIE = "kz_editor";
 
   function stored(name) {
     try { return localStorage.getItem(name); } catch (err) { return null; }
@@ -36,12 +41,21 @@
     } catch (err) { /* private browsing */ }
   }
 
-  var EDIT = EDIT_FROM_URL || (stored(EDIT_FLAG) === "1" && !!stored(KEY_STORE));
+  function signedIn() {
+    return document.cookie.split(";").some(function (part) {
+      return part.trim() === EDITOR_COOKIE + "=1";
+    });
+  }
+
+  var EDIT = signedIn();
   var MAX_BYTES = 12 * 1024 * 1024;
 
   var state = { images: {}, texts: {}, styles: {}, notes: {}, slots: {}, theme: {} };
   var slots = new Set();
   var serverError = null;
+  /* Set when the server has answered 401 — the session expired, or another
+     tab signed out. The chrome then offers the way back in. */
+  var sessionEnded = false;
 
   /* ----------------------------------------------------------- wording ---
      Every label in the editing chrome lives here, so the toolbar, the
@@ -54,10 +68,9 @@
       edit: "Bearbeiten", comment: "Kommentar",
       guideTitle: "Bearbeitungsmodus",
       guideBody: "Text: Doppelklicken Sie auf einen Text, um ihn zu ändern. Bilder: Ziehen Sie ein Foto auf einen Platzhalter. Hintergrund: Abschnitt anklicken.",
-      guideLocked: "Geben Sie den Schlüssel ein, um Änderungen vorzunehmen.",
-      keyPlaceholder: "Schlüssel", start: "Bearbeiten starten", checking: "Wird geprüft…",
-      allImages: "Alle Bilder", stop: "Bearbeiten beenden", gotIt: "Verstanden",
-      wrongKey: "Falscher Schlüssel",
+      allImages: "Alle Bilder", stop: "Abmelden", gotIt: "Verstanden",
+      signedOut: "Sitzung abgelaufen — bitte erneut anmelden",
+      signIn: "Erneut anmelden",
       notSaving: "Änderungen werden nicht gespeichert",
       tooBig: "Bild zu groß, bitte kleiner als 12 MB",
       noServer: "Server nicht erreichbar -- bitte Verbindung prüfen und erneut versuchen",
@@ -99,10 +112,9 @@
       edit: "Edit", comment: "Comment",
       guideTitle: "Editing Guide",
       guideBody: "Text: double-click any text to change it. Images: drag a photo onto any placeholder. Background: click a section.",
-      guideLocked: "Enter the key to make changes.",
-      keyPlaceholder: "Key", start: "Start editing", checking: "Checking…",
-      allImages: "All images", stop: "Stop editing", gotIt: "Got it",
-      wrongKey: "Wrong key",
+      allImages: "All images", stop: "Sign out", gotIt: "Got it",
+      signedOut: "Session expired — please sign in again",
+      signIn: "Sign in again",
       notSaving: "Changes are not being saved",
       tooBig: "Image too large, please use one under 12 MB",
       noServer: "Could not reach the server -- check the connection and try again",
@@ -163,6 +175,23 @@
 
   var ready = loadFrom("/api/state")
     .then(function (data) {
+      /* The cookie said the visitor was signed in and the server disagrees:
+         it expired, or someone set it by hand. The chrome has already been
+         built by then, so rather than leaving a dead editor on screen the
+         cookie is cleared and the page reloaded once — the guard keeps that
+         from becoming a loop if the two never agree. */
+      if (data && data.canEdit === false && EDIT) {
+        document.cookie = EDITOR_COOKIE + "=; Max-Age=0; path=/";
+        try {
+          if (!sessionStorage.getItem("kz-recheck")) {
+            sessionStorage.setItem("kz-recheck", "1");
+            location.reload();
+          }
+        } catch (err) { /* private browsing: leave the page as it is */ }
+      } else if (data && data.canEdit) {
+        try { sessionStorage.removeItem("kz-recheck"); } catch (err) { /* ignore */ }
+      }
+
       if (data) return data;
       /* Either there is no backend — a plain clone, where the checked-in
          state is the right answer — or the deployment is broken. Which one
@@ -399,39 +428,20 @@
 
   /* ------------------------------------------------------------ writing */
 
-  function editKey() {
-    return stored(KEY_STORE);
-  }
-
   function failed(res, data) {
-    /* A rejected key is a dead key — drop it so the next action asks again
-       instead of silently failing over and over. */
+    /* 401 now means the session has gone — it expired, or it was signed out
+       in another tab. Nothing local can fix that, so say so plainly and let
+       signOut() offer the way back rather than failing silently over and
+       over. */
     if (res.status === 401) {
-      remember(KEY_STORE, null);
-      remember(EDIT_FLAG, null);
+      sessionEnded = true;
+      window.dispatchEvent(new CustomEvent("kz:signed-out"));
+      return new Error(t("signedOut"));
     }
     /* 503 means the server is fine but its storage is not wired up; keep that
        message, it names the variable to add. */
     if (res.status === 503 && data.error) serverError = data.error;
     return new Error(data.error || "Fehler / failed (" + res.status + ")");
-  }
-
-  /* Verified against the server rather than locally, so a wrong key is
-     rejected at sign-in instead of at the first upload. An empty patch is
-     accepted by /api/content purely as this check. */
-  function verifyKey(key) {
-    return fetch("/api/content", {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-kz-key": key },
-      body: "{}"
-    }).then(function (res) {
-      if (res.ok) return true;
-      return res.json().catch(function () { return {}; }).then(function (data) {
-        throw new Error(res.status === 401
-          ? (data.error === "unauthorized" ? "Falscher Schlüssel / wrong key" : data.error)
-          : (data.error || "Fehler (" + res.status + ")"));
-      });
-    });
   }
 
   /* Serverless functions reject a request body over about 4.5 MB before it
@@ -469,17 +479,20 @@
   }
 
   function upload(slot, file) {
-    var key = editKey();
-    if (!key) return Promise.reject(new Error("kein Schlüssel / no key"));
+    if (!EDIT) return Promise.reject(new Error(t("signedOut")));
     if (!/^image\//.test(file.type)) return Promise.reject(new Error("Nur Bilder / images only"));
 
     return shrink(file).then(function (payload) {
       if (payload.size > MAX_BYTES) throw new Error(t("tooBig"));
       var type = payload.type || file.type;
 
+      /* The session cookie is what authorises this. same-origin is fetch's
+         default, but it is spelled out because the whole editor depends on
+         the cookie riding along. */
       return fetch("/api/upload?slot=" + encodeURIComponent(slot), {
         method: "POST",
-        headers: { "content-type": type, "x-kz-key": key },
+        credentials: "same-origin",
+        headers: { "content-type": type },
         body: payload
       }).catch(function () {
         /* fetch only rejects on a network-level failure; the server never
@@ -499,13 +512,13 @@
   var queue = Promise.resolve();
 
   function saveContent(patch) {
-    var key = editKey();
-    if (!key) return Promise.reject(new Error("kein Schlüssel / no key"));
+    if (!EDIT) return Promise.reject(new Error(t("signedOut")));
 
     queue = queue.then(function () {
       return fetch("/api/content", {
         method: "POST",
-        headers: { "content-type": "application/json", "x-kz-key": key },
+        credentials: "same-origin",
+        headers: { "content-type": "application/json" },
         body: JSON.stringify(patch)
       }).then(function (res) {
         return res.json().catch(function () { return {}; }).then(function (data) {
@@ -828,7 +841,7 @@
   window.KZ = {
     ready: ready,
     edit: EDIT,
-    editFromUrl: EDIT_FROM_URL,
+    signOut: signOut,
     state: state,
     get images() { return state.images; },
     get texts() { return state.texts; },
@@ -854,22 +867,22 @@
     setRadius: setRadius
   };
 
-  /* ------------------------------------------------------- sign-in button --
-     The design already has an "Edit" button in the bottom-left corner that
-     opens an Editing Guide, but it was a demo explainer that did nothing.
-     This turns it into the real entry point: same styling, same position, on
-     every page rather than only on Home, with the key prompt inside the panel
-     it already showed. The prototype's inert copy is hidden so there is only
-     one. */
+  /* ---------------------------------------------------------- editor dock --
+     Built only for someone who is signed in. A visitor sees the design and
+     nothing else: no Edit button, no panel, no invitation to type a key —
+     there is no key to type. Signing in at /login is the only entrance, and
+     it turns editing on everywhere at once.
 
-  function buildSignIn() {
+     The design's own "Edit" button in the bottom-left corner was a demo
+     explainer that did nothing; it stays hidden either way, so a visitor is
+     never offered a control that leads nowhere. */
+
+  function buildDock() {
 
     var style = document.createElement("style");
     style.textContent = [
-      /* The prototype's demo button sat here and did nothing. */
-      '#dc-root [style*="bottom:26px"][style*="left:26px"]{display:none!important;}',
-      /* Clears the editor toolbar when it is on screen. */
-      "#kz-signin{position:fixed;bottom:" + (EDIT ? "74px" : "26px") + ";left:26px;",
+      /* Clears the editor toolbar, which is always on screen here. */
+      "#kz-signin{position:fixed;bottom:74px;left:26px;",
       "z-index:61;font-family:'EB Garamond',Georgia,serif;}",
       "#kz-signin .row{display:flex;gap:8px;align-items:center;}",
       "#kz-signin .trigger{display:flex;align-items:center;gap:8px;",
@@ -902,13 +915,20 @@
     var host = document.createElement("div");
     host.id = "kz-signin";
 
+    /* Where the "Bearbeiten" button used to sit. It no longer offers to start
+       editing — editing has already started — so all it carries now is the
+       guide to how, and the way back out. A question mark rather than a word,
+       because it is the smaller of the two controls here and the one reached
+       least often. */
     var trigger = document.createElement("button");
     trigger.className = "trigger";
+    trigger.setAttribute("aria-label", t("guideTitle"));
     trigger.innerHTML =
       "<svg width='14' height='14' viewBox='0 0 24 24' fill='none'>" +
-      "<path d='M4 20h4L20 8l-4-4L4 16v4z' stroke='#d9a868' stroke-width='1.6' " +
-      "stroke-linejoin='round'/></svg><span></span>";
-    trigger.querySelector("span").textContent = t("edit");
+      "<circle cx='12' cy='12' r='9' stroke='#d9a868' stroke-width='1.6'/>" +
+      "<path d='M9.6 9.2a2.4 2.4 0 1 1 3.2 2.3c-.6.2-.8.7-.8 1.3v.4' " +
+      "stroke='#d9a868' stroke-width='1.6' stroke-linecap='round'/>" +
+      "<circle cx='12' cy='16.4' r='.9' fill='#d9a868'/></svg>";
 
     /* Commenting is the thing the client does most, so it gets its own
        button rather than being buried a mode-click deep in the toolbar. */
@@ -922,12 +942,6 @@
 
     comment.addEventListener("click", function (e) {
       e.stopPropagation();
-      if (!EDIT) {
-        /* Same key as editing — open the panel rather than failing silently. */
-        panel.hidden = false;
-        render();
-        return;
-      }
       panel.hidden = true;
       if (window.KZEditor) window.KZEditor.setMode("notes");
     });
@@ -951,54 +965,22 @@
       var title = document.createElement("h4");
       title.textContent = t("guideTitle");
       var body = document.createElement("p");
-      body.textContent = EDIT ? t("guideBody") : t("guideLocked");
+      body.textContent = sessionEnded ? t("signedOut") : t("guideBody");
       panel.appendChild(title);
       panel.appendChild(body);
 
-      if (!EDIT) {
-        var error = document.createElement("p");
-        error.className = "err";
-        error.hidden = true;
-
-        var input = document.createElement("input");
-        input.type = "password";
-        input.placeholder = t("keyPlaceholder");
-        input.autocomplete = "current-password";
-
-        var go = document.createElement("button");
-        go.className = "go";
-        go.textContent = t("start");
-
-        function submit() {
-          var key = input.value.trim();
-          if (!key) return input.focus();
-          go.disabled = true;
-          go.textContent = t("checking");
-          error.hidden = true;
-          verifyKey(key).then(function () {
-            remember(KEY_STORE, key);
-            remember(EDIT_FLAG, "1");
-            /* Reloading is the honest way in: the image slots decide whether
-               to attach their drop targets when they are created. */
-            location.reload();
-          }, function (err) {
-            go.disabled = false;
-            go.textContent = t("start");
-            error.textContent = err.message;
-            error.hidden = false;
-            input.select();
-          });
-        }
-
-        go.addEventListener("click", submit);
-        input.addEventListener("keydown", function (e) {
-          if (e.key === "Enter") { e.preventDefault(); submit(); }
-        });
-
-        panel.appendChild(error);
-        panel.appendChild(input);
-        panel.appendChild(go);
-        setTimeout(function () { input.focus(); }, 0);
+      /* The session went while the page stayed open. Nothing on this page can
+         mend that, so the panel stops being a guide and becomes the way back
+         to the sign-in form, returning here afterwards. */
+      if (sessionEnded) {
+        var again = document.createElement("a");
+        again.className = "go";
+        again.style.display = "block";
+        again.style.textAlign = "center";
+        again.style.textDecoration = "none";
+        again.href = "/login?next=" + encodeURIComponent(location.pathname + location.search);
+        again.textContent = t("signIn");
+        panel.appendChild(again);
         return;
       }
 
@@ -1010,19 +992,17 @@
 
       var links = document.createElement("div");
       links.className = "links";
+
       var admin = document.createElement("a");
-      admin.href = "admin.html";
+      admin.href = "/photos";
       admin.textContent = t("allImages");
+
+      /* Signing out is a state change on the server, so it is a POST, not a
+         link someone's link-prefetcher can fire by accident. */
       var stop = document.createElement("button");
       stop.textContent = t("stop");
-      stop.addEventListener("click", function () {
-        remember(KEY_STORE, null);
-        remember(EDIT_FLAG, null);
-        /* Drop ?edit=1 too, or the reload would land straight back in edit. */
-        var url = new URL(location.href);
-        url.searchParams.delete("edit");
-        location.href = url.pathname + url.search;
-      });
+      stop.addEventListener("click", signOut);
+
       links.appendChild(admin);
       links.appendChild(stop);
       panel.appendChild(links);
@@ -1034,9 +1014,14 @@
     });
 
     window.addEventListener("kz:lang", function () {
-      trigger.querySelector("span").textContent = t("edit");
+      trigger.setAttribute("aria-label", t("guideTitle"));
       comment.querySelector("span").textContent = t("comment");
       if (!panel.hidden) render();
+    });
+
+    window.addEventListener("kz:signed-out", function () {
+      panel.hidden = false;
+      render();
     });
 
     document.addEventListener("click", function (e) {
@@ -1044,13 +1029,56 @@
     });
   }
 
+  /* The prototype shipped an "Edit" button in the bottom-left corner that
+     opened a demo explainer and did nothing else. It is hidden for everyone,
+     signed in or not: for an admin the dock takes its place, and a visitor
+     should never be offered a control that leads nowhere. This runs outside
+     buildDock precisely because it has to happen for visitors too. */
+  function hidePrototypeButton() {
+    var style = document.createElement("style");
+    style.textContent =
+      '#dc-root [style*="bottom:26px"][style*="left:26px"]{display:none!important;}';
+    (document.head || document.documentElement).appendChild(style);
+  }
+
+  /* Posted rather than linked, so no prefetcher can sign the client out by
+     touching a URL. The form is built and submitted rather than fetched
+     because the response is a redirect the browser should follow.
+
+     The token is asked for at the moment of the click rather than kept from
+     page load: a tab left open all afternoon would otherwise carry a token
+     from a session that has since been rotated, and the sign-out would fail
+     with a 419 at the one moment the client is trying to leave. */
+  function signOut() {
+    loadFrom("/api/state").then(function (data) {
+      var form = document.createElement("form");
+      form.method = "post";
+      form.action = "/logout";
+      form.style.display = "none";
+
+      var token = document.createElement("input");
+      token.type = "hidden";
+      token.name = "_token";
+      token.value = (data && data.csrf) || "";
+      form.appendChild(token);
+
+      document.body.appendChild(form);
+      form.submit();
+    });
+  }
+
   function boot() {
-    if (EDIT) {
-      var editor = document.createElement("script");
-      editor.src = "editor.js";
-      document.head.appendChild(editor);
-    }
-    buildSignIn();
+    hidePrototypeButton();
+
+    /* A visitor gets the design and nothing else. Every piece of editing
+       chrome below this line exists only for a signed-in admin. */
+    if (!EDIT) return;
+
+    var editor = document.createElement("script");
+    editor.src = "editor.js";
+    document.head.appendChild(editor);
+
+    buildDock();
   }
 
   if (document.readyState === "loading") {

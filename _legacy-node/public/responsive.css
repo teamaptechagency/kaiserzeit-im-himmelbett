@@ -1,0 +1,167 @@
+/*
+ * responsive.css — mobile corrections for the design prototypes.
+ *
+ * The handoff pages carry their own breakpoints for the nav (880px), the
+ * Nest split (900px) and the profile sidebar (760px). What they never
+ * specify is a phone treatment for the hero booking bar or for the tighter
+ * fixed-column grids, so those are handled here.
+ *
+ * Kept in its own file, and hooked on the inline styles the design already
+ * uses, so the .dc.html files stay byte-for-byte as delivered. The grid
+ * minmax() floors are clamped in support.js; everything else is below.
+ *
+ * Selectors match on the normalised inline style, e.g.
+ * [style*="flex-wrap:nowrap"] — support.js serialises declarations without
+ * spaces, so these are stable.
+ */
+
+/* A stray overflowing child should never make the whole page pan sideways. */
+html, body { max-width: 100%; overflow-x: hidden; }
+
+#dc-root img,
+#dc-root image-slot { max-width: 100%; }
+
+@media (max-width: 760px) {
+  /* Hero booking bar: authored as one non-wrapping row with a horizontal
+     scrollbar. On a phone that clips the guests field and the CTA, so let it
+     stack instead. */
+  #dc-root [style*="flex-wrap:nowrap"][style*="overflow-x:auto"] {
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+  }
+  #dc-root [style*="flex-wrap:nowrap"][style*="overflow-x:auto"] > * {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Two- and three-up fixed grids (apartment cards, the photo gallery)
+     have no auto-fit floor to clamp, so they are collapsed explicitly. */
+  #dc-root [style*="grid-template-columns:repeat(2,1fr)"] {
+    grid-template-columns: 1fr !important;
+  }
+  #dc-root [style*="grid-template-columns:repeat(3,1fr)"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Modals: full-height dialogs need to scroll rather than overflow. */
+  #dc-root [style*="position:fixed"][style*="z-index"] > [style*="border-radius:14px"] {
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+
+  /* Long words in German headings should break rather than push the layout. */
+  #dc-root h1, #dc-root h2, #dc-root h3 { overflow-wrap: break-word; }
+}
+
+/* ---------------------------------------------------------------- header --
+ * Six of the seven pages author the bar as a centred 76px logo stacked over
+ * the controls row: 130px on a 375px phone. That is a sixth of the viewport
+ * held permanently over the page, and it is taller than the 120px of top
+ * padding the home hero clears for it, so the hero's first line starts
+ * underneath it. With the desktop links hidden at 880px the row's
+ * space-between also drops the language, sign-in and hamburger controls hard
+ * against the left edge, under nothing. Booking.dc.html authors the same bar
+ * as a single 95px row whose logo and controls meet with no gap at all.
+ *
+ * Both are folded into one row on a phone — logo left, controls right, 68px
+ * tall and 60px below 380px. The height is pinned rather than left intrinsic
+ * because the mobile menu is anchored at a hard-coded top:118px and has to be
+ * re-anchored to whatever the bar now measures.
+ */
+@media (max-width: 760px) {
+  :root { --kz-nav-h: 68px; }
+
+  #dc-root nav[style*="position:fixed"] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    height: var(--kz-nav-h);
+    padding: 0 16px !important;
+  }
+
+  /* Stacked variant: the centred logo row becomes the left-hand cell. */
+  #dc-root nav[style*="position:fixed"] > div[style*="justify-content:center"] {
+    flex: 0 0 auto !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* The controls — and the desktop links already hidden at 880px — become
+     the right-hand cell in both variants. */
+  #dc-root nav[style*="position:fixed"] > div:last-child {
+    flex: 1 1 auto !important;
+    justify-content: flex-end !important;
+    min-width: 0 !important;
+    gap: 10px !important;
+  }
+  #dc-root nav[style*="position:fixed"] > div:last-child > div {
+    gap: 10px !important;
+  }
+
+  #dc-root nav[style*="position:fixed"] img {
+    height: 48px !important;
+    flex-shrink: 0;
+  }
+
+  /* top:118px was already 12px inside the 130px bar, and would hang 50px
+     below the folded one. Anchored to the bar's real height instead, and
+     scrollable so a short viewport does not swallow the last links. */
+  #dc-root [style*="position:fixed"][style*="top:118px"] {
+    top: var(--kz-nav-h) !important;
+    max-height: calc(100vh - var(--kz-nav-h));
+    overflow-y: auto;
+  }
+
+  /* An anchor jump has to land below the bar, not behind it. */
+  html { scroll-padding-top: calc(var(--kz-nav-h) + 12px); }
+}
+
+/* Below about 380px the folded row still does not fit: the logo, the language
+   button, the sign-in pill and the hamburger together need ~348px at 320px of
+   viewport, and the overflow lands as the language button sitting on top of
+   the logo. Tightened rather than wrapped, so the bar stays one row. */
+@media (max-width: 380px) {
+  :root { --kz-nav-h: 60px; }
+
+  #dc-root nav[style*="position:fixed"] {
+    padding: 0 12px !important;
+    gap: 8px !important;
+  }
+  #dc-root nav[style*="position:fixed"] > div:last-child,
+  #dc-root nav[style*="position:fixed"] > div:last-child > div {
+    gap: 8px !important;
+  }
+  #dc-root nav[style*="position:fixed"] img { height: 38px !important; }
+
+  /* The pill controls carry 14–20px of side padding for a desktop bar. */
+  #dc-root nav[style*="position:fixed"] [style*="border-radius:999px"] {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* The hairline between the pills is decoration this width cannot afford. */
+  #dc-root nav[style*="position:fixed"] [style*="width:1px"] { display: none !important; }
+}
+
+/* Between the phone fold and the design's own 880px breakpoint the stacked bar
+   is the intended treatment, but hiding the desktop links leaves the row on
+   space-between with a single child, so the controls sit hard against the left
+   edge with the width of the page empty beside them. Alignment only. */
+@media (min-width: 761px) and (max-width: 880px) {
+  #dc-root nav[style*="position:fixed"] > div:last-child {
+    justify-content: flex-end !important;
+  }
+}
+
+@media (max-width: 520px) {
+  /* The 360° viewer and gallery are tall on a phone; cap them so the page
+     stays scannable. */
+  #dc-root .nest-gallery { grid-template-rows: none !important; }
+
+  /* Trust line under the booking bar reads better stacked than as three
+     bullet-separated fragments. */
+  #dc-root [style*="flex-wrap:wrap"][style*="justify-content:center"] { row-gap: 6px; }
+}
+
+/* Editing chrome must not sit on top of the content it is editing. */
+body.kz-bg #dc-root { scroll-margin-bottom: 60px; }

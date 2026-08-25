@@ -1,0 +1,577 @@
+/*
+ * Sign in, sign up, and the two-factor step.
+ *
+ * Two panels on a desktop: one of the flats on the left, the form on the
+ * right. Separate from install.css on purpose — the installer has to render
+ * on a server where nothing works yet and cannot afford to depend on a photo
+ * or on anything in the database, while this screen can.
+ */
+
+:root {
+  --ink:      #191614;
+  --panel:    #201d1a;
+  --raised:   #29241f;
+  --line:     #3a332c;
+  --cream:    #f2ecdf;
+  --muted:    #a89c8b;
+  --faint:    #7d7365;
+  --gold:     #d9a868;
+  --bronze:   #b9803f;
+  --ok:       #7fa87f;
+  --bad:      #d98a6a;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--gold); text-decoration: none; }
+a:hover { color: var(--cream); }
+
+/* ============================================================== layout === */
+
+.au {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  min-height: 100vh;
+}
+
+/* ------------------------------------------------------------- picture -- */
+
+/*
+ * Sticky, and exactly one screen tall.
+ *
+ * The sign-up form is longer than a viewport. Before this, scrolling to the
+ * password fields took the picture and its caption off the top of the screen
+ * with them, leaving a form floating in the dark — the thing the split layout
+ * exists to avoid. Pinned, it stays put while the form moves.
+ */
+.au__art {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+  padding: 44px 46px;
+  overflow: hidden;
+}
+
+/*
+ * The scrim exists so the copy is legible whatever photo somebody uploads.
+ * A dark flat and a bright one both end up under the same gradient, which is
+ * cheaper than asking an editor to think about contrast.
+ */
+.au__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(25,22,20,0.30) 0%, rgba(25,22,20,0.10) 38%, rgba(25,22,20,0.92) 100%),
+    linear-gradient(90deg, rgba(25,22,20,0.40) 0%, rgba(25,22,20,0) 55%);
+}
+
+.au__artcopy { position: relative; max-width: 28rem; }
+
+.au__eyebrow {
+  display: block;
+  font-size: 11.5px;
+  letter-spacing: 0.19em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 13px;
+}
+
+.au__quote {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 26px;
+  font-style: italic;
+  line-height: 1.34;
+  color: #f7f1e6;
+  text-wrap: balance;
+}
+
+.au__caption {
+  margin: 15px 0 0;
+  font-size: 13.5px;
+  letter-spacing: 0.06em;
+  color: rgba(242, 236, 224, 0.7);
+}
+
+.au__caption::before {
+  content: "";
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--bronze);
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+/* ---------------------------------------------------------------- form -- */
+
+.au__panel {
+  background: var(--panel);
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 40px 56px;
+}
+
+.au__inner { width: 100%; max-width: 25rem; margin: auto 0; }
+
+.au__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 26px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 16.5px;
+  color: var(--cream);
+}
+
+.au__brand:hover { color: var(--cream); }
+
+.au__mark {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--bronze);
+  border-radius: 50%;
+  color: var(--gold);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.au__brand small {
+  display: block;
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.au h1 {
+  margin: 0 0 6px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  font-size: 27px;
+  line-height: 1.18;
+}
+
+.au__lead { margin: 0 0 22px; color: var(--muted); font-size: 15.5px; line-height: 1.5; }
+
+/* ================================================== both languages ====== */
+
+/*
+ * German leads, English follows on the same line.
+ *
+ * It used to sit on a line of its own under every label, which doubled the
+ * height of the form and turned scanning it into reading it — six labels
+ * became twelve lines before a single field. Inline, dimmer and smaller, it
+ * is there for whoever needs it and out of the way of whoever does not.
+ *
+ * Headings and the lead paragraph keep the second line: those are sentences,
+ * and a sentence in two languages does not fit on one line.
+ */
+.au__en {
+  font-family: "EB Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--faint);
+  letter-spacing: 0;
+}
+
+/* Inline by default — labels, buttons, the swap line. */
+.au__field label .au__en,
+.au__btn .au__en,
+.au__swap .au__en {
+  display: inline;
+  font-size: 0.92em;
+  margin-left: 0.45em;
+}
+
+.au__field label .au__en::before,
+.au__swap .au__en::before {
+  content: "·";
+  margin-right: 0.45em;
+  color: var(--line);
+  font-style: normal;
+}
+
+/* Block, on its own line — sentences. */
+.au h1 .au__en,
+.au__lead .au__en,
+.au__claim .au__en {
+  display: block;
+  font-size: 0.62em;
+  line-height: 1.4;
+  margin-top: 5px;
+}
+
+.au__lead .au__en { font-size: 0.9em; margin-top: 3px; }
+.au__claim .au__en { font-size: 0.92em; margin-top: 7px; }
+
+/* -------------------------------------------------------------- fields -- */
+
+.au__field { margin-bottom: 14px; }
+
+.au__field label {
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  margin-bottom: 5px;
+  color: var(--cream);
+}
+
+/* Sits at the end of the label rather than on a line of its own. */
+.au__opt {
+  float: right;
+  font-size: 0.92em;
+  font-style: italic;
+  color: var(--faint);
+  letter-spacing: 0;
+}
+
+.au__field input {
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--cream);
+  font: inherit;
+  font-size: 16px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.au__field input:focus {
+  outline: none;
+  border-color: var(--bronze);
+  box-shadow: 0 0 0 3px rgba(185, 128, 63, 0.14);
+}
+
+/*
+ * Red only after somebody has actually got something wrong.
+ *
+ * :user-invalid, not :invalid — the plain one matches an empty required field
+ * from the moment the page loads, so every field on a blank sign-up form
+ * turned red before it had been touched. This one waits for the field to have
+ * been filled in and left.
+ */
+.au__field input:user-invalid { border-color: var(--bad); }
+.au__field input:user-invalid:focus { box-shadow: 0 0 0 3px rgba(217, 138, 106, 0.14); }
+
+.au__field input::placeholder { color: rgba(168, 156, 139, 0.5); }
+
+.au__field small {
+  display: block;
+  margin-top: 5px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--faint);
+}
+
+.au__row { display: flex; gap: 13px; }
+.au__row > .au__field { flex: 1; min-width: 0; }
+
+/* ------------------------------------------------------ password reveal -- */
+
+/*
+ * Ten characters is a lot to type blind, and a mistyped password on a sign-up
+ * form is only discovered by the confirm field disagreeing — which tells you
+ * that one of the two is wrong, not which.
+ */
+.au__pw { position: relative; }
+
+.au__pw input { padding-right: 46px; }
+
+.au__eye {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  color: var(--faint);
+  cursor: pointer;
+  padding: 0;
+}
+
+.au__eye:hover { color: var(--gold); }
+.au__eye:focus-visible { outline: 2px solid var(--bronze); outline-offset: -2px; }
+.au__eye svg { display: block; }
+
+/* ------------------------------------------------------------- buttons -- */
+
+.au__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  padding: 13px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--bronze);
+  background: transparent;
+  color: var(--gold);
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.au__btn:hover { color: var(--cream); border-color: var(--cream); }
+
+.au__btn--go {
+  background: linear-gradient(135deg, #e6c184, var(--bronze));
+  border-color: transparent;
+  color: #201d1a;
+  font-weight: 600;
+}
+
+.au__btn--go .au__en { color: rgba(32, 29, 26, 0.6); }
+.au__btn--go:hover { background: var(--cream); color: #201d1a; border-color: transparent; }
+.au__btn[disabled] { opacity: 0.55; cursor: default; }
+
+.au__actions { margin-top: 20px; }
+
+/* A rule with words sitting in the middle of it. */
+.au__or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  font-size: 12.5px;
+  color: var(--faint);
+}
+
+.au__or::before,
+.au__or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+/* ------------------------------------------------------- notes, alerts -- */
+
+.au__note {
+  border: 1px solid var(--ok);
+  background: rgba(127, 168, 127, 0.10);
+  border-radius: 8px;
+  padding: 12px 15px;
+  margin-bottom: 18px;
+  font-size: 15px;
+}
+
+.au__note--bad { border-color: var(--bad); background: rgba(217, 138, 106, 0.10); }
+.au__note p { margin: 0 0 5px; }
+.au__note p:last-child { margin: 0; }
+
+.au__hint { margin: 11px 0 0; font-size: 13.5px; color: var(--muted); }
+.au__hint--bad { color: var(--bad); }
+
+/*
+ * The banner on the first-administrator screen. Deliberately loud: whoever is
+ * reading it is about to take ownership of the site, and that should not look
+ * like an ordinary sign-up.
+ */
+.au__claim {
+  border: 1px solid var(--bronze);
+  background: rgba(217, 168, 104, 0.09);
+  border-radius: 8px;
+  padding: 13px 16px;
+  margin-bottom: 20px;
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+.au__claim b {
+  display: block;
+  font-family: "Playfair Display", Georgia, serif;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.au__swap { margin: 20px 0 0; font-size: 14.5px; color: var(--muted); text-align: center; }
+.au__foot { margin: 26px 0 0; font-size: 13.5px; color: var(--faint); }
+
+/* ============================================================== phones === */
+
+@media (max-width: 900px) {
+  .au { grid-template-columns: 1fr; }
+
+  /* A banner rather than nothing: a form alone in the dark with nothing
+     identifying it is worse than a small picture. Not sticky here — one
+     screen is too little to give a fifth of it to a photograph. */
+  .au__art {
+    position: static;
+    height: auto;
+    min-height: 168px;
+    padding: 24px 22px;
+  }
+
+  .au__quote { font-size: 19px; }
+  .au__caption { display: none; }
+  .au__panel { min-height: 0; padding: 30px 22px 46px; }
+  .au__inner { max-width: 27rem; margin: 0 auto; }
+}
+
+@media (max-width: 430px) {
+  .au__art { min-height: 132px; }
+  .au__quote { font-size: 17.5px; }
+  .au h1 { font-size: 24px; }
+  /* Two fields side by side is too tight to type in at this width. */
+  .au__row { flex-direction: column; gap: 0; }
+}
+
+/* Somebody who has asked for less movement gets none of the transitions. */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+/* ------------------------------------------------------- one-time code -- */
+
+.au__code {
+  font-family: ui-monospace, Menlo, Consolas, monospace !important;
+  font-size: 21px !important;
+  letter-spacing: 0.22em;
+  text-align: center;
+}
+
+/* ---------------------------------------------- a light picture panel --- */
+
+/*
+ * The vintage map is cream where a photograph is dark. The same scrim that
+ * makes white copy readable over a dim room leaves it invisible over pale
+ * paper, so this one is far heavier and warm rather than neutral — the map
+ * becomes a texture behind the words instead of something to be read.
+ */
+.au__art--light .au__scrim {
+  background:
+    linear-gradient(180deg, rgba(25,22,20,0.62) 0%, rgba(25,22,20,0.55) 34%, rgba(25,22,20,0.94) 100%),
+    linear-gradient(90deg, rgba(25,22,20,0.55) 0%, rgba(25,22,20,0.28) 60%);
+}
+
+.au__art--light { background-position: 62% center; }
+
+/* --------------------------------------------------- language picker --- */
+
+.au__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.au__top .au__brand { margin-bottom: 0; }
+
+/*
+ * Closed it is the short code and a chevron; open it is every language
+ * written in its own language.
+ *
+ * A <details> rather than a <select>: a select cannot mark the current
+ * choice, cannot be styled to match anything, and needs script to navigate.
+ * This needs none of the three.
+ */
+.au__lang {
+  position: relative;
+  flex: none;
+  margin-top: 3px;
+}
+
+.au__lang > summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+/* Safari draws its own triangle without this. */
+.au__lang > summary::-webkit-details-marker { display: none; }
+
+.au__lang > summary:hover,
+.au__lang[open] > summary { border-color: var(--bronze); color: var(--gold); }
+
+.au__lang-code { font-weight: 600; }
+.au__lang > summary svg { transition: transform 0.15s; opacity: 0.8; }
+.au__lang[open] > summary svg { transform: rotate(180deg); }
+
+.au__langlist {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  min-width: 12.5rem;
+  max-height: 17rem;
+  overflow-y: auto;
+  margin: 0;
+  padding: 5px;
+  list-style: none;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.45);
+}
+
+.au__langlist a {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 15px;
+  color: var(--cream);
+}
+
+.au__langlist a:hover { background: rgba(217, 168, 104, 0.12); color: var(--gold); }
+
+/* The one you are already in, marked rather than hidden — a list that drops
+   the current choice makes people wonder whether they mis-clicked. */
+.au__langlist a[aria-current] {
+  color: var(--gold);
+  background: rgba(217, 168, 104, 0.08);
+}
+
+.au__langlist a[aria-current] .au__langname::after {
+  content: "✓";
+  margin-left: 8px;
+  font-size: 0.85em;
+}
+
+.au__langcode {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--faint);
+}
+
+.au__langlist a:hover .au__langcode { color: var(--bronze); }
+
+@media (max-width: 430px) {
+  .au__langlist { min-width: 11rem; }
+}

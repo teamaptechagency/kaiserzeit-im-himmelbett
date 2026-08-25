@@ -1,0 +1,373 @@
+/*
+ * The installer's own stylesheet.
+ *
+ * Self-contained rather than sharing responsive.css: that file styles the
+ * design prototypes, and the installer has to render on a server where
+ * nothing else works yet. The palette is the site's own — the ink and gold
+ * of the .dc.html pages — so setup does not feel like a different product.
+ */
+
+:root {
+  --ink:      #201d1a;
+  --ink-soft: #2a2521;
+  --line:     #3a332c;
+  --cream:    #f2ecdf;
+  --muted:    #b3a897;
+  --gold:     #d9a868;
+  --bronze:   #b9803f;
+  --ok:       #7fa87f;
+  --warn:     #d98a6a;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.86em;
+  background: rgba(217, 168, 104, 0.12);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--gold);
+}
+
+.ob {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 20px 72px;
+}
+
+/* ------------------------------------------------------------- brand -- */
+
+.ob__brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 19px;
+  margin-bottom: 34px;
+}
+
+.ob__mark {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--bronze);
+  border-radius: 50%;
+  color: var(--gold);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  flex: none;
+}
+
+.ob__brand small {
+  display: block;
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* -------------------------------------------------------------- rail -- */
+
+.ob__rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  list-style: none;
+  margin: 0 0 26px;
+  padding: 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.ob__rail-item { display: flex; align-items: center; gap: 8px; }
+.ob__rail-item.is-now  { color: var(--gold); }
+.ob__rail-item.is-done { color: var(--cream); }
+
+.ob__rail-dot {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 12px;
+}
+
+/* -------------------------------------------------------------- card -- */
+
+.ob__card {
+  background: var(--ink-soft);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 30px 28px;
+}
+
+.ob__eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.ob__eyebrow--lock { color: var(--warn); }
+
+.ob__card h1 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 1.25;
+  margin: 0 0 10px;
+}
+
+.ob__lead { color: var(--muted); margin: 0 0 24px; }
+
+/* ------------------------------------------------------------- checks -- */
+
+.ob__steps { list-style: none; margin: 0 0 26px; padding: 0; }
+
+.ob__step {
+  display: grid;
+  grid-template-columns: 26px 1fr auto;
+  gap: 12px;
+  align-items: start;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.ob__step:last-child { border-bottom: 0; }
+.ob__step h2 { font-size: 16px; font-weight: 600; margin: 0; font-family: inherit; }
+.ob__step p  { margin: 2px 0 0; font-size: 14px; color: var(--muted); }
+
+.ob__dot {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 13px;
+  border: 1px solid currentColor;
+}
+
+.is-ok   .ob__dot { color: var(--ok); }
+.is-warn .ob__dot { color: var(--warn); }
+
+.ob__note {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+  padding-top: 3px;
+}
+
+/* ------------------------------------------------------------- fields -- */
+
+.ob__row { display: flex; gap: 16px; flex-wrap: wrap; }
+.ob__row > .ob__field { flex: 1 1 220px; }
+.ob__field--narrow { flex: 0 1 120px !important; }
+
+.ob__field { margin-bottom: 18px; }
+
+.ob__field label {
+  display: block;
+  font-size: 14px;
+  letter-spacing: 0.03em;
+  margin-bottom: 6px;
+}
+
+.ob__field input {
+  width: 100%;
+  padding: 11px 13px;
+  background: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--cream);
+  font: inherit;
+  font-size: 16px;
+}
+
+.ob__field input:focus {
+  outline: none;
+  border-color: var(--bronze);
+}
+
+.ob__field small { display: block; margin-top: 6px; font-size: 13px; color: var(--muted); }
+
+/* ------------------------------------------------------------- import -- */
+
+.ob__import {
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  padding: 18px 18px 16px;
+  margin-bottom: 22px;
+}
+
+.ob__import h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.ob__import p { margin: 0 0 14px; font-size: 14px; color: var(--muted); }
+
+.ob__import input[type="file"] {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.ob__import input[type="file"]::file-selector-button {
+  font: inherit;
+  font-size: 14px;
+  margin-right: 12px;
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--bronze);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ob__import small { display: block; margin-top: 10px; font-size: 13px; color: var(--muted); }
+
+/* ------------------------------------------------------------ buttons -- */
+
+.ob__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+
+.ob__btn {
+  display: inline-block;
+  padding: 11px 22px;
+  border-radius: 6px;
+  border: 1px solid var(--bronze);
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.ob__btn--go {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--ink);
+}
+
+.ob__btn--go:hover { background: var(--cream); border-color: var(--cream); }
+
+.ob__btn--ghost { background: transparent; color: var(--gold); }
+.ob__btn--ghost:hover { color: var(--cream); border-color: var(--cream); }
+
+.ob__btn--dead {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+/* ------------------------------------------------------- alerts, key -- */
+
+.ob__alert,
+.ob__notice {
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  font-size: 15px;
+}
+
+.ob__alert {
+  background: rgba(217, 138, 106, 0.12);
+  border: 1px solid var(--warn);
+}
+
+.ob__notice {
+  background: rgba(127, 168, 127, 0.12);
+  border: 1px solid var(--ok);
+}
+
+.ob__alert p,
+.ob__notice p { margin: 0 0 6px; }
+
+.ob__alert p:last-child,
+.ob__notice p:last-child { margin-bottom: 0; }
+
+.ob__key {
+  border: 1px solid var(--bronze);
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 22px;
+  background: rgba(217, 168, 104, 0.07);
+}
+
+.ob__key-label { margin: 0 0 10px; font-size: 14px; color: var(--muted); }
+
+.ob__key-value {
+  display: block;
+  font-size: 18px;
+  padding: 10px 12px;
+  background: var(--ink);
+  border-radius: 6px;
+  word-break: break-all;
+}
+
+.ob__key-note { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+
+.ob__foot {
+  margin-top: 26px;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.ob__card .ob__foot { text-align: left; margin-top: 20px; }
+
+@media (max-width: 620px) {
+  .ob { padding: 30px 16px 60px; }
+  .ob__card { padding: 24px 18px; }
+  .ob__card h1 { font-size: 25px; }
+  .ob__step { grid-template-columns: 26px 1fr; }
+  .ob__note { grid-column: 2; white-space: normal; padding-top: 0; }
+}
+
+/* ------------------------------------------------------------- passkey -- */
+
+.ob__passkey { margin-bottom: 4px; }
+
+.ob__btn--wide {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+
+.ob__hint { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
+
+/* A rule with the words sitting in the middle of it. */
+.ob__or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.ob__or::before,
+.ob__or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}

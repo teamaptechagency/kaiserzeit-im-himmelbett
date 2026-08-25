@@ -1,0 +1,1028 @@
+{
+  "About Us.dc.html": {
+    "de": {
+      "nav": {
+        "home": "Home",
+        "apartments": "Apartments",
+        "booking": "Buchung",
+        "about": "Über uns",
+        "kontakt": "Kontakt"
+      },
+      "page": {
+        "label": "Über uns",
+        "title": "Meet Your Hosts"
+      },
+      "hosts": {
+        "quote": "Wir glauben, dass ein perfekter Aufenthalt bedeutet, sich vollkommen zuhause zu fühlen – auch unterwegs.",
+        "body1": "Als Ihre privaten Gastgeber stecken wir unser Herz in jedes Detail, damit Ihr Check-in reibungslos verläuft. Von der Innenausstattung bis zum Empfang – alles ist darauf ausgerichtet, Ihnen dieses besondere 'Kaiserzeit'-Gefühl zu geben, eine Mischung aus historischem Charme und modernem Komfort.",
+        "body2": "Wir freuen uns darauf, Ihren Aufenthalt in Leipzig unvergesslich zu machen. Und ganz ehrlich: Bei uns läuft nicht immer alles perfekt – wir sind schließlich auch nur Menschen. Sollte einmal etwas nicht ganz stimmen, sagen Sie uns Bescheid. Wir finden immer eine Lösung.",
+        "cta": "Frage stellen",
+        "replyNote": "Antwortet meist innerhalb einer Stunde"
+      },
+      "story": {
+        "title": "Zwei Menschen, ein Anspruch",
+        "body": "Ivi & Jörg führen KAISERZEIT im Himmelbett als persönliches Projekt – nicht als anonyme Hotelkette. Jedes Apartment tragen sie mit eigener Handschrift ein, verwurzelt in der Geschichte Leipzigs und gedacht für Gäste, die das Besondere suchen."
+      },
+      "footer": {
+        "tagline": "Private Rückzugsorte mit Charakter, im Herzen von Leipzig.",
+        "addressTitle": "Adressen",
+        "contact": "Kontakt",
+        "legalTitle": "Rechtliches",
+        "legal": [
+          "Datenschutz",
+          "AGB",
+          "Cookie-Einstellungen",
+          "Impressum"
+        ],
+        "rights": "© 2026 KAISERZEIT im Himmelbett. Alle Rechte vorbehalten."
+      }
+    },
+    "en": {
+      "nav": {
+        "home": "Home",
+        "apartments": "Apartments",
+        "booking": "Booking",
+        "about": "About Us",
+        "kontakt": "Contact"
+      },
+      "page": {
+        "label": "About Us",
+        "title": "Meet Your Hosts"
+      },
+      "hosts": {
+        "quote": "We believe a perfect stay means feeling completely at home while you're on the road.",
+        "body1": "As your private hosts, we pour our hearts into every detail so your check-in is seamless. From the interior design to the way we welcome you, everything is created to give you that special 'Kaiserzeit' feeling – a blend of historic charm and modern comfort.",
+        "body2": "We look forward to making your time in Leipzig unforgettable. And honestly, we know things don't always run perfectly – after all, we're human. If something isn't quite right, just let us know. We'll always find a solution.",
+        "cta": "Ask a Question",
+        "replyNote": "Usually replies within an hour"
+      },
+      "story": {
+        "title": "Two People, One Standard",
+        "body": "Ivi & Jörg run KAISERZEIT im Himmelbett as a personal project, not an anonymous hotel chain. Every apartment carries their own handwriting, rooted in Leipzig's history and made for guests who look for something different."
+      },
+      "footer": {
+        "tagline": "Private retreats with character, in the heart of Leipzig.",
+        "addressTitle": "Addresses",
+        "contact": "Contact",
+        "legalTitle": "Legal",
+        "legal": [
+          "Privacy Policy",
+          "Terms & Conditions",
+          "Cookie Preferences",
+          "Imprint"
+        ],
+        "rights": "© 2026 KAISERZEIT im Himmelbett. All rights reserved."
+      }
+    }
+  },
+  "Apartment.dc.html": {
+    "de": {
+      "nav": {
+        "home": "Home",
+        "apartments": "Apartments",
+        "booking": "Buchung",
+        "about": "Über uns",
+        "kontakt": "Kontakt"
+      },
+      "page": {
+        "featuresTitle": "Ausstattung",
+        "perNight": "pro Nacht",
+        "bookCta": "Verfügbarkeit prüfen",
+        "askCta": "Frage stellen",
+        "panoTitle": "360°-Rundgang",
+        "panoHint": "Ziehen, um sich umzusehen"
+      },
+      "footer": {
+        "tagline": "Private Rückzugsorte mit Charakter, im Herzen von Leipzig.",
+        "addressTitle": "Adressen",
+        "contact": "Kontakt",
+        "legalTitle": "Rechtliches",
+        "legal": [
+          "Datenschutz",
+          "AGB",
+          "Cookie-Einstellungen",
+          "Impressum"
+        ],
+        "rights": "© 2026 KAISERZEIT im Himmelbett. Alle Rechte vorbehalten."
+      }
+    },
+    "en": {
+      "nav": {
+        "home": "Home",
+        "apartments": "Apartments",
+        "booking": "Booking",
+        "about": "About Us",
+        "kontakt": "Contact"
+      },
+      "page": {
+        "featuresTitle": "Amenities",
+        "perNight": "per night",
+        "bookCta": "Check Availability",
+        "askCta": "Ask a Question",
+        "panoTitle": "360° Walkthrough",
+        "panoHint": "Drag to look around"
+      },
+      "footer": {
+        "tagline": "Private retreats with character, in the heart of Leipzig.",
+        "addressTitle": "Addresses",
+        "contact": "Contact",
+        "legalTitle": "Legal",
+        "legal": [
+          "Privacy Policy",
+          "Terms & Conditions",
+          "Cookie Preferences",
+          "Imprint"
+        ],
+        "rights": "© 2026 KAISERZEIT im Himmelbett. All rights reserved."
+      }
+    }
+  },
+  "Apartments.dc.html": {
+    "de": {
+      "nav": {
+        "home": "Home",
+        "apartments": "Apartments",
+        "booking": "Buchung",
+        "about": "Über uns",
+        "kontakt": "Kontakt"
+      },
+      "page": {
+        "label": "Unsere Apartments",
+        "title": "Apartments",
+        "subtitle": "Vier Apartments, zwei Adressen – jedes mit eigenem Charakter, alle mit demselben Anspruch an Stil und Komfort.",
+        "checkCta": "Details ansehen",
+        "contactCta": "Kontakt aufnehmen"
+      },
+      "groups": [
+        {
+          "slotId": "group-blumenstrasse",
+          "name": "City, Messe & Zoo",
+          "address": "Blumenstraße 1, 04105 Leipzig",
+          "desc": "Drei Apartments im Herzen der Stadt – zu Fuß entfernt von Zoo, Messe und Zentrum.",
+          "apts": [
+            {
+              "name": "Residenz",
+              "key": "residenz"
+            },
+            {
+              "name": "Cozy",
+              "key": "cozy"
+            },
+            {
+              "name": "Belle Étage",
+              "key": "belle-etage"
+            }
+          ]
+        },
+        {
+          "slotId": "group-kanal",
+          "name": "Kanal & Künstlerviertel",
+          "address": "Helmholtzstraße 12, 04177 Leipzig",
+          "desc": "Ein Apartment direkt am Wasser, umgeben von Kunst, Kultur und dem Leipziger Nachtleben.",
+          "apts": [
+            {
+              "name": "Nest am Kanal",
+              "key": "nest"
+            }
+          ]
+        }
+      ],
+      "individualApts": [
+        {
+          "slotId": "apt-residenz",
+          "key": "residenz",
+          "name": "Residenz",
+          "address": "Blumenstraße 1, 04105 Leipzig",
+          "desc": "Hohe Altbaudecken, Stuck und ein königliches Himmelbett."
+        },
+        {
+          "slotId": "apt-cozy",
+          "key": "cozy",
+          "name": "Cozy",
+          "address": "Blumenstraße 1, 04105 Leipzig",
+          "desc": "Kompakt und liebevoll eingerichtet – ideal für kurze Aufenthalte."
+        },
+        {
+          "slotId": "apt-belle-etage",
+          "key": "belle-etage",
+          "name": "Belle Étage",
+          "address": "Blumenstraße 1, 04105 Leipzig",
+          "desc": "Elegante Beletage mit Erkerfenstern und Kronleuchtern."
+        },
+        {
+          "slotId": "apt-nest",
+          "key": "nest",
+          "name": "Nest am Kanal",
+          "address": "Helmholtzstraße 12, 04177 Leipzig",
+          "desc": "Ruhig am Wasser gelegen, mitten im Künstlerviertel."
+        }
+      ],
+      "layoutToggle": {
+        "groups": "2 Gruppen",
+        "individual": "4 Apartments"
+      },
+      "footer": {
+        "tagline": "Private Rückzugsorte mit Charakter, im Herzen von Leipzig.",
+        "addressTitle": "Adressen",
+        "contact": "Kontakt",
+        "legalTitle": "Rechtliches",
+        "legal": [
+          "Datenschutz",
+          "AGB",
+          "Cookie-Einstellungen",
+          "Impressum"
+        ],
+        "rights": "© 2026 KAISERZEIT im Himmelbett. Alle Rechte vorbehalten."
+      }
+    },
+    "en": {
+      "nav": {
+        "home": "Home",
+        "apartments": "Apartments",
+        "booking": "Booking",
+        "about": "About Us",
+        "kontakt": "Contact"
+      },
+      "page": {
+        "label": "Our Apartments",
+        "title": "Apartments",
+        "subtitle": "Four apartments, two addresses – each with its own character, all with the same standard of style and comfort.",
+        "checkCta": "View Details",
+        "contactCta": "Get in touch"
+      },
+      "groups": [
+        {
+          "slotId": "group-blumenstrasse",
+          "name": "City, Messe & Zoo",
+          "address": "Blumenstraße 1, 04105 Leipzig",
+          "desc": "Three apartments in the heart of the city – a short walk from the zoo, the trade fair, and the centre.",
+          "apts": [
+            {
+              "name": "Residenz",
+              "key": "residenz"
+            },
+            {
+              "name": "Cozy",
+              "key": "cozy"
+            },
+            {
+              "name": "Belle Étage",
+              "key": "belle-etage"
+            }
+          ]
+        },
+        {
+          "slotId": "group-kanal",
+          "name": "Kanal & Künstlerviertel",
+          "address": "Helmholtzstraße 12, 04177 Leipzig",
+          "desc": "One apartment right on the water, surrounded by art, culture, and Leipzig nightlife.",
+          "apts": [
+            {
+              "name": "Nest am Kanal",
+              "key": "nest"
+            }
+          ]
+        }
+      ],
+      "individualApts": [
+        {
+          "slotId": "apt-residenz",
+          "key": "residenz",
+          "name": "Residenz",
+          "address": "Blumenstraße 1, 04105 Leipzig",
+          "desc": "Soaring period ceilings, stucco, and a regal canopy bed."
+        },
+        {
+          "slotId": "apt-cozy",
+          "key": "cozy",
+          "name": "Cozy",
+          "address": "Blumenstraße 1, 04105 Leipzig",
+          "desc": "Compact and thoughtfully furnished – ideal for shorter stays."
+        },
+        {
+          "slotId": "apt-belle-etage",
+          "key": "belle-etage",
+          "name": "Belle Étage",
+          "address": "Blumenstraße 1, 04105 Leipzig",
+          "desc": "Elegant belle-étage with bay windows and chandeliers."
+        },
+        {
+          "slotId": "apt-nest",
+          "key": "nest",
+          "name": "Nest am Kanal",
+          "address": "Helmholtzstraße 12, 04177 Leipzig",
+          "desc": "Quietly set on the water, in the heart of the artists' quarter."
+        }
+      ],
+      "layoutToggle": {
+        "groups": "2 Groups",
+        "individual": "4 Apartments"
+      },
+      "footer": {
+        "tagline": "Private retreats with character, in the heart of Leipzig.",
+        "addressTitle": "Addresses",
+        "contact": "Contact",
+        "legalTitle": "Legal",
+        "legal": [
+          "Privacy Policy",
+          "Terms & Conditions",
+          "Cookie Preferences",
+          "Imprint"
+        ],
+        "rights": "© 2026 KAISERZEIT im Himmelbett. All rights reserved."
+      }
+    }
+  },
+  "Booking.dc.html": {
+    "de": {
+      "nav": {
+        "home": "Home",
+        "apartments": "Apartments",
+        "booking": "Buchung",
+        "about": "Über uns",
+        "kontakt": "Kontakt"
+      },
+      "page": {
+        "title": "KAISERZEIT im Himmelbett!",
+        "subtitle": "Prüfen Sie Verfügbarkeit und reservieren Sie Ihren Aufenthalt in Leipzig – schnell, direkt und sicher.",
+        "badge": "Alle Apartments mit unserem Signature-Himmelbett."
+      },
+      "trust": {
+        "noFees": "Keine Plattformgebühren",
+        "direct": "Direktbuchung",
+        "flexible": "Flexible Kommunikation"
+      },
+      "form": {
+        "title": "Reservierung anfragen",
+        "subtitle": "Prüfen Sie Verfügbarkeit und reservieren Sie in wenigen Schritten.",
+        "selectApt": "Apartment wählen",
+        "selectDates": "Reisedaten wählen",
+        "yourName": "Ihr Name",
+        "namePlaceholder": "Vollständiger Name eingeben",
+        "whatsapp": "WhatsApp-Nummer (optional)",
+        "whatsappPlaceholder": "+49 …",
+        "guestCounts": "Gästezahl",
+        "noPayment": "Keine Zahlung jetzt erforderlich.",
+        "bookIdle": "Jetzt anfragen",
+        "bookSending": "Wird gesendet…",
+        "bookSent": "Angefragt ✓",
+        "nights": "Nächte",
+        "validationHint": "Bitte Name und gültige Reisedaten angeben."
+      },
+      "auth": {
+        "signinTitle": "Anmelden, um fortzufahren",
+        "signupTitle": "Konto erstellen, um fortzufahren",
+        "subtitle": "Ihre Buchungsdetails werden sicher gespeichert.",
+        "google": "Mit Google fortfahren",
+        "facebook": "Mit Facebook fortfahren",
+        "or": "ODER",
+        "email": "E-Mail",
+        "emailPlaceholder": "E-Mail-Adresse eingeben",
+        "password": "Passwort",
+        "passwordPlaceholder": "Passwort eingeben",
+        "forgot": "Passwort vergessen?",
+        "signinCta": "Anmelden",
+        "noAccount": "Noch kein Konto?",
+        "signup": "Registrieren",
+        "fullName": "Vollständiger Name",
+        "fullNamePlaceholder": "Vollständigen Namen eingeben",
+        "confirmPassword": "Passwort bestätigen",
+        "confirmPasswordPlaceholder": "Passwort erneut eingeben",
+        "terms": "Ich akzeptiere die AGB und Datenschutzrichtlinie.",
+        "signupCta": "Registrieren",
+        "haveAccount": "Bereits ein Konto?",
+        "signin": "Anmelden",
+        "logout": "Abmelden",
+        "bookings": "Buchungen"
+      },
+      "payment": {
+        "title": "Zahlungsmethode",
+        "subtitle": "Wie möchten Sie Ihre Zahlung abschließen?",
+        "cashOnArrival": "Bar bei Ankunft",
+        "cashOnArrivalHint": "Bezahlen Sie direkt beim Check-in vor Ort.",
+        "digital": "Digitale Zahlung",
+        "digitalHint": "Karte, PayPal oder andere digitale Methoden.",
+        "confirm": "Buchung bestätigen",
+        "secureNote": "Ihre Daten sind durch Standardverschlüsselung geschützt."
+      },
+      "confirmed": {
+        "title": "Buchung bestätigt!",
+        "subtitle": "Ihre Reservierung wurde bestätigt. Eine detaillierte Bestätigungs-E-Mail wurde an Ihren Posteingang gesendet.",
+        "ref": "Ref.",
+        "whatsappNote": "Unser Gastteam meldet sich per WhatsApp mit Anweisungen für den Check-in vor Ihrer Ankunft.",
+        "cta": "Zu Ihren Buchungen"
+      },
+      "summary": {
+        "cleaning": "Reinigungsgebühr",
+        "vat": "MwSt. (7%)",
+        "cityTax": "Kurtaxe (5%)",
+        "total": "Gesamt:"
+      },
+      "footer": {
+        "tagline": "Private Rückzugsorte mit Charakter, im Herzen von Leipzig.",
+        "addressTitle": "Adressen",
+        "contact": "Kontakt",
+        "legalTitle": "Rechtliches",
+        "legal": [
+          "Datenschutz",
+          "AGB",
+          "Cookie-Einstellungen",
+          "Impressum"
+        ],
+        "rights": "© 2026 KAISERZEIT im Himmelbett. Alle Rechte vorbehalten."
+      }
+    },
+    "en": {
+      "nav": {
+        "home": "Home",
+        "apartments": "Apartments",
+        "booking": "Booking",
+        "about": "About Us",
+        "kontakt": "Contact"
+      },
+      "page": {
+        "title": "KAISERZEIT im Himmelbett!",
+        "subtitle": "Check availability and reserve your stay in Leipzig – fast, direct, and secure.",
+        "badge": "All apartments feature our signature Himmelbett."
+      },
+      "trust": {
+        "noFees": "No platform fees",
+        "direct": "Direct booking",
+        "flexible": "Flexible communication"
+      },
+      "form": {
+        "title": "Make a Reservation",
+        "subtitle": "Check availability and reserve in just a few steps.",
+        "selectApt": "Select Apartment",
+        "selectDates": "Select Dates",
+        "yourName": "Your Name",
+        "namePlaceholder": "Enter your full name",
+        "whatsapp": "WhatsApp Number (optional)",
+        "whatsappPlaceholder": "+49 …",
+        "guestCounts": "Guest Counts",
+        "noPayment": "No payment required now.",
+        "bookIdle": "Book Now",
+        "bookSending": "Sending…",
+        "bookSent": "Requested ✓",
+        "nights": "nights",
+        "validationHint": "Please enter your name and valid travel dates."
+      },
+      "auth": {
+        "signinTitle": "Sign in to Continue",
+        "signupTitle": "Create an Account to Continue",
+        "subtitle": "Your booking details will be secure and easy to manage.",
+        "google": "Continue with Google",
+        "facebook": "Continue with Facebook",
+        "or": "OR",
+        "email": "Email",
+        "emailPlaceholder": "Enter your email address",
+        "password": "Password",
+        "passwordPlaceholder": "Enter your password",
+        "forgot": "Forgot Password?",
+        "signinCta": "Sign In",
+        "noAccount": "Don't have an account?",
+        "signup": "Sign up",
+        "fullName": "Full Name",
+        "fullNamePlaceholder": "Enter your full name",
+        "confirmPassword": "Confirm Password",
+        "confirmPasswordPlaceholder": "Re-enter your password",
+        "terms": "I agree to the Terms and Privacy Policy.",
+        "signupCta": "Register",
+        "haveAccount": "Already have an account?",
+        "signin": "Sign in",
+        "logout": "Log out",
+        "bookings": "Bookings"
+      },
+      "payment": {
+        "title": "Payment Method",
+        "subtitle": "Choose how you'd like to complete your payment.",
+        "cashOnArrival": "Cash on Arrival",
+        "cashOnArrivalHint": "Pay directly with our staff during check-in.",
+        "digital": "Digital Payment",
+        "digitalHint": "Card, PayPal, or other digital methods.",
+        "confirm": "Confirm Booking",
+        "secureNote": "Your information is protected with standard encryption."
+      },
+      "confirmed": {
+        "title": "Booking Confirmed!",
+        "subtitle": "Your reservation has been confirmed. A detailed confirmation email has been sent to your inbox.",
+        "ref": "Ref.",
+        "whatsappNote": "Our guest team will reach out over WhatsApp with check-in instructions before your arrival.",
+        "cta": "Go to Your Bookings"
+      },
+      "summary": {
+        "cleaning": "Cleaning fee",
+        "vat": "VAT (7%)",
+        "cityTax": "City tax (5%)",
+        "total": "Total:"
+      },
+      "footer": {
+        "tagline": "Private retreats with character, in the heart of Leipzig.",
+        "addressTitle": "Addresses",
+        "contact": "Contact",
+        "legalTitle": "Legal",
+        "legal": [
+          "Privacy Policy",
+          "Terms & Conditions",
+          "Cookie Preferences",
+          "Imprint"
+        ],
+        "rights": "© 2026 KAISERZEIT im Himmelbett. All rights reserved."
+      }
+    }
+  },
+  "Contact.dc.html": {
+    "de": {
+      "nav": {
+        "home": "Home",
+        "apartments": "Apartments",
+        "booking": "Buchung",
+        "about": "Über uns",
+        "kontakt": "Kontakt"
+      },
+      "page": {
+        "label": "Kontakt",
+        "title": "Wir sind für Sie da",
+        "subtitle": "Fragen zu Verfügbarkeit, Anreise oder Ihrem Aufenthalt? Schreiben Sie uns – wir antworten meist innerhalb einer Stunde."
+      },
+      "form": {
+        "title": "Nachricht senden",
+        "name": "Ihr Name",
+        "email": "Ihre E-Mail",
+        "message": "Ihre Nachricht",
+        "submit": "Nachricht senden"
+      },
+      "direct": {
+        "title": "Direkt erreichen"
+      },
+      "addresses": {
+        "title": "Adressen"
+      },
+      "footer": {
+        "tagline": "Private Rückzugsorte mit Charakter, im Herzen von Leipzig.",
+        "addressTitle": "Adressen",
+        "contact": "Kontakt",
+        "legalTitle": "Rechtliches",
+        "legal": [
+          "Datenschutz",
+          "AGB",
+          "Cookie-Einstellungen",
+          "Impressum"
+        ],
+        "rights": "© 2026 KAISERZEIT im Himmelbett. Alle Rechte vorbehalten."
+      }
+    },
+    "en": {
+      "nav": {
+        "home": "Home",
+        "apartments": "Apartments",
+        "booking": "Booking",
+        "about": "About Us",
+        "kontakt": "Contact"
+      },
+      "page": {
+        "label": "Contact",
+        "title": "We're Here for You",
+        "subtitle": "Questions about availability, arrival, or your stay? Write to us – we usually reply within an hour."
+      },
+      "form": {
+        "title": "Send a Message",
+        "name": "Your Name",
+        "email": "Your Email",
+        "message": "Your Message",
+        "submit": "Send Message"
+      },
+      "direct": {
+        "title": "Reach Us Directly"
+      },
+      "addresses": {
+        "title": "Addresses"
+      },
+      "footer": {
+        "tagline": "Private retreats with character, in the heart of Leipzig.",
+        "addressTitle": "Addresses",
+        "contact": "Contact",
+        "legalTitle": "Legal",
+        "legal": [
+          "Privacy Policy",
+          "Terms & Conditions",
+          "Cookie Preferences",
+          "Imprint"
+        ],
+        "rights": "© 2026 KAISERZEIT im Himmelbett. All rights reserved."
+      }
+    }
+  },
+  "Home.dc.html": {
+    "de": {
+      "nav": {
+        "home": "Home",
+        "apartments": "Apartments",
+        "booking": "Buchung",
+        "about": "Über uns",
+        "kontakt": "Kontakt",
+        "cta": "Verfügbarkeit prüfen"
+      },
+      "hero": {
+        "eyebrow": "Ein erlesener Aufenthalt in Leipzig",
+        "titleLine1": "KAISERZEIT",
+        "titleLine2": "im Himmelbett!",
+        "subtitle": "Ihr einzigartiges Apartment-Erlebnis in Leipzig, Deutschland.",
+        "ctaPrimary": "Verfügbarkeit prüfen",
+        "ctaSecondary": "Jetzt buchen",
+        "scroll": "Entdecken",
+        "booking": {
+          "nameLabel": "Ihr Name",
+          "namePlaceholder": "Vollständiger Name",
+          "datesLabel": "Aufenthalt",
+          "datesPlaceholder": "Check-in & Check-out",
+          "guestsLabel": "Gästezahl",
+          "guestsValue": "2 Gäste",
+          "cta": "Verfügbarkeit prüfen",
+          "trust": [
+            "Garantiert der günstigste Preis bei Direktbuchung",
+            "Keine versteckten Plattformgebühren",
+            "Direkte Buchung bei Ihrem Gastgeber"
+          ]
+        }
+      },
+      "intro": {
+        "label": "Willkommen",
+        "title": "Ein Zuhause auf Zeit, mit Geschichte",
+        "body": "Zwischen hohen Altbaudecken und samtweichen Details verbinden unsere Apartments das Erbe der Kaiserzeit mit dem Komfort von heute. Jedes Detail wurde mit Bedacht gewählt – für Gäste, die das Besondere zu schätzen wissen.",
+        "cta": "Verfügbarkeit prüfen"
+      },
+      "groups": {
+        "label": "Unsere Adressen",
+        "title": "Zwei Adressen, ein Anspruch",
+        "items": [
+          {
+            "slotId": "group-blumenstrasse",
+            "name": "City, Messe & Zoo",
+            "address": "Blumenstraße 1, 04105 Leipzig",
+            "desc": "Drei Apartments im Herzen der Stadt – zu Fuß entfernt von Zoo, Messe und Zentrum.",
+            "apts": [
+              "Residenz",
+              "Cozy",
+              "Belle Étage"
+            ],
+            "cta": "Mehr erfahren"
+          },
+          {
+            "slotId": "group-kanal",
+            "name": "Kanal & Künstlerviertel",
+            "address": "Helmholtzstraße 12, 04177 Leipzig",
+            "desc": "Ein Apartment direkt am Wasser, umgeben von Kunst, Kultur und dem Leipziger Nachtleben – ruhig gelegen und doch mitten im Geschehen.",
+            "apts": [
+              "Nest am Kanal"
+            ],
+            "cta": "Mehr erfahren"
+          }
+        ]
+      },
+      "map": {
+        "label": "Lage",
+        "title": "Mitten im Geschehen",
+        "subtitle": "Lage war für uns nie nebensächlich – jede Adresse liegt dort, wo Leipzig sich zeigt."
+      },
+      "amenities": {
+        "title": "Mein Leipzig lob ich mir",
+        "subtitle": "Es ist ein klein Paris und bildet seine Leute.",
+        "items": [
+          {
+            "icon": "wifi",
+            "title": "Moderne Konnektivität",
+            "desc": "Ob Homeoffice oder Streaming: Sie können sich in allen Apartments auf schnelles, stabiles Internet verlassen."
+          },
+          {
+            "icon": "pin",
+            "title": "„Kurze Wege\" und „exzellente Anbindung\"",
+            "desc": "In Leipzig ist alles nah – von unseren Apartments aus noch näher. Ob die Ruhe der Parks oder die pulsierende Energie des Zentrums: Mit exzellenten Verkehrsanbindungen und zentraler Lage erreichen Sie alle Highlights von „Klein-Paris\" im Nu."
+          },
+          {
+            "icon": "home",
+            "title": "Ankommen & sich zuhause fühlen",
+            "desc": "Wir möchten, dass Sie sich vom ersten Moment an entspannen können. Nehmen Sie sich nach der Ankunft Zeit für einen frischen Kaffee oder Tee – alles ist für Sie vorbereitet. Unsere Apartments verfügen über individuell ausgestattete Küchen. Ob schneller Espresso oder leichter Snack – es fehlt an nichts."
+          },
+          {
+            "icon": "booking",
+            "title": "Direktbuchung, mehr Vorteile",
+            "desc": "Buchen Sie direkt über unsere Website, um sich die beste verfügbare Rate zu sichern. Genießen Sie einen professionellen Buchungsprozess mit offizieller Rechnung, bei direktem Draht zu uns als Ihren Gastgebern. Einfach, transparent und persönlich."
+          }
+        ]
+      },
+      "hosts": {
+        "label": "Ihre Gastgeber",
+        "title": "Lernen Sie Ivi & Jörg kennen",
+        "quote": "Wir glauben, dass ein perfekter Aufenthalt bedeutet, sich vollkommen zuhause zu fühlen – auch unterwegs.",
+        "body1": "Als Ihre privaten Gastgeber stecken wir unser Herz in jedes Detail, damit Ihr Check-in reibungslos verläuft. Von der Innenausstattung bis zum Empfang – alles ist darauf ausgerichtet, Ihnen dieses besondere 'Kaiserzeit'-Gefühl zu geben, eine Mischung aus historischem Charme und modernem Komfort.",
+        "body2": "Wir freuen uns darauf, Ihren Aufenthalt in Leipzig unvergesslich zu machen. Und ganz ehrlich: Bei uns läuft nicht immer alles perfekt – wir sind schließlich auch nur Menschen und keine kühle, unpersönliche Maschine. Sollte einmal etwas nicht ganz stimmen, sagen Sie uns Bescheid. Wir finden immer eine Lösung.",
+        "cta": "Frage stellen",
+        "replyNote": "Antwortet meist innerhalb einer Stunde"
+      },
+      "testimonials": {
+        "label": "Stimmen",
+        "title": "Was Gäste sagen",
+        "items": [
+          {
+            "text": "Ein Ort, an dem man die Zeit vergisst.",
+            "name": "M. Hoffmann"
+          },
+          {
+            "text": "Stilvoll, ruhig und liebevoll eingerichtet.",
+            "name": "S. Berger"
+          },
+          {
+            "text": "Fühlte sich an wie eine private Suite.",
+            "name": "J. Krause"
+          }
+        ]
+      },
+      "footer": {
+        "tagline": "Private Rückzugsorte mit Charakter, im Herzen von Leipzig.",
+        "addressTitle": "Adressen",
+        "contact": "Kontakt",
+        "legalTitle": "Rechtliches",
+        "legal": [
+          "Datenschutz",
+          "AGB",
+          "Cookie-Einstellungen",
+          "Impressum"
+        ],
+        "rights": "© 2026 KAISERZEIT im Himmelbett. Alle Rechte vorbehalten."
+      }
+    },
+    "en": {
+      "nav": {
+        "home": "Home",
+        "apartments": "Apartments",
+        "booking": "Booking",
+        "about": "About Us",
+        "kontakt": "Contact",
+        "cta": "Check Availability"
+      },
+      "hero": {
+        "eyebrow": "A Refined Stay in Leipzig",
+        "titleLine1": "KAISERZEIT",
+        "titleLine2": "im Himmelbett!",
+        "subtitle": "Your Unique Apartment Experience in Leipzig, Germany.",
+        "ctaPrimary": "Check Availability",
+        "ctaSecondary": "Book Now",
+        "scroll": "Discover",
+        "booking": {
+          "nameLabel": "Your Name",
+          "namePlaceholder": "Full Name",
+          "datesLabel": "Stay Dates",
+          "datesPlaceholder": "Check-in & out",
+          "guestsLabel": "Guest Count",
+          "guestsValue": "2 guests",
+          "cta": "Check Availability",
+          "trust": [
+            "Guaranteed best price when booking direct",
+            "No hidden platform fees",
+            "Direct booking with your host"
+          ]
+        }
+      },
+      "intro": {
+        "label": "Welcome",
+        "title": "A Home for a While, With History",
+        "body": "Between soaring period ceilings and soft, considered details, our apartments blend the heritage of the Kaiserzeit with today's comfort. Every detail is chosen with care – for guests who notice the difference.",
+        "cta": "Check Availability"
+      },
+      "groups": {
+        "label": "Our Addresses",
+        "title": "Two Addresses, One Standard",
+        "items": [
+          {
+            "slotId": "group-blumenstrasse",
+            "name": "City, Messe & Zoo",
+            "address": "Blumenstraße 1, 04105 Leipzig",
+            "desc": "Three apartments in the heart of the city – a short walk from the zoo, the trade fair, and the centre.",
+            "apts": [
+              "Residenz",
+              "Cozy",
+              "Belle Étage"
+            ],
+            "cta": "Learn more"
+          },
+          {
+            "slotId": "group-kanal",
+            "name": "Kanal & Künstlerviertel",
+            "address": "Helmholtzstraße 12, 04177 Leipzig",
+            "desc": "One apartment right on the water, surrounded by art, culture, and Leipzig nightlife – quietly set, yet close to it all.",
+            "apts": [
+              "Nest am Kanal"
+            ],
+            "cta": "Learn more"
+          }
+        ]
+      },
+      "map": {
+        "label": "Location",
+        "title": "In the Middle of It All",
+        "subtitle": "Location was never an afterthought for us – every address sits where Leipzig shows itself best."
+      },
+      "amenities": {
+        "title": "My Little Paris",
+        "subtitle": "I praise my Leipzig! It is a little Paris and shapes its people.",
+        "items": [
+          {
+            "icon": "wifi",
+            "title": "Modern Connectivity",
+            "desc": "Whether for home office or streaming, you can rely on fast and stable internet in all apartments."
+          },
+          {
+            "icon": "pin",
+            "title": "\"Short distances\" and \"excellent connectivity\"",
+            "desc": "In Leipzig, everything is close – and from our apartments, it's even closer. Whether you're looking for the peacefulness of the parks or the vibrant energy of the city centre: with excellent public transport connections and our central locations, you can reach all the highlights of \"Little Paris\" in no time."
+          },
+          {
+            "icon": "home",
+            "title": "Arrive & Feel at Home",
+            "desc": "We want you to relax from the very first moment. After your arrival, take a moment to enjoy a fresh coffee or tea – everything is ready for you. Our apartments feature individually equipped kitchens. Whether it's a quick morning espresso or a light snack, we've made sure you have everything you need."
+          },
+          {
+            "icon": "booking",
+            "title": "Direct Booking, Better Benefits",
+            "desc": "Book directly through our website to secure the best available rate. Enjoy a professional booking process with official invoicing, while keeping a direct line to us as your hosts. Simple, transparent, and personal."
+          }
+        ]
+      },
+      "hosts": {
+        "label": "Your Hosts",
+        "title": "Meet Ivi & Jörg",
+        "quote": "We believe a perfect stay means feeling completely at home while you're on the road.",
+        "body1": "As your private hosts, we pour our hearts into every detail so your check-in is seamless. From the interior design to the way we welcome you, everything is created to give you that special 'Kaiserzeit' feeling – a blend of historic charm and modern comfort.",
+        "body2": "We look forward to making your time in Leipzig unforgettable. And honestly, we know things don't always run perfectly – after all, we're human, not a cold, corporate machine. If something isn't quite right, just let us know. We'll always find a solution.",
+        "cta": "Ask a Question",
+        "replyNote": "Usually replies within an hour"
+      },
+      "testimonials": {
+        "label": "Voices",
+        "title": "What Guests Say",
+        "items": [
+          {
+            "text": "A place where you forget time.",
+            "name": "M. Hoffmann"
+          },
+          {
+            "text": "Stylish, calm, and thoughtfully furnished.",
+            "name": "S. Berger"
+          },
+          {
+            "text": "Felt like a private suite.",
+            "name": "J. Krause"
+          }
+        ]
+      },
+      "footer": {
+        "tagline": "Private retreats with character, in the heart of Leipzig.",
+        "addressTitle": "Addresses",
+        "contact": "Contact",
+        "legalTitle": "Legal",
+        "legal": [
+          "Privacy Policy",
+          "Terms & Conditions",
+          "Cookie Preferences",
+          "Imprint"
+        ],
+        "rights": "© 2026 KAISERZEIT im Himmelbett. All rights reserved."
+      }
+    }
+  },
+  "Profile.dc.html": {
+    "de": {
+      "nav": {
+        "home": "Home",
+        "apartments": "Apartments",
+        "booking": "Buchung",
+        "about": "Über uns",
+        "kontakt": "Kontakt"
+      },
+      "auth": {
+        "bookings": "Buchungen",
+        "logout": "Abmelden"
+      },
+      "page": {
+        "label": "Mein Konto",
+        "historyTitle": "Buchungsverlauf",
+        "datesLabel": "Daten",
+        "refLabel": "Referenz",
+        "empty": "Keine Buchungen in dieser Kategorie.",
+        "filters": {
+          "all": "Alle",
+          "upcoming": "Bevorstehend",
+          "past": "Vergangen"
+        },
+        "status": {
+          "upcoming": "Bevorstehend",
+          "completed": "Abgeschlossen",
+          "cancelled": "Storniert"
+        },
+        "editProfile": "Profil bearbeiten",
+        "editTitle": "Kontodaten",
+        "fullName": "Vollständiger Name",
+        "email": "E-Mail",
+        "whatsapp": "WhatsApp-Nummer",
+        "language": "Sprache",
+        "save": "Änderungen speichern",
+        "saving": "Wird gespeichert…",
+        "saved": "Gespeichert ✓",
+        "overviewTitle": "Übersicht",
+        "totalBookings": "Buchungen insgesamt",
+        "menu": {
+          "overview": "Übersicht",
+          "history": "Buchungsverlauf",
+          "edit": "Profil bearbeiten"
+        },
+        "invoice": "Rechnung",
+        "invoiceTitle": "Rechnungsdetails",
+        "total": "Gesamtbetrag",
+        "downloadPdf": "Als PDF herunterladen",
+        "welcomeLabel": "Willkommen bei KAISERZEIT",
+        "thanksNote": "Vielen Dank für Ihren Aufenthalt bei uns.",
+        "verse": "Ein Himmelbett, ein Dach aus Zeit — möge Leipzig Sie sanft begleiten, bis wir uns wiedersehen."
+      },
+      "footer": {
+        "tagline": "Private Rückzugsorte mit Charakter, im Herzen von Leipzig.",
+        "addressTitle": "Adressen",
+        "contact": "Kontakt",
+        "legalTitle": "Rechtliches",
+        "legal": [
+          "Datenschutz",
+          "AGB",
+          "Cookie-Einstellungen",
+          "Impressum"
+        ],
+        "rights": "© 2026 KAISERZEIT im Himmelbett. Alle Rechte vorbehalten."
+      }
+    },
+    "en": {
+      "nav": {
+        "home": "Home",
+        "apartments": "Apartments",
+        "booking": "Booking",
+        "about": "About Us",
+        "kontakt": "Contact"
+      },
+      "auth": {
+        "bookings": "Bookings",
+        "logout": "Log out"
+      },
+      "page": {
+        "label": "My Account",
+        "historyTitle": "Booking History",
+        "datesLabel": "Dates",
+        "refLabel": "Reference",
+        "empty": "No bookings in this category.",
+        "filters": {
+          "all": "All",
+          "upcoming": "Upcoming",
+          "past": "Past"
+        },
+        "status": {
+          "upcoming": "Upcoming",
+          "completed": "Completed",
+          "cancelled": "Cancelled"
+        },
+        "editProfile": "Edit Profile",
+        "editTitle": "Account Details",
+        "fullName": "Full Name",
+        "email": "Email",
+        "whatsapp": "WhatsApp Number",
+        "language": "Language",
+        "save": "Save Changes",
+        "saving": "Saving…",
+        "saved": "Saved ✓",
+        "overviewTitle": "Overview",
+        "totalBookings": "Total Bookings",
+        "menu": {
+          "overview": "Overview",
+          "history": "Booking History",
+          "edit": "Edit Profile"
+        },
+        "invoice": "Invoice",
+        "invoiceTitle": "Invoice Details",
+        "total": "Total",
+        "downloadPdf": "Download as PDF",
+        "welcomeLabel": "Welcome to KAISERZEIT",
+        "thanksNote": "Thank you for staying with us.",
+        "verse": "Beneath a canopy of quiet hours, may Leipzig keep you gently — until we welcome you again."
+      },
+      "footer": {
+        "tagline": "Private retreats with character, in the heart of Leipzig.",
+        "addressTitle": "Addresses",
+        "contact": "Contact",
+        "legalTitle": "Legal",
+        "legal": [
+          "Privacy Policy",
+          "Terms & Conditions",
+          "Cookie Preferences",
+          "Imprint"
+        ],
+        "rights": "© 2026 KAISERZEIT im Himmelbett. All rights reserved."
+      }
+    }
+  }
+}
