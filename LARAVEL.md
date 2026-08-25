@@ -246,3 +246,56 @@ Under **Configuration → Admin**:
 
 Database credentials and the app key deliberately stay in `.env`, where
 changing one is an act rather than a form submission.
+
+---
+
+## Where this runs — and why not Vercel any more
+
+The preview used to be static files, so Vercel suited it. This does not:
+
+| what it needs | Vercel |
+|---|---|
+| a PHP runtime | none first-party |
+| MySQL that persists | serverless, no database |
+| a writable disk for uploads, sessions and cache | read-only except `/tmp` |
+
+Fixing the build would not fix that. It would produce a deploy that builds
+cleanly and then serves nothing that works.
+
+So `vercel.json` here switches deployment off for this branch. Without it
+Vercel finds Laravel's `package.json`, runs `vite build`, looks for a `dist`
+directory that Laravel never produces, and fails — which is what the failing
+builds were.
+
+**The old site on `main` is untouched.** It keeps its own `vercel.json`, its
+`api/` functions and its static pages, and it goes on deploying exactly as
+before. Nothing about this branch changes what the client sees today.
+
+### Putting it on PHP hosting
+
+Any host with PHP 8.2 and MySQL. Hostinger already runs wpnazmul.com, so it
+is the obvious one.
+
+1. Upload everything except `vendor/`, `node_modules/`, `.env` and
+   `_legacy-node/`.
+2. Point the domain's document root at `public/`. Not at the project root —
+   the folder above `public/` holds `.env` and must never be reachable.
+3. `composer install --no-dev --optimize-autoloader`, or upload a `vendor/`
+   built elsewhere if the host has no shell.
+4. Create an empty database and a user for it in the hosting panel.
+5. Open **`/install`** and work through the four steps. It writes `.env`
+   itself — no file editing, no phpMyAdmin.
+6. `php artisan storage:link`, or let step 4 do it. Where symlinks are
+   forbidden the `/storage/slots` route serves photos through PHP instead.
+7. Set `APP_ENV=production` and `APP_DEBUG=false` in `.env`.
+8. Delete the two `/install` routes from `routes/web.php`.
+
+`APP_URL` must be the real domain: passkeys bind to the hostname, and an IP
+address or a stale value stops them working with no useful error.
+
+### The npm side
+
+`package.json` and `vite.config.js` come from the Laravel skeleton and are
+unused — the design pages bring their own CSS and the runtime is plain
+JavaScript. `npm install` is not needed to run the site, and there is nothing
+to build.
