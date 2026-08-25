@@ -126,10 +126,6 @@
       </h1>
       <p style="font-size:clamp(16px,2vw,20px);line-height:1.6;color:rgba(242,236,224,0.82);max-width:600px;margin:22px 0 0;">{{ t.hero.subtitle }}</p>
       <div id="booking" style="margin-top:36px;width:min(94vw,960px);background:rgba(41,36,31,0.88);border:1px solid rgba(185,128,63,0.3);borderRadius:14px;padding:clamp(22px,3vw,32px) clamp(20px,3vw,36px);backdropFilter:blur(6px);position:relative;">
-        <div style="position:absolute;top:10px;right:14px;display:flex;gap:4px;background:rgba(0,0,0,0.25);borderRadius:999px;padding:3px;">
-          <button onClick="{{ setDropdownMode }}" style="{{ dropdownModeBtnStyle }}">Dropdown</button>
-          <button onClick="{{ setPopupMode }}" style="{{ popupModeBtnStyle }}">Popup</button>
-        </div>
         <div style="display:flex;flex-wrap:nowrap;gap:16px;align-items:end;overflow-x:auto;">
           <div style="text-align:left;flex:1 1 0;min-width:150px;">
             <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#d9a868;margin-bottom:10px;white-space:nowrap;">{{ t.hero.booking.nameLabel }}</div>
@@ -161,23 +157,6 @@
               ✓ {{ item }}
             </span>
           </sc-for>
-        </div>
-        <div style="{{ resultsWrapperStyle }}">
-          <div style="padding-top:26px;borderTop:1px solid rgba(185,128,63,0.25);text-align:left;">
-            <div style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:#d9a868;margin-bottom:18px;">{{ resultsTitle }}</div>
-            <div style="display:flex;flex-direction:column;gap:14px;">
-              <sc-for list="{{ apartmentResults }}" as="apt" hint-placeholder-count="4">
-                <div style="display:flex;align-items:center;gap:16px;background:rgba(20,18,16,0.5);border:1px solid rgba(185,128,63,0.18);borderRadius:10px;padding:12px;">
-                  <image-slot id="{{ apt.slotId }}" shape="rounded" radius="8" placeholder="Foto" style="width:76px;height:64px;flex-shrink:0;"></image-slot>
-                  <div style="flex:1;min-width:0;">
-                    <div style="font-family:'Playfair Display',serif;font-size:17px;color:#f7f1e6;margin-bottom:4px;">{{ apt.name }}</div>
-                    <div style="font-size:14px;color:rgba(242,236,224,0.6);line-height:1.4;">{{ apt.brief }}</div>
-                  </div>
-                  <span style="{{ apt.statusStyle }}">{{ apt.statusLabel }}</span>
-                </div>
-              </sc-for>
-            </div>
-          </div>
         </div>
       </div>
       <sc-if value="{{ isPopupMode }}" hint-placeholder-val="{{ false }}">
@@ -588,7 +567,7 @@ const LANDMARKS = {
 };
 
 class Component extends DCLogic {
-  state = { lang: "de", showMobileMenu: false, isSignedIn: false, profileMenuOpen: false, langMenuOpen: false, mapTab: "blumenstrasse", checkStage: "idle", showResults: false, apartmentStatus: {}, showCookiePopup: false, resultsMode: "dropdown" };
+  state = { lang: "de", showMobileMenu: false, isSignedIn: false, profileMenuOpen: false, langMenuOpen: false, mapTab: "blumenstrasse", checkStage: "idle", showResults: false, apartmentStatus: {}, showCookiePopup: false };
 
   toggleCookiePopup = () => this.setState(s => ({ showCookiePopup: !s.showCookiePopup }));
 
@@ -656,23 +635,15 @@ class Component extends DCLogic {
       bookingBtnLabel,
       bookingBtnOnClick,
       showResults: this.state.showResults,
-      isDropdownMode: this.state.resultsMode === "dropdown",
-      isPopupMode: this.state.showResults && this.state.resultsMode === "popup",
+      /* The availability results are a popup, and only a popup. The handoff
+         offered an inline dropdown alongside it so the client could choose
+         between the two; the choice was made, so the other one is gone
+         rather than left switched off. */
+      isPopupMode: this.state.showResults,
       toggleResults: this.toggleResults,
       stopPropagation: (e) => e.stopPropagation(),
       popupOverlayStyle: { position: "fixed", inset: 0, zIndex: 70, background: "rgba(10,9,8,0.72)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" },
       popupCardStyle: { width: "min(94vw,560px)", maxHeight: "80vh", overflowY: "auto", background: "#29241f", border: "1px solid rgba(185,128,63,0.35)", borderRadius: "14px", padding: "28px", textAlign: "left", boxShadow: "0 30px 70px rgba(0,0,0,0.5)" },
-      setDropdownMode: () => this.setState({ resultsMode: "dropdown" }),
-      setPopupMode: () => this.setState({ resultsMode: "popup" }),
-      dropdownModeBtnStyle: { fontSize: "11px", letterSpacing: "0.04em", padding: "6px 12px", borderRadius: "999px", border: "none", cursor: "pointer", fontFamily: "'Playfair Display',serif", fontWeight: 600, background: this.state.resultsMode === "dropdown" ? "linear-gradient(135deg,#e6c184,#b9803f)" : "transparent", color: this.state.resultsMode === "dropdown" ? "#201d1a" : "rgba(242,236,224,0.55)" },
-      popupModeBtnStyle: { fontSize: "11px", letterSpacing: "0.04em", padding: "6px 12px", borderRadius: "999px", border: "none", cursor: "pointer", fontFamily: "'Playfair Display',serif", fontWeight: 600, background: this.state.resultsMode === "popup" ? "linear-gradient(135deg,#e6c184,#b9803f)" : "transparent", color: this.state.resultsMode === "popup" ? "#201d1a" : "rgba(242,236,224,0.55)" },
-      resultsWrapperStyle: {
-        maxHeight: (this.state.showResults && this.state.resultsMode === "dropdown") ? "900px" : "0px",
-        opacity: (this.state.showResults && this.state.resultsMode === "dropdown") ? 1 : 0,
-        marginTop: (this.state.showResults && this.state.resultsMode === "dropdown") ? "26px" : "0px",
-        overflow: "hidden",
-        transition: "max-height 0.45s ease, opacity 0.35s ease, margin-top 0.45s ease"
-      },
       resultsTitle: uiLabels.resultsTitle,
       apartmentResults,
       showMobileMenu: this.state.showMobileMenu,
