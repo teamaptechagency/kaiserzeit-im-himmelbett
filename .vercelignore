@@ -5,7 +5,6 @@ _legacy-node
 tests
 
 # Local development only.
-.claude
 storage/logs
 storage/framework/cache
 storage/framework/sessions
